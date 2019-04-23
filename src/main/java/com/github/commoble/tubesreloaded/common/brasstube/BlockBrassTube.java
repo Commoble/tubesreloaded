@@ -1,15 +1,24 @@
 package com.github.commoble.tubesreloaded.common.brasstube;
 
+import java.util.Random;
+
+import javax.annotation.Nullable;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSixWay;
 import net.minecraft.block.IBucketPickupHandler;
 import net.minecraft.block.ILiquidContainer;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.init.Fluids;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathType;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
@@ -17,11 +26,13 @@ import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiquidContainer
@@ -51,7 +62,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 		this.shapes = this.makeShapes();
 	}
 
-	/// basic block behaviour
+	/// basic block properties
 
 	/**
 	 * @deprecated call via {@link IBlockState#isFullCube()} whenever possible.
@@ -70,9 +81,15 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	}
 
 	@Override
-	public boolean propagatesSkylightDown(IBlockState state, IBlockReader reader, BlockPos pos)
+	public boolean hasTileEntity(IBlockState state)
 	{
 		return true;
+	}
+
+	@Override
+	public TileEntity createTileEntity(IBlockState state, IBlockReader world)
+	{
+		return new TileEntityBrassTube();
 	}
 
 	/**
@@ -85,17 +102,71 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 		return BlockRenderLayer.CUTOUT;
 	}
 
-//	/**
-//	 * @deprecated call via
-//	 *             {@link IBlockState#shouldSideBeRendered(IBlockAccess,BlockPos,EnumFacing)}
-//	 *             whenever possible. Implementing/overriding is fine.
-//	 */
-//	@OnlyIn(Dist.CLIENT)
-//	public static boolean shouldSideBeRendered(IBlockState adjacentState, IBlockReader blockState, BlockPos blockAccess,
-//			EnumFacing pos)
-//	{
-//		return true;
-//	}
+	// block behaviour
+
+	@Override
+	public void tick(IBlockState state, World worldIn, BlockPos pos, Random random)
+	{
+
+	}
+
+	public void onReplaced(IBlockState state, World worldIn, BlockPos pos, IBlockState newState, boolean isMoving)
+	{
+		if (state.getBlock() != newState.getBlock())
+		{
+			TileEntity tileentity = worldIn.getTileEntity(pos);
+			if (tileentity instanceof TileEntityBrassTube)
+			{
+				((TileEntityBrassTube)tileentity).dropItems();
+				//worldIn.updateComparatorOutputLevel(pos, this);
+			}
+
+			super.onReplaced(state, worldIn, pos, newState, isMoving);
+		}
+	}
+
+	/**
+	 * Called when a neighboring block was changed and marks that this state should
+	 * perform any checks during a neighbor change. Cases may include when redstone
+	 * power is updated, cactus blocks popping off due to a neighboring solid block,
+	 * etc.
+	 */
+	@Deprecated
+	public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+	{
+		this.updateTE(worldIn, pos);
+	}
+
+	/**
+	 * Called by ItemBlocks after a block is set in the world, to allow post-place
+	 * logic
+	 */
+	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, @Nullable EntityLivingBase placer,
+			ItemStack stack)
+	{
+		this.updateTE(worldIn, pos);
+	}
+
+	@Deprecated
+	public boolean onBlockActivated(IBlockState state, World worldIn, BlockPos pos, EntityPlayer player, EnumHand hand,
+			EnumFacing side, float hitX, float hitY, float hitZ)
+	{
+		TileEntity te = worldIn.getTileEntity(pos);
+		if (te instanceof TileEntityBrassTube)
+		{
+			System.out.println(((TileEntityBrassTube) te).distanceToNearestInventory);
+		}
+		return true;
+	}
+
+	public void updateTE(World world, BlockPos pos)
+	{
+		TileEntity te = world.getTileEntity(pos);
+		if (te instanceof TileEntityBrassTube)
+		{
+			((TileEntityBrassTube) te).updateState();
+		}
+	}
 
 	/// connections and states
 

@@ -3,6 +3,7 @@ package com.github.commoble.tubesreloaded.common.event;
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
 import com.github.commoble.tubesreloaded.common.registry.BlockRegistrar;
 import com.github.commoble.tubesreloaded.common.registry.ItemRegistrar;
+import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -42,6 +43,6 @@ public class RegistryEventHandler
 	@SubscribeEvent
 	public static void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event)
 	{
-		//TileEntityRegistrar.registerTileEntities(event);
+		TileEntityRegistrar.registerTileEntities(event);
 	}
 }
