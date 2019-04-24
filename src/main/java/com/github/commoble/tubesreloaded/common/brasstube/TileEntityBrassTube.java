@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.commoble.tubesreloaded.common.registry.BlockRegistrar;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 
 import net.minecraft.inventory.InventoryHelper;
@@ -18,7 +19,6 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -48,9 +48,9 @@ public class TileEntityBrassTube extends TileEntity
 
 	/**** State behavior ****/
 
-	public void updateState()
+	public void checkStateAndMaybeUpdate()
 	{
-		int newDist = this.distanceToNearestInventory;
+		int newDist = Integer.MAX_VALUE;
 		for (EnumFacing face : EnumFacing.values())
 		{
 			TileEntity neighborTE = this.world.getTileEntity(this.pos.offset(face));
@@ -70,10 +70,25 @@ public class TileEntityBrassTube extends TileEntity
 				IItemHandler handler = cap.orElse(null);
 				if (handler != null)
 				{
-					handler.
+					if (TileEntityBrassTube.isSpaceForAnythingInItemHandler(handler))
+					{
+						newDist = 0;
+						break;
+					}
 				}
 			}
 		}
+		if (newDist != this.distanceToNearestInventory)
+		{
+			this.distanceToNearestInventory = newDist;
+			this.markStateUpdated();
+		}
+	}
+	
+	public void markStateUpdated()
+	{
+		this.world.notifyNeighborsOfStateChange(pos, BlockRegistrar.BRASS_TUBE);
+		this.markDirty();
 	}
 
 	/**** Inventory handling ****/
@@ -101,6 +116,11 @@ public class TileEntityBrassTube extends TileEntity
 		{
 			InventoryHelper.spawnItemStack(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(), wrapper.stack);
 		}
+	}
+	
+	public static boolean isSpaceForAnythingInItemHandler(IItemHandler handler)
+	{
+		return true;
 	}
 
 	/**** NBT and synchronization ****/

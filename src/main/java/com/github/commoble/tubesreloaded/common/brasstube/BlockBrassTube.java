@@ -30,6 +30,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -110,9 +111,10 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 
 	}
 
+	@Override
 	public void onReplaced(IBlockState state, World worldIn, BlockPos pos, IBlockState newState, boolean isMoving)
 	{
-		if (state.getBlock() != newState.getBlock())
+		if (!worldIn.isRemote && state.getBlock() != newState.getBlock())
 		{
 			TileEntity tileentity = worldIn.getTileEntity(pos);
 			if (tileentity instanceof TileEntityBrassTube)
@@ -121,8 +123,8 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 				//worldIn.updateComparatorOutputLevel(pos, this);
 			}
 
-			super.onReplaced(state, worldIn, pos, newState, isMoving);
 		}
+		super.onReplaced(state, worldIn, pos, newState, isMoving);
 	}
 
 	/**
@@ -131,22 +133,37 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	 * power is updated, cactus blocks popping off due to a neighboring solid block,
 	 * etc.
 	 */
+	@Override
 	@Deprecated
 	public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
 	{
-		this.updateTE(worldIn, pos);
+		if (!worldIn.isRemote)
+		{
+			this.updateTE(worldIn, pos);
+		}
 	}
 
 	/**
 	 * Called by ItemBlocks after a block is set in the world, to allow post-place
 	 * logic
 	 */
+	@Override
 	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, @Nullable EntityLivingBase placer,
 			ItemStack stack)
 	{
-		this.updateTE(worldIn, pos);
+		if (!worldIn.isRemote)
+		{
+			this.updateTE(worldIn, pos);
+			TileEntity te = worldIn.getTileEntity(pos);
+			if (te != null)
+			{
+				te.markDirty();
+			}
+		}
+		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
 	}
 
+	@Override
 	@Deprecated
 	public boolean onBlockActivated(IBlockState state, World worldIn, BlockPos pos, EntityPlayer player, EnumHand hand,
 			EnumFacing side, float hitX, float hitY, float hitZ)
@@ -154,7 +171,8 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 		TileEntity te = worldIn.getTileEntity(pos);
 		if (te instanceof TileEntityBrassTube)
 		{
-			System.out.println(((TileEntityBrassTube) te).distanceToNearestInventory);
+			System.out.println(((TileEntityBrassTube)te).distanceToNearestInventory);
+			player.sendStatusMessage(new TextComponentTranslation("Distance to nearest inventory = " + ((TileEntityBrassTube)te).distanceToNearestInventory), true);
 		}
 		return true;
 	}
@@ -164,7 +182,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 		TileEntity te = world.getTileEntity(pos);
 		if (te instanceof TileEntityBrassTube)
 		{
-			((TileEntityBrassTube) te).updateState();
+			((TileEntityBrassTube) te).checkStateAndMaybeUpdate();
 		}
 	}
 
