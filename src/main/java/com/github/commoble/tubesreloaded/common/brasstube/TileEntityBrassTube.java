@@ -58,15 +58,16 @@ public class TileEntityBrassTube extends TileEntity
 			{
 				TileEntityBrassTube tube = (TileEntityBrassTube) neighborTE;
 				if (tube.distanceToNearestInventory < Integer.MAX_VALUE
-						&& tube.distanceToNearestInventory+1 < newDist)
+						&& tube.distanceToNearestInventory + 1 < newDist)
 				{
 					newDist = tube.distanceToNearestInventory + 1;
 				}
 			}
-			
+
 			else if (neighborTE != null)
 			{
-				LazyOptional<IItemHandler> cap = neighborTE.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face);
+				LazyOptional<IItemHandler> cap = neighborTE.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,
+						face);
 				IItemHandler handler = cap.orElse(null);
 				if (handler != null)
 				{
@@ -84,11 +85,11 @@ public class TileEntityBrassTube extends TileEntity
 			this.markStateUpdated();
 		}
 	}
-	
+
 	public void markStateUpdated()
 	{
-		this.world.notifyNeighborsOfStateChange(pos, BlockRegistrar.BRASS_TUBE);
 		this.markDirty();
+		this.world.notifyNeighborsOfStateChange(pos, BlockRegistrar.BRASS_TUBE);
 	}
 
 	/**** Inventory handling ****/
@@ -114,10 +115,11 @@ public class TileEntityBrassTube extends TileEntity
 	{
 		for (ItemInTubeWrapper wrapper : this.inventory)
 		{
-			InventoryHelper.spawnItemStack(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(), wrapper.stack);
+			InventoryHelper.spawnItemStack(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(),
+					wrapper.stack);
 		}
 	}
-	
+
 	public static boolean isSpaceForAnythingInItemHandler(IItemHandler handler)
 	{
 		return true;
@@ -162,6 +164,11 @@ public class TileEntityBrassTube extends TileEntity
 		return super.write(compound);
 	}
 
+	/**
+	 * Get an NBT compound to sync to the client with SPacketChunkData, used for
+	 * initial loading of the chunk or when many blocks change at once. This
+	 * compound comes back to you clientside in {@link handleUpdateTag}
+	 */
 	@Override
 	public NBTTagCompound getUpdateTag()
 	{
