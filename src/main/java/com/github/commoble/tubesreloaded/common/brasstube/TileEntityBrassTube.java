@@ -1,15 +1,18 @@
 package com.github.commoble.tubesreloaded.common.brasstube;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.common.registry.BlockRegistrar;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.INBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -19,6 +22,7 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -29,11 +33,10 @@ public class TileEntityBrassTube extends TileEntity
 	public static final String DIST_NBT_KEY = "distance";
 	public static final String INV_NBT_KEY = "inventory";
 
+	protected HashMap<Item, ItemFinder> finders;
 	protected List<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
 	protected TubeInventoryHandler inventoryHandler = new TubeInventoryHandler(this); // extends ItemStackHandler
 	protected LazyOptional<IItemHandler> inventoryHolder = LazyOptional.of(() -> inventoryHandler);
-
-	public int distanceToNearestInventory = Integer.MAX_VALUE;
 
 	public TileEntityBrassTube(TileEntityType<?> tileEntityTypeIn)
 	{
@@ -46,51 +49,7 @@ public class TileEntityBrassTube extends TileEntity
 		super(TileEntityRegistrar.TE_TYPE_BRASS_TUBE);
 	}
 
-	/**** State behavior ****/
-
-	public void checkStateAndMaybeUpdate()
-	{
-		int newDist = Integer.MAX_VALUE;
-		for (EnumFacing face : EnumFacing.values())
-		{
-			TileEntity neighborTE = this.world.getTileEntity(this.pos.offset(face));
-			if (neighborTE instanceof TileEntityBrassTube)
-			{
-				TileEntityBrassTube tube = (TileEntityBrassTube) neighborTE;
-				if (tube.distanceToNearestInventory < Integer.MAX_VALUE
-						&& tube.distanceToNearestInventory + 1 < newDist)
-				{
-					newDist = tube.distanceToNearestInventory + 1;
-				}
-			}
-
-			else if (neighborTE != null)
-			{
-				LazyOptional<IItemHandler> cap = neighborTE.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,
-						face);
-				IItemHandler handler = cap.orElse(null);
-				if (handler != null)
-				{
-					if (TileEntityBrassTube.isSpaceForAnythingInItemHandler(handler))
-					{
-						newDist = 0;
-						break;
-					}
-				}
-			}
-		}
-		if (newDist != this.distanceToNearestInventory)
-		{
-			this.distanceToNearestInventory = newDist;
-			this.markStateUpdated();
-		}
-	}
-
-	public void markStateUpdated()
-	{
-		this.markDirty();
-		this.world.notifyNeighborsOfStateChange(pos, BlockRegistrar.BRASS_TUBE);
-	}
+	
 
 	/**** Inventory handling ****/
 
@@ -123,6 +82,29 @@ public class TileEntityBrassTube extends TileEntity
 	public static boolean isSpaceForAnythingInItemHandler(IItemHandler handler)
 	{
 		return true;
+	}
+
+	public boolean isAnyInventoryAdjacent()
+	{
+		for (EnumFacing face : EnumFacing.values())
+		{
+			TileEntity te = this.world.getTileEntity(pos.offset(face));
+			if (te != null && !(te instanceof TileEntityBrassTube))
+			{
+				// if a nearby inventory that is not a tube exists
+				LazyOptional<IItemHandler> cap = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,
+						face.getOpposite());
+				IItemHandler handler = cap.orElse(null);
+				if (handler != null)
+				{
+					if (TileEntityBrassTube.isSpaceForAnythingInItemHandler(handler))
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**** NBT and synchronization ****/
@@ -168,6 +150,7 @@ public class TileEntityBrassTube extends TileEntity
 	 * Get an NBT compound to sync to the client with SPacketChunkData, used for
 	 * initial loading of the chunk or when many blocks change at once. This
 	 * compound comes back to you clientside in {@link handleUpdateTag}
+	 *  // handleUpdateTag just calls read by default
 	 */
 	@Override
 	public NBTTagCompound getUpdateTag()

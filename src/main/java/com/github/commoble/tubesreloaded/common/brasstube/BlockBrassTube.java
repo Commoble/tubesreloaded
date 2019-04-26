@@ -4,6 +4,8 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
+import com.github.commoble.tubesreloaded.common.registry.BlockRegistrar;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSixWay;
 import net.minecraft.block.IBucketPickupHandler;
@@ -15,8 +17,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.init.Fluids;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathType;
@@ -114,17 +114,25 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	@Override
 	public void onReplaced(IBlockState state, World worldIn, BlockPos pos, IBlockState newState, boolean isMoving)
 	{
-		if (!worldIn.isRemote && state.getBlock() != newState.getBlock())
+		if (state.getBlock() == newState.getBlock())
 		{
-			TileEntity tileentity = worldIn.getTileEntity(pos);
-			if (tileentity instanceof TileEntityBrassTube)
-			{
-				((TileEntityBrassTube)tileentity).dropItems();
-				//worldIn.updateComparatorOutputLevel(pos, this);
-			}
-
+			// only thing super.onReplaced does is remove the tile entity
+			// if the block stays the same, we specifically do NOT remove the tile entity
+			// so don't do anything here
 		}
-		super.onReplaced(state, worldIn, pos, newState, isMoving);
+		else
+		{
+			if (!worldIn.isRemote)
+			{
+				TileEntity tileentity = worldIn.getTileEntity(pos);
+				if (tileentity instanceof TileEntityBrassTube)
+				{
+					((TileEntityBrassTube) tileentity).dropItems();
+					// worldIn.updateComparatorOutputLevel(pos, this);
+				}
+			}
+			super.onReplaced(state, worldIn, pos, newState, isMoving);
+		}
 	}
 
 	/**
@@ -155,9 +163,10 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 		{
 			this.updateTE(worldIn, pos);
 			TileEntity te = worldIn.getTileEntity(pos);
-			if (te != null)
+			if (te instanceof TileEntityBrassTube)
 			{
-				te.markDirty();
+				// need to notify neighbors again
+				worldIn.notifyNeighbors(pos, BlockRegistrar.BRASS_TUBE);
 			}
 		}
 		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
@@ -171,8 +180,11 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 		TileEntity te = worldIn.getTileEntity(pos);
 		if (te instanceof TileEntityBrassTube)
 		{
-			System.out.println(((TileEntityBrassTube)te).distanceToNearestInventory);
-			player.sendStatusMessage(new TextComponentTranslation("Distance to nearest inventory = " + ((TileEntityBrassTube)te).distanceToNearestInventory), true);
+			System.out.println(((TileEntityBrassTube) te).distanceToNearestInventory);
+			player.sendStatusMessage(
+					new TextComponentTranslation(
+							"Distance to nearest inventory = " + ((TileEntityBrassTube) te).distanceToNearestInventory),
+					true);
 		}
 		return true;
 	}
