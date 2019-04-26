@@ -113,7 +113,7 @@ public class TileEntityBrassTube extends TileEntity
 	public void read(NBTTagCompound compound)
 	{
 		super.read(compound);
-		this.distanceToNearestInventory = compound.getInt(DIST_NBT_KEY);
+		//this.distanceToNearestInventory = compound.getInt(DIST_NBT_KEY);
 		NBTTagList invList = compound.getList(INV_NBT_KEY, 10);
 		List<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
 		for (int i = 0; i < invList.size(); i++)
@@ -127,7 +127,7 @@ public class TileEntityBrassTube extends TileEntity
 	@Override
 	public NBTTagCompound write(NBTTagCompound compound)
 	{
-		compound.setInt(DIST_NBT_KEY, this.distanceToNearestInventory);
+		//compound.setInt(DIST_NBT_KEY, this.distanceToNearestInventory);
 
 		NBTTagList invList = new NBTTagList();
 

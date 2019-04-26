@@ -147,8 +147,9 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	{
 		if (!worldIn.isRemote)
 		{
-			this.updateTE(worldIn, pos);
+			
 		}
+		super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
 	}
 
 	/**
@@ -161,13 +162,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	{
 		if (!worldIn.isRemote)
 		{
-			this.updateTE(worldIn, pos);
-			TileEntity te = worldIn.getTileEntity(pos);
-			if (te instanceof TileEntityBrassTube)
-			{
-				// need to notify neighbors again
-				worldIn.notifyNeighbors(pos, BlockRegistrar.BRASS_TUBE);
-			}
+			
 		}
 		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
 	}
@@ -177,29 +172,12 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	public boolean onBlockActivated(IBlockState state, World worldIn, BlockPos pos, EntityPlayer player, EnumHand hand,
 			EnumFacing side, float hitX, float hitY, float hitZ)
 	{
-		TileEntity te = worldIn.getTileEntity(pos);
-		if (te instanceof TileEntityBrassTube)
-		{
-			System.out.println(((TileEntityBrassTube) te).distanceToNearestInventory);
-			player.sendStatusMessage(
-					new TextComponentTranslation(
-							"Distance to nearest inventory = " + ((TileEntityBrassTube) te).distanceToNearestInventory),
-					true);
-		}
-		return true;
-	}
-
-	public void updateTE(World world, BlockPos pos)
-	{
-		TileEntity te = world.getTileEntity(pos);
-		if (te instanceof TileEntityBrassTube)
-		{
-			((TileEntityBrassTube) te).checkStateAndMaybeUpdate();
-		}
+		return super.onBlockActivated(state, worldIn, pos, player, hand, side, hitX, hitY, hitZ);
 	}
 
 	/// connections and states
 
+	@Override
 	public IBlockState getStateForPlacement(BlockItemUseContext context)
 	{
 		IBlockReader world = context.getWorld();
