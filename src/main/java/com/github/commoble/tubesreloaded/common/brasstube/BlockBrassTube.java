@@ -4,7 +4,7 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.common.registry.BlockRegistrar;
+import com.github.commoble.tubesreloaded.common.routing.FinderAdditionHelper;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSixWay;
@@ -30,7 +30,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -147,7 +146,10 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	{
 		if (!worldIn.isRemote)
 		{
-			
+			// when chests and friends change their inventory,
+			// they call updateComparatorOutputLevel
+			// which calls neighborChanged on adjacent blocks
+			// so we can tell when a neighboring chest changes its inventory sign
 		}
 		super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
 	}
@@ -162,7 +164,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	{
 		if (!worldIn.isRemote)
 		{
-			
+			FinderAdditionHelper.onTubePlaced(worldIn, pos);
 		}
 		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
 	}
@@ -203,7 +205,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 		if (te == null)
 			return false;
 
-		if (te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face) != null)
+		if (te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face).isPresent())
 		{
 			return true;
 		}

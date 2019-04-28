@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.common.brasstube;
+package com.github.commoble.tubesreloaded.common.routing;
 
 import net.minecraft.util.math.BlockPos;
 
@@ -11,5 +11,10 @@ public class ItemFinder
 	{
 		this.distance = distance;
 		this.pos = pos;
+	}
+	
+	public ItemFinder plusOneSpace()
+	{
+		return new ItemFinder(this.distance+1, this.pos);
 	}
 }

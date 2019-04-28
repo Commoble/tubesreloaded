@@ -1,7 +1,5 @@
 package com.github.commoble.tubesreloaded.common.brasstube;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,10 +7,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
+import com.github.commoble.tubesreloaded.common.routing.ItemFinderMap;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.INBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,7 +19,6 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -30,10 +26,11 @@ import net.minecraftforge.items.IItemHandler;
 
 public class TileEntityBrassTube extends TileEntity
 {
-	public static final String DIST_NBT_KEY = "distance";
+	//public static final String DIST_NBT_KEY = "distance";
 	public static final String INV_NBT_KEY = "inventory";
 
-	protected HashMap<Item, ItemFinder> finders;
+	public ItemFinderMap finderMap = new ItemFinderMap();
+	
 	protected List<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
 	protected TubeInventoryHandler inventoryHandler = new TubeInventoryHandler(this); // extends ItemStackHandler
 	protected LazyOptional<IItemHandler> inventoryHolder = LazyOptional.of(() -> inventoryHandler);
@@ -41,13 +38,14 @@ public class TileEntityBrassTube extends TileEntity
 	public TileEntityBrassTube(TileEntityType<?> tileEntityTypeIn)
 	{
 		super(tileEntityTypeIn);
-		// TODO Auto-generated constructor stub
 	}
 
 	public TileEntityBrassTube()
 	{
-		super(TileEntityRegistrar.TE_TYPE_BRASS_TUBE);
+		this(TileEntityRegistrar.TE_TYPE_BRASS_TUBE);
 	}
+
+	/**** Event Handling ****/
 
 	
 
