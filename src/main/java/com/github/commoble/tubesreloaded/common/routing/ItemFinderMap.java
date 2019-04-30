@@ -23,20 +23,42 @@ public class ItemFinderMap
 		this.finders = new HashMap<Item, ItemFinder>();
 	}
 	
+	@Override
+	public String toString()
+	{
+		return this.finders.toString();
+	}
+	
 	public ItemFinderMap(Map<Item, ItemFinder> finders)
 	{
 		this.finders = finders;
 	}
 	
-	public void mergeFromTE(World world, BlockPos pos)
+	// Precondition: item exists in otherFinderMap
+	// ITEM: item to check, may be null (indicating empty slot is being compared
+	// THIS: an itemFinderMap that is possibly closer to an inventory containing a relevant slot for ITEM
+	// DISTANCE: the distance of the origin's finder
+	public boolean isItemOrEmptyCloserHereThanIn(Item item, int distance)
 	{
-		this.mergeFromTE(world.getTileEntity(pos));
+		return (this.finders.containsKey(null) && this.finders.get(null).distance < distance)
+				||
+				(
+						(item != null)
+						&&
+						(this.finders.containsKey(item) && this.finders.get(item).distance < distance)
+				);
+	}
+	
+	// returns true if any change occurred in this findermap
+	public boolean mergeFromTE(World world, BlockPos pos)
+	{
+		return this.mergeFromTE(world.getTileEntity(pos));
 	}
 
-	public void mergeFromTE(TileEntity te)
+	public boolean mergeFromTE(TileEntity te)
 	{
 		if (te == null)
-			return;
+			return false;
 
 		// if the TE is a tube, take the tube's finders and compare them to this one's,
 		// with the following rules:
@@ -53,18 +75,19 @@ public class ItemFinderMap
 		if (te instanceof TileEntityBrassTube)
 		{
 			TileEntityBrassTube tube = (TileEntityBrassTube) te;
-			this.mergeFromFinderMap(tube.finderMap);
+			return this.mergeFromFinderMap(tube.finderMap);
 		}
 		else
 		{
 			LazyOptional<IItemHandler> cap = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
-			if (cap.isPresent())
+			if (cap.isPresent())	// not null
 			{
+				IItemHandler handler = cap.orElse(null);
 				BlockPos pos = te.getPos();
-				cap.ifPresent(handler -> mergeFromFinderMap(getFinderMapFromItemHandler(handler, pos)));
+				return this.mergeFromFinderMap(getFinderMapFromItemHandler(handler, pos));
 
 			}
-
+			return false;
 			// ignore TEs that use IInventory but not item handler
 		}
 	}
@@ -72,7 +95,7 @@ public class ItemFinderMap
 	// returns a finder map that represents the items in a TE's item handler
 	// items here are 0 units away from the TE since they are in it
 	// 
-	public ItemFinderMap getFinderMapFromItemHandler(IItemHandler handler, BlockPos pos)
+	public static ItemFinderMap getFinderMapFromItemHandler(IItemHandler handler, BlockPos pos)
 	{
 		HashMap<Item, ItemFinder> map = new HashMap<Item, ItemFinder>();
 		int slots = handler.getSlots();
@@ -80,12 +103,13 @@ public class ItemFinderMap
 		{
 			ItemStack stack = handler.getStackInSlot(i);
 			
+			
 			// if there is an empty slot here, we can put any item in it, the other ones don't matter
 			if (stack.isEmpty())
 			{
 				HashMap<Item, ItemFinder> emptyMap = new HashMap<Item, ItemFinder>();
 				emptyMap.put(null, new ItemFinder(0, pos));	// null is the empty item
-				return new ItemFinderMap(map);
+				return new ItemFinderMap(emptyMap);
 			}
 			
 			if (stack.getCount() < stack.getMaxStackSize() && !map.containsKey(stack.getItem()))

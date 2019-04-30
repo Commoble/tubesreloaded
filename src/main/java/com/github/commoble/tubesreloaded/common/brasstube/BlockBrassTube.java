@@ -4,7 +4,7 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.common.routing.FinderAdditionHelper;
+import com.github.commoble.tubesreloaded.common.routing.FinderHelper;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSixWay;
@@ -111,6 +111,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	}
 
 	@Override
+	@Deprecated
 	public void onReplaced(IBlockState state, World worldIn, BlockPos pos, IBlockState newState, boolean isMoving)
 	{
 		if (state.getBlock() == newState.getBlock())
@@ -150,6 +151,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 			// they call updateComparatorOutputLevel
 			// which calls neighborChanged on adjacent blocks
 			// so we can tell when a neighboring chest changes its inventory sign
+			FinderHelper.onTubeNeighborChange(worldIn, pos);
 		}
 		super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
 	}
@@ -162,19 +164,26 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, @Nullable EntityLivingBase placer,
 			ItemStack stack)
 	{
-		if (!worldIn.isRemote)
-		{
-			FinderAdditionHelper.onTubePlaced(worldIn, pos);
-		}
+		 if (!worldIn.isRemote)
+		 {
+				FinderHelper.onTubeNeighborChange(worldIn, pos);
+		 }
 		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
 	}
 
 	@Override
 	@Deprecated
-	public boolean onBlockActivated(IBlockState state, World worldIn, BlockPos pos, EntityPlayer player, EnumHand hand,
+	public boolean onBlockActivated(IBlockState state, World world, BlockPos pos, EntityPlayer player, EnumHand hand,
 			EnumFacing side, float hitX, float hitY, float hitZ)
 	{
-		return super.onBlockActivated(state, worldIn, pos, player, hand, side, hitX, hitY, hitZ);
+		TileEntity te = world.getTileEntity(pos);
+		if (te instanceof TileEntityBrassTube)
+		{
+			TileEntityBrassTube tube = (TileEntityBrassTube)te;
+			tube.printMap();
+			return true;
+		}
+		return super.onBlockActivated(state, world, pos, player, hand, side, hitX, hitY, hitZ);
 	}
 
 	/// connections and states

@@ -10,6 +10,7 @@ import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.common.routing.ItemFinderMap;
 
 import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.INBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -19,6 +20,7 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -106,6 +108,19 @@ public class TileEntityBrassTube extends TileEntity
 	}
 
 	/**** NBT and synchronization ****/
+	
+	public void printMap()
+	{
+		for (Item item : this.finderMap.finders.keySet())
+		{
+			String name = item == null ? "empty" : item.getTranslationKey();
+			System.out.println(name + "--" + this.finderMap.finders.get(item).distance);
+		}
+		if (this.finderMap.finders.isEmpty())
+		{
+			System.out.println("no reachable slots");
+		}
+	}
 
 	@Override
 	public void read(NBTTagCompound compound)
@@ -169,6 +184,9 @@ public class TileEntityBrassTube extends TileEntity
 		return new SPacketUpdateTileEntity(getPos(), 1, nbt);
 	}
 
+	/**
+	 * Receive packet on client and get data out of it
+	 */
 	@Override
 	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity packet)
 	{
