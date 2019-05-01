@@ -7,10 +7,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
-import com.github.commoble.tubesreloaded.common.routing.ItemFinderMap;
 
 import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.INBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -20,7 +18,6 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -28,11 +25,9 @@ import net.minecraftforge.items.IItemHandler;
 
 public class TileEntityBrassTube extends TileEntity
 {
-	//public static final String DIST_NBT_KEY = "distance";
+	// public static final String DIST_NBT_KEY = "distance";
 	public static final String INV_NBT_KEY = "inventory";
 
-	public ItemFinderMap finderMap = new ItemFinderMap();
-	
 	protected List<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
 	protected TubeInventoryHandler inventoryHandler = new TubeInventoryHandler(this); // extends ItemStackHandler
 	protected LazyOptional<IItemHandler> inventoryHolder = LazyOptional.of(() -> inventoryHandler);
@@ -48,8 +43,6 @@ public class TileEntityBrassTube extends TileEntity
 	}
 
 	/**** Event Handling ****/
-
-	
 
 	/**** Inventory handling ****/
 
@@ -107,26 +100,11 @@ public class TileEntityBrassTube extends TileEntity
 		return false;
 	}
 
-	/**** NBT and synchronization ****/
-	
-	public void printMap()
-	{
-		for (Item item : this.finderMap.finders.keySet())
-		{
-			String name = item == null ? "empty" : item.getTranslationKey();
-			System.out.println(name + "--" + this.finderMap.finders.get(item).distance);
-		}
-		if (this.finderMap.finders.isEmpty())
-		{
-			System.out.println("no reachable slots");
-		}
-	}
-
 	@Override
 	public void read(NBTTagCompound compound)
 	{
 		super.read(compound);
-		//this.distanceToNearestInventory = compound.getInt(DIST_NBT_KEY);
+		// this.distanceToNearestInventory = compound.getInt(DIST_NBT_KEY);
 		NBTTagList invList = compound.getList(INV_NBT_KEY, 10);
 		List<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
 		for (int i = 0; i < invList.size(); i++)
@@ -140,7 +118,7 @@ public class TileEntityBrassTube extends TileEntity
 	@Override
 	public NBTTagCompound write(NBTTagCompound compound)
 	{
-		//compound.setInt(DIST_NBT_KEY, this.distanceToNearestInventory);
+		// compound.setInt(DIST_NBT_KEY, this.distanceToNearestInventory);
 
 		NBTTagList invList = new NBTTagList();
 
@@ -163,7 +141,7 @@ public class TileEntityBrassTube extends TileEntity
 	 * Get an NBT compound to sync to the client with SPacketChunkData, used for
 	 * initial loading of the chunk or when many blocks change at once. This
 	 * compound comes back to you clientside in {@link handleUpdateTag}
-	 *  // handleUpdateTag just calls read by default
+	 * //handleUpdateTag just calls read by default
 	 */
 	@Override
 	public NBTTagCompound getUpdateTag()
