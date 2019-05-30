@@ -1,7 +1,9 @@
 package com.github.commoble.tubesreloaded.common.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.github.commoble.tubesreloaded.common.brasstube.TileEntityBrassTube;
 
@@ -26,5 +28,12 @@ public class WorldHelper
 		}
 		
 		return tes;
+	}
+	
+	public static Stream<TileEntityBrassTube> getBlockPositionsAsTubeTileEntities(World world, Collection<BlockPos> posCollection)
+	{
+		Stream<TileEntity> teStream = posCollection.stream().map(tubePos -> world.getTileEntity(tubePos));
+		Stream<TileEntity> filteredStream = teStream.filter(te -> te instanceof TileEntityBrassTube);
+		return filteredStream.map(te -> (TileEntityBrassTube) te);
 	}
 }

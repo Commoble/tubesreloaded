@@ -141,12 +141,17 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	 */
 	@Override
 	@Deprecated
-	public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos)
 	{
-		if (!worldIn.isRemote)
+		if (!world.isRemote)
 		{
+			TileEntity te = world.getTileEntity(pos);
+			if (te instanceof TileEntityBrassTube)
+			{
+				((TileEntityBrassTube) te).onPossibleNetworkUpdateRequired();
+			}
 		}
-		super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
+		super.neighborChanged(state, world, pos, blockIn, fromPos);
 	}
 
 	/**
@@ -154,13 +159,18 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	 * logic
 	 */
 	@Override
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, @Nullable EntityLivingBase placer,
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, @Nullable EntityLivingBase placer,
 			ItemStack stack)
 	{
-		if (!worldIn.isRemote)
+		if (!world.isRemote)
 		{
+			TileEntity te = world.getTileEntity(pos);
+			if (te instanceof TileEntityBrassTube)
+			{
+				((TileEntityBrassTube) te).onPossibleNetworkUpdateRequired();
+			}
 		}
-		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+		super.onBlockPlacedBy(world, pos, state, placer, stack);
 	}
 
 	@Override
@@ -172,6 +182,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 		if (te instanceof TileEntityBrassTube)
 		{
 			TileEntityBrassTube tube = (TileEntityBrassTube) te;
+			System.out.println(tube.network);
 		}
 		return super.onBlockActivated(state, world, pos, player, hand, side, hitX, hitY, hitZ);
 	}

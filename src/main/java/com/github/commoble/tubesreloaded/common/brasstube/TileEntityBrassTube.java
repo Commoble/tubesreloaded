@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
+import com.github.commoble.tubesreloaded.common.routing.RoutingNetwork;
 
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
@@ -31,6 +32,9 @@ public class TileEntityBrassTube extends TileEntity
 	protected List<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
 	protected TubeInventoryHandler inventoryHandler = new TubeInventoryHandler(this); // extends ItemStackHandler
 	protected LazyOptional<IItemHandler> inventoryHolder = LazyOptional.of(() -> inventoryHandler);
+	
+	@Nonnull
+	public RoutingNetwork network = RoutingNetwork.INVALID_NETWORK;
 
 	public TileEntityBrassTube(TileEntityType<?> tileEntityTypeIn)
 	{
@@ -43,6 +47,21 @@ public class TileEntityBrassTube extends TileEntity
 	}
 
 	/**** Event Handling ****/
+	
+	public void onPossibleNetworkUpdateRequired()
+	{
+		RoutingNetwork newNetwork = RoutingNetwork.buildNetworkFrom(this.pos, this.world);
+		if (this.network.invalid || !newNetwork.equals(this.network))
+		{	// if the existing network has been invalidated or changed,
+			// use the new network, and invalidate the old network
+			// additionally, make sure all tubes in the new network are using the new network
+			// 	(to reduce the amount of network building that must be done)
+			// and invalidate the old network (in case it was changed)
+			this.network.invalid = true;
+			this.network = newNetwork;
+			newNetwork.confirmAllTubes(this.world);
+		}
+	}
 
 	/**** Inventory handling ****/
 

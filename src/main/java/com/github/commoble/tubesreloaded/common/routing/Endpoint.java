@@ -1,56 +1,50 @@
 package com.github.commoble.tubesreloaded.common.routing;
 
-import java.util.EnumSet;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.items.CapabilityItemHandler;
 
 public class Endpoint
 {	
-	public EnumSet<EnumFacing> relevantFaces = EnumSet.noneOf(EnumFacing.class);
-	public BlockPos pos;	// TEs can become invalidated or replaced, so get new ones when needed
+	public final BlockPos pos;	// TEs can become invalidated or replaced, so get new ones when needed (not sure why this comment is here)
+	public final EnumFacing face;	// the face of the block at this blockpos that represents the endpoint
 	
-	public Endpoint(BlockPos tePos)
+	public Endpoint(BlockPos tePos, EnumFacing blockFace)
 	{
 		this.pos = tePos;
+		this.face = blockFace;
 	}
 	
-	// create an Endpoint such that its relevant faces are those that
-	// a) have an item handler capability, and
-	// b) face a position in the tubeSet
-	@Nonnull
-	public static Endpoint createEndpoint(BlockPos tePos, World world, Set<BlockPos> tubeSet)
+	@Override
+	public boolean equals(Object other)
 	{
-		TileEntity te = world.getTileEntity(tePos);
-		Endpoint endpoint = new Endpoint(tePos);
-		
-		if (te == null)
+		if (this == other)	// same instance, must be equal
 		{
-			return endpoint; // empty endpoint
+			return true;
 		}
-		
-		for (EnumFacing face : EnumFacing.values())
+		else if (other instanceof Endpoint)
+		{	// if other object is an endpoint,
+			// this is equivalent to the other endpoint if and only if
+			// both blockpos are equivalent and both endpoints are equivalent
+			Endpoint otherEndpoint = (Endpoint) other;
+			return this.pos.equals(otherEndpoint.pos) && this.face.equals(otherEndpoint.face);
+		}
+		else
 		{
-			if (te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face).isPresent())
-			{
-				if (tubeSet.contains(tePos.offset(face)))
-				{
-					endpoint.relevantFaces.add(face);
-				}
-			}
+			return false;	// not an endpoint, can't be equal
 		}
-		
-		return endpoint;
 	}
 	
+	@Override
+	public int hashCode()
+	{
+		return this.pos.hashCode() ^ this.face.hashCode();
+	}
 	
-	
+	@Override
+	public String toString()
+	{
+		return this.pos + ";    " + this.face;
+	}
 	
 	
 }
