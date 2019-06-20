@@ -1,12 +1,16 @@
 package com.github.commoble.tubesreloaded.common.routing;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
 
 import com.github.commoble.tubesreloaded.common.brasstube.TileEntityBrassTube;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -17,19 +21,90 @@ import net.minecraftforge.items.IItemHandler;
 
 public class RoutingNetwork
 {
-	private final Set<BlockPos> tubes = new HashSet<BlockPos>();	// set of the tubes that make up the network interior
+	public final Set<BlockPos> tubes = new HashSet<BlockPos>();	// set of the tubes that make up the network interior
 	
 	// set of the faces at the edge of the network
 	// that items can be inserted into
 	// the faces are the faces of the TE blocks (i.e. if face = west,
 	// the network is to the west of the block, and items are inserted
 	// into the west face of the block)
-	private final Set<Endpoint> endpoints = new HashSet<Endpoint>();
+	public final Set<Endpoint> endpoints = new HashSet<Endpoint>();
+	
+	// mapping of starting blockpos : routes to all endpoints from that starting pos
+	// the routes are sorted in order of nearest endpoint to the starting pos
+	private final HashMap<BlockPos, List<Route>> bestRoutes = new HashMap<BlockPos, List<Route>>();
 	
 	public boolean invalid = false;
 	
 	public static final RoutingNetwork INVALID_NETWORK = new RoutingNetwork();
 	static {INVALID_NETWORK.invalid = true;}
+
+	
+	// use buildNetworkFrom instead
+	private RoutingNetwork()
+	{
+		
+	}
+	
+	public boolean contains(BlockPos pos)
+	{
+		if (this.tubes.contains(pos))
+		{
+			return true;
+		}
+		else
+		{
+			for(Endpoint endpoint : this.endpoints)
+			{
+				if (endpoint.pos.equals(pos))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+	
+	public int getSize()
+	{
+		return this.tubes.size() + this.endpoints.size();
+	}
+	
+	// gets the route to the nearest endpoint based on the position of the initial tube
+	// and the side of that tube that the item was inserted into
+	// returns NULL if there are no valid routes
+	@Nullable
+	public Route getBestRoute(World world, BlockPos startPos, EnumFacing insertionSide, ItemStack stack)
+	{
+		// lazily generate the routes if they don't exist yet
+		List<Route> routes;
+		if (this.bestRoutes.containsKey(startPos))
+		{
+			routes = this.bestRoutes.get(startPos);
+		}
+		else
+		{
+			routes = this.generateRoutes(startPos);
+			this.bestRoutes.put(startPos, routes);
+		}
+		
+		// this list is sorted by travel time to an endpoint from this position
+		for(Route route : routes)
+		{
+			// ignore the block the item was inserted from, all else are valid
+			if (route.isRouteDestinationValid(world, startPos, insertionSide, stack))
+			{
+				return route;
+			}
+		}
+		
+		return null;	// no valid routes
+	}
+	
+	private List<Route> generateRoutes(BlockPos startPos)
+	{
+		return FastestRoutesSolver.generateRoutes(this, startPos);
+	}
 	
 	public static RoutingNetwork buildNetworkFrom(BlockPos pos, World world)
 	{
@@ -94,7 +169,7 @@ public class RoutingNetwork
 	// sets the network of every tube in this network to this network 
 	public void confirmAllTubes(World world)
 	{
-		WorldHelper.getBlockPositionsAsTubeTileEntities(world, this.tubes).forEach(tube -> tube.network = this);
+		WorldHelper.getBlockPositionsAsTubeTileEntities(world, this.tubes).forEach(tube -> tube.setNetwork(this));
 	}
 	
 	@Override

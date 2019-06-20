@@ -1,7 +1,16 @@
 package com.github.commoble.tubesreloaded.common.routing;
 
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 public class Endpoint
 {	
@@ -32,6 +41,50 @@ public class Endpoint
 		{
 			return false;	// not an endpoint, can't be equal
 		}
+	}
+	
+	/**
+	 * Returns TRUE if the TE at this endpoint has an item handler and any portion
+	 * of the given itemstack can be inserted into that item handler
+	 * 
+	 * Return FALSE if the handler cannot take the stack or if either the
+	 * handler or the TE do not exist
+	 * 
+	 * This only simulates the insertion and does not affect the state of
+	 * any itemstacks or inventories
+	 * 
+	 * @param world The world this endpoint lies in
+	 * @param stack The stack to attempt to insert
+	 * @return true or false as described above
+	 */
+	public boolean canInsertItem(World world, ItemStack stack)
+	{
+		TileEntity te = world.getTileEntity(this.pos);
+		
+		if (te == null) return false;
+		
+		LazyOptional<IItemHandler> optionalHandler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, this.face);
+		return optionalHandler.map(handler -> canInsertItem(handler, stack)).orElse(false);
+	}
+	
+	// helper function used for the above method
+	// the itemstack is the one passed into the above method, the item handler is assumed to exist
+	private boolean canInsertItem(IItemHandler handler, ItemStack stack)
+	{
+		for (int i=0; i<handler.getSlots(); i++)
+		{
+			// for each slot, if the itemstack can be inserted into the slot
+				// (i.e. if the type of that item is valid for that slot AND
+				// if there is room to put at least part of that stack into the slot)
+			// then the inventory at this endpoint can receive the stack, so return true
+			if (handler.isItemValid(i, stack) && handler.insertItem(i, stack, true).getCount() < stack.getCount())
+			{
+				return true;
+			}
+		}
+		
+		// return false if no acceptable slot is found
+		return false;
 	}
 	
 	@Override

@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
+import com.github.commoble.tubesreloaded.common.routing.Route;
 import com.github.commoble.tubesreloaded.common.routing.RoutingNetwork;
 
 import net.minecraft.inventory.InventoryHelper;
@@ -33,8 +34,8 @@ public class TileEntityBrassTube extends TileEntity
 	protected TubeInventoryHandler inventoryHandler = new TubeInventoryHandler(this); // extends ItemStackHandler
 	protected LazyOptional<IItemHandler> inventoryHolder = LazyOptional.of(() -> inventoryHandler);
 	
-	@Nonnull
-	public RoutingNetwork network = RoutingNetwork.INVALID_NETWORK;
+	@Nonnull	// use getNetwork()
+	private RoutingNetwork network = RoutingNetwork.INVALID_NETWORK;
 
 	public TileEntityBrassTube(TileEntityType<?> tileEntityTypeIn)
 	{
@@ -44,6 +45,27 @@ public class TileEntityBrassTube extends TileEntity
 	public TileEntityBrassTube()
 	{
 		this(TileEntityRegistrar.TE_TYPE_BRASS_TUBE);
+	}
+	
+	/**** Getters and Setters	****/
+	public RoutingNetwork getNetwork()
+	{
+		if (this.network.invalid)
+		{
+			this.network = RoutingNetwork.buildNetworkFrom(this.pos, this.world);
+		}
+		return this.network;
+	}
+	
+	public void setNetwork(RoutingNetwork network)
+	{
+		this.network = network;
+	}
+	
+	// insertionSide is the side of this block the item was inserted from
+	public Route getBestRoute(EnumFacing insertionSide, ItemStack stack)
+	{
+		return this.getNetwork().getBestRoute(this.world, this.pos, insertionSide, stack);
 	}
 
 	/**** Event Handling ****/

@@ -1,8 +1,11 @@
 package com.github.commoble.tubesreloaded.common.brasstube;
 
+import java.util.HashMap;
 import java.util.Random;
 
 import javax.annotation.Nullable;
+
+import com.github.commoble.tubesreloaded.common.routing.Route;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSixWay;
@@ -28,6 +31,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -179,12 +183,23 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 			EnumFacing side, float hitX, float hitY, float hitZ)
 	{
 		TileEntity te = world.getTileEntity(pos);
-		if (te instanceof TileEntityBrassTube)
+		if (!world.isRemote() && te instanceof TileEntityBrassTube)
 		{
+			System.out.println("checking");
 			TileEntityBrassTube tube = (TileEntityBrassTube) te;
-			System.out.println(tube.network);
+			ItemStack stack = player.getHeldItem(hand);
+			Route bestRoute = tube.getNetwork().getBestRoute(world, pos, side, stack);
+			if (bestRoute != null)
+			{
+				player.sendStatusMessage(new TextComponentTranslation(bestRoute.toStringFrom(pos)), false);
+			}
+			else
+			{
+				player.sendStatusMessage(new TextComponentTranslation("No valid route!"), false);
+			}
 		}
-		return super.onBlockActivated(state, world, pos, player, hand, side, hitX, hitY, hitZ);
+		return true;
+		//return super.onBlockActivated(state, world, pos, player, hand, side, hitX, hitY, hitZ);
 	}
 
 	/// connections and states
@@ -377,9 +392,11 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 		}
 	}
 
+	
 	@Override
 	public IFluidState getFluidState(IBlockState state)
 	{
+		HashMap<EnumFacing, EnumFacing> map = new HashMap<>();
 		return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(state);
 	}
 
