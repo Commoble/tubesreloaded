@@ -12,7 +12,7 @@ import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.LazyOptional;
@@ -74,7 +74,7 @@ public class RoutingNetwork
 	// and the side of that tube that the item was inserted into
 	// returns NULL if there are no valid routes
 	@Nullable
-	public Route getBestRoute(World world, BlockPos startPos, EnumFacing insertionSide, ItemStack stack)
+	public Route getBestRoute(World world, BlockPos startPos, Direction insertionSide, ItemStack stack)
 	{
 		// lazily generate the routes if they don't exist yet
 		List<Route> routes;
@@ -120,7 +120,7 @@ public class RoutingNetwork
 			TileEntity te = world.getTileEntity(endPos);
 			if (te == null) continue;	// just in case
 			
-			for(EnumFacing face : EnumFacing.values())
+			for(Direction face : Direction.values())
 			{
 				// if the te has an item handler on this face, add an endpoint (representing that face) to the network
 				if (network.tubes.contains(endPos.offset(face)))
@@ -144,7 +144,7 @@ public class RoutingNetwork
 		{
 			network.tubes.add(pos);
 			// build further from tubes
-			for (EnumFacing face : EnumFacing.values())
+			for (Direction face : Direction.values())
 			{
 				BlockPos checkPos = pos.offset(face);
 				if (!visited.contains(checkPos))

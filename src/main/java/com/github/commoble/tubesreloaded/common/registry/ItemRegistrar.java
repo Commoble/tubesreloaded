@@ -2,8 +2,8 @@ package com.github.commoble.tubesreloaded.common.registry;
 
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
 
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.ObjectHolder;
@@ -27,7 +27,7 @@ public class ItemRegistrar
 	{
 		IForgeRegistry<Item> registry = event.getRegistry();
 		
-		registerItem(registry, new ItemBlock(BlockRegistrar.BRASS_TUBE, new Item.Properties().group(CreativeTabs.tab)), BlockNames.BRASS_TUBE_NAME);
+		registerItem(registry, new BlockItem(BlockRegistrar.BRASS_TUBE, new Item.Properties().group(CreativeTabs.tab)), BlockNames.BRASS_TUBE_NAME);
 		
 		// real items
 		

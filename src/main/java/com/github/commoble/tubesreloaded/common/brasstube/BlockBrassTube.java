@@ -8,16 +8,15 @@ import javax.annotation.Nullable;
 import com.github.commoble.tubesreloaded.common.routing.Route;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockSixWay;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.IBucketPickupHandler;
 import net.minecraft.block.ILiquidContainer;
-import net.minecraft.block.state.BlockFaceShape;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.block.SixWayBlock;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.fluid.IFluidState;
-import net.minecraft.init.Fluids;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathType;
@@ -26,12 +25,14 @@ import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -39,14 +40,14 @@ import net.minecraftforge.items.CapabilityItemHandler;
 
 public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiquidContainer
 {
-	public static final EnumFacing[] FACING_VALUES = EnumFacing.values();
+	public static final Direction[] FACING_VALUES = Direction.values();
 
-	public static final BooleanProperty DOWN = BlockSixWay.DOWN;
-	public static final BooleanProperty UP = BlockSixWay.UP;
-	public static final BooleanProperty NORTH = BlockSixWay.NORTH;
-	public static final BooleanProperty SOUTH = BlockSixWay.SOUTH;
-	public static final BooleanProperty WEST = BlockSixWay.WEST;
-	public static final BooleanProperty EAST = BlockSixWay.EAST;
+	public static final BooleanProperty DOWN = SixWayBlock.DOWN;
+	public static final BooleanProperty UP = SixWayBlock.UP;
+	public static final BooleanProperty NORTH = SixWayBlock.NORTH;
+	public static final BooleanProperty SOUTH = SixWayBlock.SOUTH;
+	public static final BooleanProperty WEST = SixWayBlock.WEST;
+	public static final BooleanProperty EAST = SixWayBlock.EAST;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
 	public static final double MIN_VOXEL = 0D;
@@ -66,30 +67,20 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 
 	/// basic block properties
 
-	/**
-	 * @deprecated call via {@link IBlockState#isFullCube()} whenever possible.
-	 *             Implementing/overriding is fine.
-	 */
 	@Override
-	public boolean isFullCube(IBlockState state)
+	public boolean allowsMovement(BlockState state, IBlockReader worldIn, BlockPos pos, PathType type)
 	{
 		return false;
 	}
 
 	@Override
-	public boolean allowsMovement(IBlockState state, IBlockReader worldIn, BlockPos pos, PathType type)
-	{
-		return false;
-	}
-
-	@Override
-	public boolean hasTileEntity(IBlockState state)
+	public boolean hasTileEntity(BlockState state)
 	{
 		return true;
 	}
 
 	@Override
-	public TileEntity createTileEntity(IBlockState state, IBlockReader world)
+	public TileEntity createTileEntity(BlockState state, IBlockReader world)
 	{
 		return new TileEntityBrassTube();
 	}
@@ -107,14 +98,14 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	// block behaviour
 
 	@Override
-	public void tick(IBlockState state, World worldIn, BlockPos pos, Random random)
+	public void tick(BlockState state, World worldIn, BlockPos pos, Random random)
 	{
 
 	}
 
 	@Override
 	@Deprecated
-	public void onReplaced(IBlockState state, World worldIn, BlockPos pos, IBlockState newState, boolean isMoving)
+	public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving)
 	{
 		if (state.getBlock() == newState.getBlock())
 		{
@@ -145,7 +136,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	 */
 	@Override
 	@Deprecated
-	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos)
+	public void neighborChanged(BlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean wat)
 	{
 		if (!world.isRemote)
 		{
@@ -155,7 +146,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 				((TileEntityBrassTube) te).onPossibleNetworkUpdateRequired();
 			}
 		}
-		super.neighborChanged(state, world, pos, blockIn, fromPos);
+		super.neighborChanged(state, world, pos, blockIn, fromPos, wat);
 	}
 
 	/**
@@ -163,7 +154,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	 * logic
 	 */
 	@Override
-	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, @Nullable EntityLivingBase placer,
+	public void onBlockPlacedBy(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer,
 			ItemStack stack)
 	{
 		if (!world.isRemote)
@@ -179,8 +170,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 
 	@Override
 	@Deprecated
-	public boolean onBlockActivated(IBlockState state, World world, BlockPos pos, EntityPlayer player, EnumHand hand,
-			EnumFacing side, float hitX, float hitY, float hitZ)
+	public boolean onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult raytrace)
 	{
 		TileEntity te = world.getTileEntity(pos);
 		if (!world.isRemote() && te instanceof TileEntityBrassTube)
@@ -188,14 +178,14 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 			System.out.println("checking");
 			TileEntityBrassTube tube = (TileEntityBrassTube) te;
 			ItemStack stack = player.getHeldItem(hand);
-			Route bestRoute = tube.getNetwork().getBestRoute(world, pos, side, stack);
+			Route bestRoute = tube.getNetwork().getBestRoute(world, pos, raytrace.getFace(), stack);
 			if (bestRoute != null)
 			{
-				player.sendStatusMessage(new TextComponentTranslation(bestRoute.toStringFrom(pos)), false);
+				player.sendStatusMessage(new TranslationTextComponent(bestRoute.toStringFrom(pos)), false);
 			}
 			else
 			{
-				player.sendStatusMessage(new TextComponentTranslation("No valid route!"), false);
+				player.sendStatusMessage(new TranslationTextComponent("No valid route!"), false);
 			}
 		}
 		return true;
@@ -205,21 +195,21 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	/// connections and states
 
 	@Override
-	public IBlockState getStateForPlacement(BlockItemUseContext context)
+	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
 		IBlockReader world = context.getWorld();
 		BlockPos pos = context.getPos();
 		IFluidState fluidstate = context.getWorld().getFluidState(context.getPos());
-		return super.getStateForPlacement(context).with(DOWN, canConnectTo(world, pos, EnumFacing.DOWN))
-				.with(UP, canConnectTo(world, pos, EnumFacing.UP))
-				.with(NORTH, canConnectTo(world, pos, EnumFacing.NORTH))
-				.with(SOUTH, canConnectTo(world, pos, EnumFacing.SOUTH))
-				.with(WEST, canConnectTo(world, pos, EnumFacing.WEST))
-				.with(EAST, canConnectTo(world, pos, EnumFacing.EAST))
+		return super.getStateForPlacement(context).with(DOWN, canConnectTo(world, pos, Direction.DOWN))
+				.with(UP, canConnectTo(world, pos, Direction.UP))
+				.with(NORTH, canConnectTo(world, pos, Direction.NORTH))
+				.with(SOUTH, canConnectTo(world, pos, Direction.SOUTH))
+				.with(WEST, canConnectTo(world, pos, Direction.WEST))
+				.with(EAST, canConnectTo(world, pos, Direction.EAST))
 				.with(WATERLOGGED, Boolean.valueOf(fluidstate.getFluid() == Fluids.WATER));
 	}
 
-	protected boolean canConnectTo(IBlockReader world, BlockPos pos, EnumFacing face)
+	protected boolean canConnectTo(IBlockReader world, BlockPos pos, Direction face)
 	{
 		BlockPos newPos = pos.offset(face);
 		if (world.getBlockState(newPos).getBlock() instanceof BlockBrassTube)
@@ -237,15 +227,15 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 		return false;
 	}
 
-	protected void fillStateContainer(StateContainer.Builder<Block, IBlockState> builder)
+	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
 	{
 		builder.add(DOWN, UP, NORTH, SOUTH, WEST, EAST, WATERLOGGED);
 	}
 
-	public BlockFaceShape getBlockFaceShape(IBlockReader worldIn, IBlockState state, BlockPos pos, EnumFacing face)
-	{
-		return BlockFaceShape.UNDEFINED;
-	}
+//	public BlockFaceShape getBlockFaceShape(IBlockReader worldIn, BlockState state, BlockPos pos, Direction face)
+//	{
+//		return BlockFaceShape.UNDEFINED;
+//	}
 
 	/**
 	 * Update the provided state given the provided neighbor facing and neighbor
@@ -259,7 +249,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	 *            face to the stateIn at currentPos
 	 */
 	@Override
-	public IBlockState updatePostPlacement(IBlockState stateIn, EnumFacing facing, IBlockState facingState,
+	public BlockState updatePostPlacement(BlockState stateIn, Direction facing, BlockState facingState,
 			IWorld worldIn, BlockPos currentPos, BlockPos facingPos)
 	{
 		if (stateIn.get(WATERLOGGED))
@@ -267,7 +257,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 			worldIn.getPendingFluidTicks().scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickRate(worldIn));
 		}
 
-		return stateIn.with(BlockSixWay.FACING_TO_PROPERTY_MAP.get(facing),
+		return stateIn.with(SixWayBlock.FACING_TO_PROPERTY_MAP.get(facing),
 				Boolean.valueOf(this.canConnectTo(worldIn, currentPos, facing)));
 	}
 
@@ -318,30 +308,30 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	}
 
 	@Override
-	public VoxelShape getRenderShape(IBlockState state, IBlockReader worldIn, BlockPos pos)
+	public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos)
 	{
-		return this.getShape(state, worldIn, pos);
+		return state.getShape(worldIn, pos);
 	}
 
 	@Override
-	public VoxelShape getCollisionShape(IBlockState state, IBlockReader worldIn, BlockPos pos)
+	public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
 	{
-		return this.getShape(state, worldIn, pos);
+		return this.getShape(state, worldIn, pos, context);
 	}
 
 	@Override
-	public VoxelShape getShape(IBlockState state, IBlockReader worldIn, BlockPos pos)
+	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
 	{
 		return this.shapes[this.getShapeIndex(state)];
 	}
 
-	public int getShapeIndex(IBlockState state)
+	public int getShapeIndex(BlockState state)
 	{
 		int index = 0;
 
 		for (int j = 0; j < FACING_VALUES.length; ++j)
 		{
-			if (state.get(BlockSixWay.FACING_TO_PROPERTY_MAP.get(FACING_VALUES[j])))
+			if (state.get(SixWayBlock.FACING_TO_PROPERTY_MAP.get(FACING_VALUES[j])))
 			{
 				index |= 1 << j;
 			}
@@ -353,13 +343,13 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	/// watterloggy stuff
 
 	@Override
-	public boolean canContainFluid(IBlockReader worldIn, BlockPos pos, IBlockState state, Fluid fluidIn)
+	public boolean canContainFluid(IBlockReader worldIn, BlockPos pos, BlockState state, Fluid fluidIn)
 	{
 		return !state.get(WATERLOGGED) && fluidIn == Fluids.WATER;
 	}
 
 	@Override
-	public boolean receiveFluid(IWorld worldIn, BlockPos pos, IBlockState state, IFluidState fluidStateIn)
+	public boolean receiveFluid(IWorld worldIn, BlockPos pos, BlockState state, IFluidState fluidStateIn)
 	{
 		if (!state.get(WATERLOGGED) && fluidStateIn.getFluid() == Fluids.WATER)
 		{
@@ -379,7 +369,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	}
 
 	@Override
-	public Fluid pickupFluid(IWorld worldIn, BlockPos pos, IBlockState state)
+	public Fluid pickupFluid(IWorld worldIn, BlockPos pos, BlockState state)
 	{
 		if (state.get(WATERLOGGED))
 		{
@@ -394,9 +384,9 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 
 	
 	@Override
-	public IFluidState getFluidState(IBlockState state)
+	public IFluidState getFluidState(BlockState state)
 	{
-		HashMap<EnumFacing, EnumFacing> map = new HashMap<>();
+		HashMap<Direction, Direction> map = new HashMap<>();
 		return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(state);
 	}
 

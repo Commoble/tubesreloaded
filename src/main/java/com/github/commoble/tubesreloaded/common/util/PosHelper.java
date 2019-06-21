@@ -2,7 +2,7 @@ package com.github.commoble.tubesreloaded.common.util;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
 public class PosHelper
@@ -13,9 +13,9 @@ public class PosHelper
 	 * @return
 	 */
 	@Nullable
-	public static EnumFacing getFacingFrom(BlockPos startPos, BlockPos nextPos)
+	public static Direction getFacingFrom(BlockPos startPos, BlockPos nextPos)
 	{
-		for (EnumFacing face : EnumFacing.values())
+		for (Direction face : Direction.values())
 		{
 			if (startPos.offset(face).equals(nextPos))
 			{

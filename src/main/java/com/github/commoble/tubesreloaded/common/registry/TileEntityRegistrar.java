@@ -15,6 +15,6 @@ public class TileEntityRegistrar
 	
 	public static void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event)
 	{
-		TileEntityType.register(BlockRegistrar.BRASS_TUBE.getRegistryName().toString(), TileEntityType.Builder.create(TileEntityBrassTube::new));
+		event.getRegistry().register(TileEntityType.Builder.func_223042_a(TileEntityBrassTube::new).build(null).setRegistryName(BlockNames.BRASS_TUBE_NAME));
 	}
 }

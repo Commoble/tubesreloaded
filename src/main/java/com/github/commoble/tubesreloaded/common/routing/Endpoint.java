@@ -2,22 +2,19 @@ package com.github.commoble.tubesreloaded.common.routing;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 public class Endpoint
 {	
 	public final BlockPos pos;	// TEs can become invalidated or replaced, so get new ones when needed (not sure why this comment is here)
-	public final EnumFacing face;	// the face of the block at this blockpos that represents the endpoint
+	public final Direction face;	// the face of the block at this blockpos that represents the endpoint
 	
-	public Endpoint(BlockPos tePos, EnumFacing blockFace)
+	public Endpoint(BlockPos tePos, Direction blockFace)
 	{
 		this.pos = tePos;
 		this.face = blockFace;

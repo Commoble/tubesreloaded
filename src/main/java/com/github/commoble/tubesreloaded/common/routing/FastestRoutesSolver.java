@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
 /**
@@ -59,7 +59,7 @@ public class FastestRoutesSolver
 			// for each position nextPos adjacent to pos, if that position is a tube or endpoint in the network
 			// remove it from the queue
 			// TODO handle support for noneuclidean tubes
-			for (EnumFacing face : EnumFacing.values())
+			for (Direction face : Direction.values())
 			{
 				BlockPos checkPos = node.pos.offset(face);
 				

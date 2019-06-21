@@ -3,8 +3,8 @@ package com.github.commoble.tubesreloaded.common.brasstube;
 import java.util.HashSet;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 
 /** Wrapper for the itemstacks being routed for the tubes
@@ -34,14 +34,14 @@ public class ItemInTubeWrapper
 		this.visited = set;
 	}
 	
-	public static ItemInTubeWrapper readFromNBT(NBTTagCompound compound)
+	public static ItemInTubeWrapper readFromNBT(CompoundNBT compound)
 	{
 		ItemStack stack = ItemStack.read(compound);
-		NBTTagList visitedSetTagList = compound.getList(VISITED_SET_TAG, 10);
+		ListNBT visitedSetTagList = compound.getList(VISITED_SET_TAG, 10);
 		HashSet<BlockPos> visitedSet = new HashSet<BlockPos>();
 		for (int i=0; i<visitedSetTagList.size(); i++)
 		{
-			NBTTagCompound visitedPos = visitedSetTagList.getCompound(i);
+			CompoundNBT visitedPos = visitedSetTagList.getCompound(i);
 			int x = visitedPos.getInt(X_TAG);
 			int y = visitedPos.getInt(Y_TAG);
 			int z = visitedPos.getInt(Z_TAG);
@@ -52,21 +52,21 @@ public class ItemInTubeWrapper
 		
 	}
 	
-	public NBTTagCompound writeToNBT(NBTTagCompound compound)
+	public CompoundNBT writeToNBT(CompoundNBT compound)
 	{
-		NBTTagList visitedSetTagList = new NBTTagList();
+		ListNBT visitedSetTagList = new ListNBT();
 		int posCount = 0;
 		for (BlockPos pos : this.visited)
 		{
-			NBTTagCompound visitedPos = new NBTTagCompound();
-			visitedPos.setInt(X_TAG, pos.getX());
-			visitedPos.setInt(Y_TAG, pos.getY());
-			visitedPos.setInt(Z_TAG, pos.getZ());
+			CompoundNBT visitedPos = new CompoundNBT();
+			visitedPos.putInt(X_TAG, pos.getX());
+			visitedPos.putInt(Y_TAG, pos.getY());
+			visitedPos.putInt(Z_TAG, pos.getZ());
 			visitedSetTagList.add(posCount, visitedPos);
 			posCount++;
 		}
 		
-		compound.setTag(VISITED_SET_TAG, visitedSetTagList);
+		compound.put(VISITED_SET_TAG, visitedSetTagList);
 		this.stack.write(compound);
 		
 		return compound;

@@ -12,14 +12,14 @@ import com.github.commoble.tubesreloaded.common.routing.RoutingNetwork;
 
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.INBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -63,7 +63,7 @@ public class TileEntityBrassTube extends TileEntity
 	}
 	
 	// insertionSide is the side of this block the item was inserted from
-	public Route getBestRoute(EnumFacing insertionSide, ItemStack stack)
+	public Route getBestRoute(Direction insertionSide, ItemStack stack)
 	{
 		return this.getNetwork().getBestRoute(this.world, this.pos, insertionSide, stack);
 	}
@@ -89,7 +89,7 @@ public class TileEntityBrassTube extends TileEntity
 
 	@Override
 	@Nonnull
-	public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable EnumFacing side)
+	public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side)
 	{
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 		{
@@ -120,7 +120,7 @@ public class TileEntityBrassTube extends TileEntity
 
 	public boolean isAnyInventoryAdjacent()
 	{
-		for (EnumFacing face : EnumFacing.values())
+		for (Direction face : Direction.values())
 		{
 			TileEntity te = this.world.getTileEntity(pos.offset(face));
 			if (te != null && !(te instanceof TileEntityBrassTube))
@@ -142,37 +142,37 @@ public class TileEntityBrassTube extends TileEntity
 	}
 
 	@Override
-	public void read(NBTTagCompound compound)
+	public void read(CompoundNBT compound)
 	{
 		super.read(compound);
 		// this.distanceToNearestInventory = compound.getInt(DIST_NBT_KEY);
-		NBTTagList invList = compound.getList(INV_NBT_KEY, 10);
+		ListNBT invList = compound.getList(INV_NBT_KEY, 10);
 		List<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
 		for (int i = 0; i < invList.size(); i++)
 		{
-			NBTTagCompound itemTag = invList.getCompound(i);
+			CompoundNBT itemTag = invList.getCompound(i);
 			inventory.add(ItemInTubeWrapper.readFromNBT(itemTag));
 		}
 		this.inventory = inventory;
 	}
 
 	@Override
-	public NBTTagCompound write(NBTTagCompound compound)
+	public CompoundNBT write(CompoundNBT compound)
 	{
 		// compound.setInt(DIST_NBT_KEY, this.distanceToNearestInventory);
 
-		NBTTagList invList = new NBTTagList();
+		ListNBT invList = new ListNBT();
 
 		for (ItemInTubeWrapper wrapper : this.inventory)
 		{
 			// empty itemstacks are not added to the tube
-			NBTTagCompound invTag = new NBTTagCompound();
+			CompoundNBT invTag = new CompoundNBT();
 			wrapper.writeToNBT(invTag);
-			invList.add((INBTBase) invTag);
+			invList.add((INBT) invTag);
 		}
 		if (!invList.isEmpty())
 		{
-			compound.setTag(INV_NBT_KEY, invList);
+			compound.put(INV_NBT_KEY, invList);
 		}
 
 		return super.write(compound);
@@ -185,9 +185,9 @@ public class TileEntityBrassTube extends TileEntity
 	 * //handleUpdateTag just calls read by default
 	 */
 	@Override
-	public NBTTagCompound getUpdateTag()
+	public CompoundNBT getUpdateTag()
 	{
-		return write(new NBTTagCompound());
+		return write(new CompoundNBT());
 	}
 
 	/**
@@ -196,18 +196,18 @@ public class TileEntityBrassTube extends TileEntity
 	 * is large
 	 */
 	@Override
-	public SPacketUpdateTileEntity getUpdatePacket()
+	public SUpdateTileEntityPacket getUpdatePacket()
 	{
-		NBTTagCompound nbt = new NBTTagCompound();
+		CompoundNBT nbt = new CompoundNBT();
 		this.write(nbt);
-		return new SPacketUpdateTileEntity(getPos(), 1, nbt);
+		return new SUpdateTileEntityPacket(getPos(), 1, nbt);
 	}
 
 	/**
 	 * Receive packet on client and get data out of it
 	 */
 	@Override
-	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity packet)
+	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet)
 	{
 		this.read(packet.getNbtCompound());
 	}

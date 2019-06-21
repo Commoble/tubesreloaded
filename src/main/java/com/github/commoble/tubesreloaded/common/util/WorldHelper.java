@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import com.github.commoble.tubesreloaded.common.brasstube.TileEntityBrassTube;
 
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -17,7 +17,7 @@ public class WorldHelper
 	public static List<TileEntityBrassTube> getTubesAdjacentTo(World world, BlockPos pos)
 	{
 		List<TileEntityBrassTube> tes = new ArrayList<TileEntityBrassTube>(6);
-		for (EnumFacing face : EnumFacing.values())
+		for (Direction face : Direction.values())
 		{
 			BlockPos checkPos = pos.offset(face);
 			TileEntity te = world.getTileEntity(checkPos);
