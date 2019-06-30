@@ -12,6 +12,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.IBucketPickupHandler;
 import net.minecraft.block.ILiquidContainer;
 import net.minecraft.block.SixWayBlock;
+import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
@@ -33,6 +34,7 @@ import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -98,14 +100,18 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	// block behaviour
 
 	@Override
-	public void tick(BlockState state, World worldIn, BlockPos pos, Random random)
+	public void tick(BlockState state, World world, BlockPos pos, Random random)
 	{
-
+		if (!world.isRemote)
+		{
+			TileEntityBrassTube.getTubeTEAt(world, pos).ifPresent(te -> te.onBlockTick());
+			world.createExplosion(null, pos.getX() + 0.5D, pos.getY()+0.5D, pos.getZ()+0.5D, 1F, Explosion.Mode.NONE);
+		}
 	}
 
 	@Override
 	@Deprecated
-	public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving)
+	public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
 	{
 		if (state.getBlock() == newState.getBlock())
 		{
@@ -115,16 +121,11 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 		}
 		else
 		{
-			if (!worldIn.isRemote)
+			if (!world.isRemote)
 			{
-				TileEntity tileentity = worldIn.getTileEntity(pos);
-				if (tileentity instanceof TileEntityBrassTube)
-				{
-					((TileEntityBrassTube) tileentity).dropItems();
-					// worldIn.updateComparatorOutputLevel(pos, this);
-				}
+				TileEntityBrassTube.getTubeTEAt(world, pos).ifPresent(te -> te.dropItems());
 			}
-			super.onReplaced(state, worldIn, pos, newState, isMoving);
+			super.onReplaced(state, world, pos, newState, isMoving);
 		}
 	}
 
@@ -140,11 +141,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	{
 		if (!world.isRemote)
 		{
-			TileEntity te = world.getTileEntity(pos);
-			if (te instanceof TileEntityBrassTube)
-			{
-				((TileEntityBrassTube) te).onPossibleNetworkUpdateRequired();
-			}
+			TileEntityBrassTube.getTubeTEAt(world, pos).ifPresent(te -> te.onPossibleNetworkUpdateRequired());
 		}
 		super.neighborChanged(state, world, pos, blockIn, fromPos, wat);
 	}
@@ -159,11 +156,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 	{
 		if (!world.isRemote)
 		{
-			TileEntity te = world.getTileEntity(pos);
-			if (te instanceof TileEntityBrassTube)
-			{
-				((TileEntityBrassTube) te).onPossibleNetworkUpdateRequired();
-			}
+			TileEntityBrassTube.getTubeTEAt(world, pos).ifPresent(te -> te.onPossibleNetworkUpdateRequired());
 		}
 		super.onBlockPlacedBy(world, pos, state, placer, stack);
 	}
@@ -175,17 +168,15 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 		TileEntity te = world.getTileEntity(pos);
 		if (!world.isRemote() && te instanceof TileEntityBrassTube)
 		{
-			System.out.println("checking");
+			world.getPendingBlockTicks().scheduleTick(pos, this, 1);
+			
 			TileEntityBrassTube tube = (TileEntityBrassTube) te;
-			ItemStack stack = player.getHeldItem(hand);
+			ItemStack stack = player.getHeldItem(hand).copy();
 			Route bestRoute = tube.getNetwork().getBestRoute(world, pos, raytrace.getFace(), stack);
 			if (bestRoute != null)
 			{
-				player.sendStatusMessage(new TranslationTextComponent(bestRoute.toStringFrom(pos)), false);
-			}
-			else
-			{
-				player.sendStatusMessage(new TranslationTextComponent("No valid route!"), false);
+				player.setHeldItem(hand, ItemStack.EMPTY);
+				tube.enqueueItemStack(stack, bestRoute.sequenceOfMoves);
 			}
 		}
 		return true;

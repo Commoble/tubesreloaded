@@ -65,6 +65,30 @@ public class RoutingNetwork
 		}
 	}
 	
+	/**
+	 * Returns true if a blockpos can potentially be part of this network
+	 * Must have a TileEntity associated with that position that is either a tube or has the inventory capability on the given side
+	 * @param pos to check
+	 * @param world to use
+	 * @param face of the block being checked that items would be inserted into
+	 * @return
+	 */
+	public boolean isValidToBeInNetwork(BlockPos pos, World world, Direction face)
+	{
+		if (this.invalid)
+			return false;
+		
+		TileEntity te = world.getTileEntity(pos);
+		return (te != null && 
+				(
+						te instanceof TileEntityBrassTube
+						||
+						te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite()).isPresent()
+				)
+			);
+		
+	}
+	
 	public int getSize()
 	{
 		return this.tubes.size() + this.endpoints.size();
@@ -76,6 +100,9 @@ public class RoutingNetwork
 	@Nullable
 	public Route getBestRoute(World world, BlockPos startPos, Direction insertionSide, ItemStack stack)
 	{
+		if (stack.isEmpty())
+			return null;	// can't fit round pegs in square holes
+		
 		// lazily generate the routes if they don't exist yet
 		List<Route> routes;
 		if (this.bestRoutes.containsKey(startPos))

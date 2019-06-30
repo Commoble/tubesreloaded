@@ -66,7 +66,7 @@ public class Endpoint
 	
 	// helper function used for the above method
 	// the itemstack is the one passed into the above method, the item handler is assumed to exist
-	private boolean canInsertItem(IItemHandler handler, ItemStack stack)
+	public static boolean canInsertItem(IItemHandler handler, ItemStack stack)
 	{
 		for (int i=0; i<handler.getSlots(); i++)
 		{
@@ -94,6 +94,58 @@ public class Endpoint
 	public String toString()
 	{
 		return this.pos + ";    " + this.face;
+	}
+
+	// returns the portion of the itemstack that was not inserted
+	// if the returned portion equals the input argument, the itemstack was not inserted
+	public ItemStack insertItem(ItemStack stack, World world)
+	{
+		// TODO Auto-generated method stub
+		ItemStack remainingStack = stack.copy();
+		TileEntity te = world.getTileEntity(this.pos);
+		if (te == null)
+		{
+			return remainingStack;
+		}
+		return te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+				.map(handler -> disperseItemToHandler(remainingStack, handler))
+				.orElse(remainingStack);
+		
+				
+	}
+	
+	// inserts as much of the item as we can into a given handler
+	// we don't copy the itemstack because we assume we are already given a copy of the original stack
+	// return the portion that was not inserted
+	public static ItemStack disperseItemToHandler(ItemStack stack, IItemHandler handler)
+	{
+		int slotCount = handler.getSlots();
+		for (int i=0; i<slotCount; i++)
+		{
+			if (handler.isItemValid(i, stack))
+			{
+				stack = handler.insertItem(i, stack, false);
+			}
+			if (stack.getCount() == 0)
+			{
+				return stack;
+			}
+		}
+		return stack;
+	}
+
+	// returns the slot index of the first available slot in the endpoint block's inventory,
+	// or -1 if no slot is valid for the stack
+	// handler is assumed to exist!
+	public int getFirstValidSlot(ItemStack stack, IItemHandler handler)
+	{
+
+		for (int i=0; i<handler.getSlots();i++)
+		{
+			if (handler.isItemValid(i, stack))
+				return i;
+		}
+		return -1;
 	}
 	
 	
