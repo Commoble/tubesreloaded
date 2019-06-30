@@ -26,6 +26,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -120,6 +121,7 @@ public class TileEntityBrassTube extends TileEntity
 	 */
 	public void onBlockTick()
 	{
+		world.createExplosion(null, pos.getX() + 0.5D, pos.getY()+0.5D, pos.getZ()+0.5D, 1F, Explosion.Mode.NONE);
 		Queue<ItemInTubeWrapper> processedWrappers = new LinkedList<ItemInTubeWrapper>();
 		while (!this.inventory.isEmpty())
 		{

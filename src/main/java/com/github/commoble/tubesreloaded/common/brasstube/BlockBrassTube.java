@@ -105,7 +105,6 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 		if (!world.isRemote)
 		{
 			TileEntityBrassTube.getTubeTEAt(world, pos).ifPresent(te -> te.onBlockTick());
-			world.createExplosion(null, pos.getX() + 0.5D, pos.getY()+0.5D, pos.getZ()+0.5D, 1F, Explosion.Mode.NONE);
 		}
 	}
 
@@ -168,7 +167,6 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 		TileEntity te = world.getTileEntity(pos);
 		if (!world.isRemote() && te instanceof TileEntityBrassTube)
 		{
-			world.getPendingBlockTicks().scheduleTick(pos, this, 1);
 			
 			TileEntityBrassTube tube = (TileEntityBrassTube) te;
 			ItemStack stack = player.getHeldItem(hand).copy();
@@ -177,6 +175,7 @@ public class BlockBrassTube extends Block implements IBucketPickupHandler, ILiqu
 			{
 				player.setHeldItem(hand, ItemStack.EMPTY);
 				tube.enqueueItemStack(stack, bestRoute.sequenceOfMoves);
+				world.getPendingBlockTicks().scheduleTick(pos, this, 1);
 			}
 		}
 		return true;
