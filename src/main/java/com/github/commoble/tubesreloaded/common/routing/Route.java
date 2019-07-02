@@ -3,8 +3,6 @@ package com.github.commoble.tubesreloaded.common.routing;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import com.github.commoble.tubesreloaded.common.util.PosHelper;
-
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -13,12 +11,12 @@ import net.minecraft.world.World;
 /** This class has a natural ordering that is inconsistent with equals() **/
 public class Route implements Comparable<Route>
 {
-	public Queue<BlockPos> sequenceOfMoves;
+	public Queue<Direction> sequenceOfMoves;
 	public Endpoint destination;
 	public int length;	// this isn't the same as the size of the sequence because tubes could have unusual length
 	
 
-	public Route(Endpoint destination, int length, Queue<BlockPos> sequenceOfMoves)
+	public Route(Endpoint destination, int length, Queue<Direction> sequenceOfMoves)
 	{
 		this.destination = destination;
 		this.length = length;
@@ -53,21 +51,17 @@ public class Route implements Comparable<Route>
 	{
 		LinkedList<String> moveStrings = new LinkedList<String>();
 		moveStrings.add(startPos.toString());
-		BlockPos prevPos = startPos;
 		
-		for (BlockPos pos : this.sequenceOfMoves)
+		for (Direction face : this.sequenceOfMoves)
 		{
-			Direction face = PosHelper.getTravelDirectionFromTo(prevPos, pos);
 			if (face == null)
 			{
-				moveStrings.add(pos.toString());
+				moveStrings.add("null");
 			}
 			else
 			{
 				moveStrings.add(face.toString());
 			}
-				
-			prevPos = pos;
 		}
 		
 		return String.join(", ", moveStrings);

@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import com.github.commoble.tubesreloaded.common.util.PosHelper;
+
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -107,7 +109,7 @@ public class FastestRoutesSolver
 		// for each endpoint, determine the route to it and add it to the list
 		for (Endpoint endpoint : network.endpoints)
 		{
-			LinkedList<BlockPos> sequenceOfMoves = getSequenceOfMoves(endpoint.pos, startPos, new LinkedList<BlockPos>(), prevs);
+			LinkedList<Direction> sequenceOfMoves = getSequenceOfMoves(endpoint.pos, startPos, new LinkedList<Direction>(), prevs);
 			if (sequenceOfMoves != null)
 			{
 				routes.add(new Route(endpoint, sequenceOfMoves.size(), sequenceOfMoves));
@@ -120,7 +122,7 @@ public class FastestRoutesSolver
 	}
 	
 	// recursively assemble the sequence of moves required to get to a given position from the startPos
-	private static LinkedList<BlockPos> getSequenceOfMoves(BlockPos pos, BlockPos startPos, LinkedList<BlockPos> list, HashMap<BlockPos, BlockPos> prevs)
+	private static LinkedList<Direction> getSequenceOfMoves(BlockPos pos, BlockPos startPos, LinkedList<Direction> returnList, HashMap<BlockPos, BlockPos> prevs)
 	{
 		if (!prevs.containsKey(pos))
 		{
@@ -128,17 +130,17 @@ public class FastestRoutesSolver
 		}
 		
 		BlockPos prevPos = prevs.get(pos);
-		list.addFirst(pos);
+		returnList.addFirst(PosHelper.getTravelDirectionFromTo(prevPos, pos));
 		
 		// TODO at the moment we're going to blindly trust that the route solver didn't create any loops, may need to add safeguard later
 		// to be honest if we do run into a loop, that's a problem to be fixed in the route solver, not here
 		if (prevPos.equals(startPos))
 		{
-			return list;
+			return returnList;
 		}
 		else
 		{
-			return getSequenceOfMoves(prevPos, startPos, list, prevs);
+			return getSequenceOfMoves(prevPos, startPos, returnList, prevs);
 		}
 	}
 }

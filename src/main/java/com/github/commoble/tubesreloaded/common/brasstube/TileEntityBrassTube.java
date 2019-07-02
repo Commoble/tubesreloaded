@@ -12,7 +12,6 @@ import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.common.routing.Endpoint;
 import com.github.commoble.tubesreloaded.common.routing.Route;
 import com.github.commoble.tubesreloaded.common.routing.RoutingNetwork;
-import com.github.commoble.tubesreloaded.common.util.PosHelper;
 
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.inventory.InventoryHelper;
@@ -145,14 +144,13 @@ public class TileEntityBrassTube extends TileEntity
 	
 	private void sendWrapperOnward(ItemInTubeWrapper wrapper)
 	{
-		if (!wrapper.remainingPositions.isEmpty())	// wrapper has remaining moves
+		if (!wrapper.remainingMoves.isEmpty())	// wrapper has remaining moves
 		{
-			BlockPos nextPos = wrapper.remainingPositions.poll();
-			Direction dir = PosHelper.getTravelDirectionFromTo(nextPos, this.pos);
-			TileEntity te = this.world.getTileEntity(nextPos);
+			Direction dir = wrapper.remainingMoves.poll();
+			TileEntity te = this.world.getTileEntity(this.pos.offset(dir));
 			if (te instanceof TileEntityBrassTube) // te exists and is a tube
 			{
-				((TileEntityBrassTube) te).enqueueItemStack(wrapper.stack, wrapper.remainingPositions);
+				((TileEntityBrassTube) te).enqueueItemStack(wrapper.stack, wrapper.remainingMoves);
 				this.world.getPendingBlockTicks().scheduleTick(te.getPos(), BlockRegistrar.BRASS_TUBE, 1);
 			}
 			else if (te != null)	// te exists but is not a tube
@@ -198,7 +196,7 @@ public class TileEntityBrassTube extends TileEntity
 		return this.enqueueItemStack(stack, route.sequenceOfMoves);
 	}
 
-	public ItemStack enqueueItemStack(ItemStack stack, Queue<BlockPos> remainingMoves)
+	public ItemStack enqueueItemStack(ItemStack stack, Queue<Direction> remainingMoves)
 	{
 		this.inventory.add(new ItemInTubeWrapper(stack, remainingMoves, 10));
 		return stack;
