@@ -7,7 +7,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.common.brasstube.TileEntityBrassTube;
+import com.github.commoble.tubesreloaded.common.brasstube.BrassTubeTileEntity;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
 import net.minecraft.item.ItemStack;
@@ -81,7 +81,7 @@ public class RoutingNetwork
 		TileEntity te = world.getTileEntity(pos);
 		return (te != null && 
 				(
-						te instanceof TileEntityBrassTube
+						te instanceof BrassTubeTileEntity
 						||
 						te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite()).isPresent()
 				)
@@ -167,7 +167,7 @@ public class RoutingNetwork
 		visited.add(pos);
 		
 		TileEntity te = world.getTileEntity(pos);
-		if (te instanceof TileEntityBrassTube)
+		if (te instanceof BrassTubeTileEntity)
 		{
 			network.tubes.add(pos);
 			// build further from tubes

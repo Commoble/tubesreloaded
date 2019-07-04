@@ -8,10 +8,10 @@ import net.minecraftforge.items.ItemStackHandler;
 
 public class TubeInventoryHandler extends ItemStackHandler
 {
-	private final TileEntityBrassTube tube;
+	private final BrassTubeTileEntity tube;
 	private final Direction face;	// face of the tube an item is being inserted into (there shall be one handler for each side)
 
-	public TubeInventoryHandler(TileEntityBrassTube tube, Direction face)
+	public TubeInventoryHandler(BrassTubeTileEntity tube, Direction face)
 	{
 		super(1);
 		this.tube = tube;
@@ -34,6 +34,7 @@ public class TubeInventoryHandler extends ItemStackHandler
 		{
 			this.tube.enqueueItemStack(stack, this.face);
 			this.tube.getWorld().getPendingBlockTicks().scheduleTick(this.tube.getPos(), BlockRegistrar.BRASS_TUBE, 1);
+			this.tube.markDirty();
 		}
 		return ItemStack.EMPTY;
 	}

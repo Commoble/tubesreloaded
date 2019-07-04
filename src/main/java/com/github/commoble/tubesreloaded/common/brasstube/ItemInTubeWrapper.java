@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.IntArrayNBT;
-import net.minecraft.nbt.IntNBT;
-import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
 
 /** Wrapper for the itemstacks being routed for the tubes
@@ -21,48 +18,44 @@ public class ItemInTubeWrapper
 {
 	public ItemStack stack;
 	public Queue<Direction> remainingMoves;
-	public int ticksRemaining;
+	public int maximumDurationInTube;	// the amount of ticks that will be spent in the current tube
+	public int ticksElapsed;
+	public float partialTickElapsed = 0;	// used by client
 	
-	public static final String MOVES_REMAINING_TAG = "visited";
+	public static final String MOVES_REMAINING_TAG = "moves";
 	public static final String TICKS_REMAINING_TAG = "ticksRemaining";
+	public static final String TICKS_DURATION_TAG = "maxDurationInTicks";
 	
 	/** It would be a good idea to supply this constructor with a copy of a list when using an existing list **/
 	public ItemInTubeWrapper(ItemStack stack, Queue<Direction> moves, int ticksToTravel)
 	{
 		this.stack = stack;
-		this.remainingMoves = moves;
-		this.ticksRemaining = ticksToTravel;
+		this.remainingMoves = new LinkedList<Direction>();
+		for (Direction dir : moves)	// copy original list so so changes don't affect the old list
+		{
+			this.remainingMoves.add(dir);
+		}
+		this.ticksElapsed = 0;
+		this.maximumDurationInTube = ticksToTravel;
 	}
 	
 	public static ItemInTubeWrapper readFromNBT(CompoundNBT compound)
 	{
 		ItemStack stack = ItemStack.read(compound);
-		ListNBT remainingMovesNBT = compound.getList(MOVES_REMAINING_TAG, 10);
-		Queue<Direction> moves = new LinkedList<Direction>();
-		int size = remainingMovesNBT.size();
-		for (int i=0; i<size; i++)
-		{
-			moves.add(Direction.byIndex(remainingMovesNBT.getInt(i)));
-		}
-		int ticksRemaining = compound.getInt(TICKS_REMAINING_TAG);
+		int[] moveBuffer = compound.getIntArray(MOVES_REMAINING_TAG);
+		int ticksElapsed = compound.getInt(TICKS_REMAINING_TAG);
+		int maxDuration = compound.getInt(TICKS_DURATION_TAG);
 
-		return new ItemInTubeWrapper(stack, moves, ticksRemaining);
-		
+		ItemInTubeWrapper wrapper = new ItemInTubeWrapper(stack, decompressMoveList(moveBuffer), maxDuration);
+		wrapper.ticksElapsed = ticksElapsed;
+		return wrapper;
 	}
 	
 	public CompoundNBT writeToNBT(CompoundNBT compound)
 	{
-		ListNBT movesListNBT = new ListNBT();
-		int posCount = 0;
-		for (Direction dir : this.remainingMoves)
-		{
-			IntNBT posNBT = new IntNBT(dir.getIndex());
-			movesListNBT.add(posCount, posNBT);
-			posCount++;
-		}
-		
-		compound.put(MOVES_REMAINING_TAG, movesListNBT);
-		compound.putInt(TICKS_REMAINING_TAG, this.ticksRemaining);
+		compound.put(MOVES_REMAINING_TAG, compressMoveList(this.remainingMoves));
+		compound.putInt(TICKS_REMAINING_TAG, this.ticksElapsed);
+		compound.putInt(TICKS_DURATION_TAG, this.maximumDurationInTube);
 		this.stack.write(compound);
 		
 		return compound;
@@ -102,10 +95,9 @@ public class ItemInTubeWrapper
 		return nbt;
 	}
 	
-	public static Queue<Direction> decompressMoveList(IntArrayNBT nbt)
+	public static Queue<Direction> decompressMoveList(int[] buffer)
 	{
 		Queue<Direction> moves = new LinkedList<Direction>();
-		int[] buffer = nbt.getIntArray();
 		int size = buffer.length;
 		if (size % 2 != 0)
 		{

@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.github.commoble.tubesreloaded.common.brasstube.TileEntityBrassTube;
+import com.github.commoble.tubesreloaded.common.brasstube.BrassTubeTileEntity;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -17,27 +17,27 @@ import net.minecraftforge.items.IItemHandler;
 
 public class WorldHelper
 {
-	public static List<TileEntityBrassTube> getTubesAdjacentTo(World world, BlockPos pos)
+	public static List<BrassTubeTileEntity> getTubesAdjacentTo(World world, BlockPos pos)
 	{
-		List<TileEntityBrassTube> tes = new ArrayList<TileEntityBrassTube>(6);
+		List<BrassTubeTileEntity> tes = new ArrayList<BrassTubeTileEntity>(6);
 		for (Direction face : Direction.values())
 		{
 			BlockPos checkPos = pos.offset(face);
 			TileEntity te = world.getTileEntity(checkPos);
-			if (te instanceof TileEntityBrassTube)
+			if (te instanceof BrassTubeTileEntity)
 			{
-				tes.add((TileEntityBrassTube)te);
+				tes.add((BrassTubeTileEntity)te);
 			}
 		}
 		
 		return tes;
 	}
 	
-	public static Stream<TileEntityBrassTube> getBlockPositionsAsTubeTileEntities(World world, Collection<BlockPos> posCollection)
+	public static Stream<BrassTubeTileEntity> getBlockPositionsAsTubeTileEntities(World world, Collection<BlockPos> posCollection)
 	{
 		Stream<TileEntity> teStream = posCollection.stream().map(tubePos -> world.getTileEntity(tubePos));
-		Stream<TileEntity> filteredStream = teStream.filter(te -> te instanceof TileEntityBrassTube);
-		return filteredStream.map(te -> (TileEntityBrassTube) te);
+		Stream<TileEntity> filteredStream = teStream.filter(te -> te instanceof BrassTubeTileEntity);
+		return filteredStream.map(te -> (BrassTubeTileEntity) te);
 	}
 	
 	public static LazyOptional<TileEntity> getTileEntityAt(World world, BlockPos pos)

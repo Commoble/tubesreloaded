@@ -1,22 +1,21 @@
-package com.github.commoble.tubesreloaded.common.event;
+package com.github.commoble.tubesreloaded.client;
 
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
 import com.github.commoble.tubesreloaded.common.brasstube.BrassTubeTileEntity;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @Mod.EventBusSubscriber(modid = TubesReloadedMod.MODID, bus=Bus.MOD)
-public class CapabilityEventHandler
+public class ClientEventHandler
 {
 	@SubscribeEvent
-	public static void onAttachCapabilitiesToTileEntities(AttachCapabilitiesEvent<TileEntity> e)
+	public static void onClientSetup(FMLClientSetupEvent event)
 	{
-		
+		ClientRegistry.bindTileEntitySpecialRenderer(BrassTubeTileEntity.class, new TubeTileEntityRenderer());
 	}
+
 }

@@ -25,32 +25,36 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
-public class TileEntityBrassTube extends TileEntity
+public class BrassTubeTileEntity extends TileEntity
 {
 	// public static final String DIST_NBT_KEY = "distance";
-	public static final String INV_NBT_KEY = "inventory";
+	public static final String INV_NBT_KEY_ADD = "inventory_new_items";
+	public static final String INV_NBT_KEY_RESET = "inventory_reset";
 
-	protected Queue<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
+	@Nonnull
+	public Queue<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
+	
 	protected final TubeInventoryHandler[] inventoryHandlers = Arrays.stream(Direction.values())
 			.map(dir -> new TubeInventoryHandler(this, dir))
 			.toArray(TubeInventoryHandler[]::new);	// one handler for each direction
 	
+	private Queue<ItemInTubeWrapper> newly_inserted_item_buffer = new LinkedList<ItemInTubeWrapper>();
+	
 	@Nonnull	// use getNetwork()
 	private RoutingNetwork network = RoutingNetwork.INVALID_NETWORK;
 
-	public TileEntityBrassTube(TileEntityType<?> tileEntityTypeIn)
+	public BrassTubeTileEntity(TileEntityType<?> tileEntityTypeIn)
 	{
 		super(tileEntityTypeIn);
 	}
 
-	public TileEntityBrassTube()
+	public BrassTubeTileEntity()
 	{
 		this(TileEntityRegistrar.TE_TYPE_BRASS_TUBE);
 	}
@@ -70,10 +74,10 @@ public class TileEntityBrassTube extends TileEntity
 		this.network = network;
 	}
 	
-	public static LazyOptional<TileEntityBrassTube> getTubeTEAt(World world, BlockPos pos)
+	public static LazyOptional<BrassTubeTileEntity> getTubeTEAt(World world, BlockPos pos)
 	{
 		TileEntity te = world.getTileEntity(pos);
-		return LazyOptional.of(te instanceof TileEntityBrassTube ? () -> (TileEntityBrassTube)te : null);
+		return LazyOptional.of(te instanceof BrassTubeTileEntity ? () -> (BrassTubeTileEntity)te : null);
 	}
 	
 	// insertionSide is the side of this block the item was inserted from
@@ -118,42 +122,42 @@ public class TileEntityBrassTube extends TileEntity
 	 * The block only ticks when it needs to, so the TE can do what it needs to
 	 * without ticking every tick
 	 */
-	public void onBlockTick()
+	public void onBlockTick()	// only occurs in server thread; blocks aren't ticked in client thread
 	{
-		world.createExplosion(null, pos.getX() + 0.5D, pos.getY()+0.5D, pos.getZ()+0.5D, 1F, Explosion.Mode.NONE);
-		Queue<ItemInTubeWrapper> processedWrappers = new LinkedList<ItemInTubeWrapper>();
-		while (!this.inventory.isEmpty())
+		this.markDirty();
+		//world.createExplosion(null, pos.getX() + 0.5D, pos.getY()+0.5D, pos.getZ()+0.5D, 1F, Explosion.Mode.NONE);
+		Queue<ItemInTubeWrapper> remainingWrappers = new LinkedList<ItemInTubeWrapper>();
+		for (ItemInTubeWrapper wrapper : this.inventory)
 		{
-			ItemInTubeWrapper nextWrapper = this.inventory.poll();
-			nextWrapper.ticksRemaining--;
-			if (nextWrapper.ticksRemaining > 0)
+			wrapper.ticksElapsed++;
+			if (wrapper.ticksElapsed >= wrapper.maximumDurationInTube)
 			{
-				processedWrappers.add(nextWrapper);
+				this.sendWrapperOnward(wrapper);
 			}
 			else
 			{
-				this.sendWrapperOnward(nextWrapper);
+				remainingWrappers.add(wrapper);
 			}
 		}
-		this.inventory = processedWrappers;
+		this.inventory = remainingWrappers;
 		if (!this.inventory.isEmpty())
 		{
 			this.world.getPendingBlockTicks().scheduleTick(this.pos, BlockRegistrar.BRASS_TUBE, 1);
 		}
 	}
 	
-	private void sendWrapperOnward(ItemInTubeWrapper wrapper)
+	public void sendWrapperOnward(ItemInTubeWrapper wrapper)
 	{
 		if (!wrapper.remainingMoves.isEmpty())	// wrapper has remaining moves
 		{
 			Direction dir = wrapper.remainingMoves.poll();
 			TileEntity te = this.world.getTileEntity(this.pos.offset(dir));
-			if (te instanceof TileEntityBrassTube) // te exists and is a tube
+			if (te instanceof BrassTubeTileEntity) // te exists and is a tube
 			{
-				((TileEntityBrassTube) te).enqueueItemStack(wrapper.stack, wrapper.remainingMoves);
-				this.world.getPendingBlockTicks().scheduleTick(te.getPos(), BlockRegistrar.BRASS_TUBE, 1);
+				((BrassTubeTileEntity) te).enqueueItemStack(wrapper.stack, wrapper.remainingMoves);
+				this.world.getPendingBlockTicks().scheduleTick(te.getPos(), BlockRegistrar.BRASS_TUBE, 1);	// does nothing on client
 			}
-			else if (te != null)	// te exists but is not a tube
+			else if (te != null && !world.isRemote)	// te exists but is not a tube
 			{
 				ItemStack remaining = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).map(handler -> Endpoint.disperseItemToHandler(wrapper.stack, handler)).orElse(ItemStack.EMPTY);
 
@@ -162,8 +166,12 @@ public class TileEntityBrassTube extends TileEntity
 					this.enqueueItemStack(remaining, dir.getOpposite());
 				}
 			}
+			else
+			{
+				this.ejectItem(wrapper.stack);
+			}
 		}
-		else	// wrapper has no remaining moves -- this isn't expected, eject the item
+		else if (!world.isRemote)	// wrapper has no remaining moves -- this isn't expected, eject the item
 		{
 			this.ejectItem(wrapper.stack);
 		}
@@ -190,16 +198,26 @@ public class TileEntityBrassTube extends TileEntity
 		return super.getCapability(cap, side);
 	}
 
+	// insert a new itemstack into the tube network from a direction
+	// and determine a route for it
 	public ItemStack enqueueItemStack(ItemStack stack, Direction face)
 	{
 		Route route = this.getNetwork().getBestRoute(this.world, this.pos, face, stack);
+		if (route == null || route.sequenceOfMoves.isEmpty())
+			return stack;
+			
+		this.newly_inserted_item_buffer.add(new ItemInTubeWrapper(stack, route.sequenceOfMoves, 10));
+
+		this.world.notifyBlockUpdate(this.pos, this.getBlockState(), this.getBlockState(), 2);
+		this.world.getPendingBlockTicks().scheduleTick(pos, BlockRegistrar.BRASS_TUBE, 1);
+		
 		return this.enqueueItemStack(stack, route.sequenceOfMoves);
 	}
 
 	public ItemStack enqueueItemStack(ItemStack stack, Queue<Direction> remainingMoves)
 	{
 		this.inventory.add(new ItemInTubeWrapper(stack, remainingMoves, 10));
-		return stack;
+		return ItemStack.EMPTY;
 	}
 
 	public void dropItems()
@@ -222,7 +240,7 @@ public class TileEntityBrassTube extends TileEntity
 		for (Direction face : Direction.values())
 		{
 			TileEntity te = this.world.getTileEntity(pos.offset(face));
-			if (te != null && !(te instanceof TileEntityBrassTube))
+			if (te != null && !(te instanceof BrassTubeTileEntity))
 			{
 				// if a nearby inventory that is not a tube exists
 				LazyOptional<IItemHandler> cap = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,
@@ -230,7 +248,7 @@ public class TileEntityBrassTube extends TileEntity
 				IItemHandler handler = cap.orElse(null);
 				if (handler != null)
 				{
-					if (TileEntityBrassTube.isSpaceForAnythingInItemHandler(handler))
+					if (BrassTubeTileEntity.isSpaceForAnythingInItemHandler(handler))
 					{
 						return true;
 					}
@@ -245,21 +263,32 @@ public class TileEntityBrassTube extends TileEntity
 	{
 		super.read(compound);
 		// this.distanceToNearestInventory = compound.getInt(DIST_NBT_KEY);
-		ListNBT invList = compound.getList(INV_NBT_KEY, 10);
-		Queue<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
-		for (int i = 0; i < invList.size(); i++)
-		{
-			CompoundNBT itemTag = invList.getCompound(i);
-			inventory.add(ItemInTubeWrapper.readFromNBT(itemTag));
+		if (compound.contains(INV_NBT_KEY_RESET))	// only update inventory if the compound has an inv. key
+		{									// this lets the client receive packets without the inventory being cleared
+			ListNBT invList = compound.getList(INV_NBT_KEY_RESET, 10);
+			Queue<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
+			for (int i = 0; i < invList.size(); i++)
+			{
+				CompoundNBT itemTag = invList.getCompound(i);
+				inventory.add(ItemInTubeWrapper.readFromNBT(itemTag));
+			}
+			this.inventory = inventory;
 		}
-		this.inventory = inventory;
+		else if (compound.contains(INV_NBT_KEY_ADD))	// add newly inserted items to this tube
+		{
+			ListNBT invList = compound.getList(INV_NBT_KEY_ADD, 10);
+			for (int i=0; i<invList.size(); i++)
+			{
+				CompoundNBT itemTag = invList.getCompound(i);
+				this.inventory.add(ItemInTubeWrapper.readFromNBT(itemTag));
+			}
+		}
 	}
 
-	@Override
+	@Override	// write entire inventory by default (for server -> hard disk purposes this is what is called)
 	public CompoundNBT write(CompoundNBT compound)
 	{
 		// compound.setInt(DIST_NBT_KEY, this.distanceToNearestInventory);
-
 		ListNBT invList = new ListNBT();
 
 		for (ItemInTubeWrapper wrapper : this.inventory)
@@ -271,7 +300,7 @@ public class TileEntityBrassTube extends TileEntity
 		}
 		if (!invList.isEmpty())
 		{
-			compound.put(INV_NBT_KEY, invList);
+			compound.put(INV_NBT_KEY_RESET, invList);
 		}
 
 		return super.write(compound);
@@ -286,19 +315,35 @@ public class TileEntityBrassTube extends TileEntity
 	@Override
 	public CompoundNBT getUpdateTag()
 	{
-		return write(new CompoundNBT());
+		return write(new CompoundNBT());	// okay to send entire inventory on chunk load
 	}
 
 	/**
-	 * Prepare a packet to sync TE to client This method as-is sends the entire NBT
-	 * data in the packet Consider overriding to whittle the packet down if TE data
-	 * is large
+	 * Prepare a packet to sync TE to client
+	 * We don't need to send the inventory in every packet
+	 * but we should notify the client of new items entering the network
 	 */
 	@Override
 	public SUpdateTileEntityPacket getUpdatePacket()
 	{
 		CompoundNBT nbt = new CompoundNBT();
-		this.write(nbt);
+		super.write(nbt); // write the basic TE stuff
+
+		ListNBT invList = new ListNBT();
+
+		while (!this.newly_inserted_item_buffer.isEmpty())
+		{
+			// empty itemstacks are not added to the tube
+			ItemInTubeWrapper wrapper = this.newly_inserted_item_buffer.poll();
+			CompoundNBT invTag = new CompoundNBT();
+			wrapper.writeToNBT(invTag);
+			invList.add((INBT) invTag);
+		}
+		if (!invList.isEmpty())
+		{
+			nbt.put(INV_NBT_KEY_ADD, invList);
+		}
+		
 		return new SUpdateTileEntityPacket(getPos(), 1, nbt);
 	}
 
