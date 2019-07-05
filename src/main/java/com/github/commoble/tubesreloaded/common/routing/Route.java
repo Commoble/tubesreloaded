@@ -30,7 +30,7 @@ public class Route implements Comparable<Route>
 	public boolean isRouteDestinationValid(World world, BlockPos startPos, Direction insertionSide, ItemStack stack)
 	{
 		// if the route's endpoint was the position/face the item was inserted from, this route is not valid
-		if (this.destination.pos.equals(startPos) && this.destination.face.getOpposite().equals(insertionSide))
+		if (this.destination.pos.equals(startPos.offset(insertionSide)) && this.destination.face.getOpposite().equals(insertionSide))
 		{
 			return false;
 		}

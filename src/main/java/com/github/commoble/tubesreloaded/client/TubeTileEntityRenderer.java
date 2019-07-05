@@ -1,7 +1,5 @@
 package com.github.commoble.tubesreloaded.client;
 
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Random;
 
 import com.github.commoble.tubesreloaded.common.brasstube.BrassTubeTileEntity;
@@ -10,15 +8,11 @@ import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -31,40 +25,11 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<BrassTubeTileEnti
 		// render tick happens independantly of regular ticks and often more frequently
 		if (!tube.inventory.isEmpty())
 		{
-			Queue<ItemInTubeWrapper> remainingWrappers = new LinkedList<ItemInTubeWrapper>();
 			for (ItemInTubeWrapper wrapper : tube.inventory)
 			{
-				this.renderWrapper(tube, x, y, z, wrapper);
-				//System.out.println(wrapper.ticksRemaining);
-
-				Minecraft mc = Minecraft.getInstance();
-				float ticksSinceLastRenderTick = mc.getTickLength();
-				wrapper.partialTickElapsed += ticksSinceLastRenderTick;
-				if (wrapper.partialTickElapsed >= 1F)
-				{
-					wrapper.partialTickElapsed -= 1F;
-					if (++wrapper.ticksElapsed >= wrapper.maximumDurationInTube)
-					{
-						tube.sendWrapperOnward(wrapper);
-					}
-					else
-					{
-						remainingWrappers.add(wrapper);
-					}
-				}
-				else
-				{
-					remainingWrappers.add(wrapper);
-				}
-
+				this.renderWrapper(tube, wrapper, x, y, z, partialTicks);
 			}
-			tube.inventory = remainingWrappers;
 		}
-	}
-
-	private void renderWrapper(BrassTubeTileEntity tube, double x, double y, double z, ItemInTubeWrapper wrapper)
-	{
-		this.doRender(tube, wrapper, x, y, z);
 	}
 
 	// ** copied from entity ItemRenderer **//
@@ -95,7 +60,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<BrassTubeTileEnti
 	/**
 	 * Renders an itemstack
 	 */
-	public void doRender(BrassTubeTileEntity tube, ItemInTubeWrapper wrapper, double x, double y, double z)
+	public void renderWrapper(BrassTubeTileEntity tube, ItemInTubeWrapper wrapper, double x, double y, double z, float partialTicks)
 	{
 		Direction nextMove = wrapper.remainingMoves.peek();
 		if (nextMove == null)
@@ -119,16 +84,27 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<BrassTubeTileEnti
 //				GlStateManager.DestFactor.ZERO);
 //		GlStateManager.pushMatrix();
 //		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		IBakedModel ibakedmodel = itemRenderer.getItemModelWithOverrides(itemstack, tube.getWorld(),
-				(LivingEntity) null);
 		int renderedItemCount = this.getModelCount(itemstack);
-		float xStart = (float)x;
-		float yStart = (float)y;
-		float zStart = (float)z;
-		float xEnd = xStart + (float)nextMove.getXOffset();
-		float yEnd = yStart + (float)nextMove.getYOffset();;
-		float zEnd = zStart + (float)nextMove.getZOffset();;
-		float lerpFactor = ((float)wrapper.ticksElapsed + wrapper.partialTickElapsed) / (float)wrapper.maximumDurationInTube;	// factor in range [0,1)
+		float xStart, yStart, zStart, xEnd, yEnd, zEnd;
+		float lerpFactor = ((float)wrapper.ticksElapsed + partialTicks) / (float)wrapper.maximumDurationInTube;	// factor in range [0,1)
+		if (wrapper.freshlyInserted)	// first move
+		{
+			xEnd = (float)x;
+			yEnd = (float)y;
+			zEnd = (float)z;
+			xStart = xEnd - (float)nextMove.getXOffset();
+			yStart = yEnd - (float)nextMove.getYOffset();
+			zStart = zEnd - (float)nextMove.getZOffset();
+		}
+		else	// any other move
+		{
+			xStart = (float)x;
+			yStart = (float)y;
+			zStart = (float)z;
+			xEnd = xStart + (float)nextMove.getXOffset();
+			yEnd = yStart + (float)nextMove.getYOffset();;
+			zEnd = zStart + (float)nextMove.getZOffset();;
+		}
 		float xLerp = MathHelper.lerp(lerpFactor, xStart, xEnd);
 		float yLerp = MathHelper.lerp(lerpFactor, yStart, yEnd);
 		float zLerp = MathHelper.lerp(lerpFactor, zStart, zEnd);

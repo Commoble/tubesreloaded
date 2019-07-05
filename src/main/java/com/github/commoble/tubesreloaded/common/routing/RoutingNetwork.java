@@ -46,7 +46,13 @@ public class RoutingNetwork
 		
 	}
 	
-	public boolean contains(BlockPos pos)
+	/** For tubes, only pos of tube is relevant
+	 * for endpoints, face is the side of the endpoint block that faces the network
+	 * @param pos
+	 * @param face
+	 * @return
+	 */
+	public boolean contains(BlockPos pos, Direction face)
 	{
 		if (this.tubes.contains(pos))
 		{
@@ -56,7 +62,7 @@ public class RoutingNetwork
 		{
 			for(Endpoint endpoint : this.endpoints)
 			{
-				if (endpoint.pos.equals(pos))
+				if (endpoint.pos.equals(pos) && endpoint.face.equals(face))
 				{
 					return true;
 				}

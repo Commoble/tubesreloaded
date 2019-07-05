@@ -101,15 +101,6 @@ public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiqu
 	// block behaviour
 
 	@Override
-	public void tick(BlockState state, World world, BlockPos pos, Random random)
-	{
-		if (!world.isRemote)
-		{
-			BrassTubeTileEntity.getTubeTEAt(world, pos).ifPresent(te -> te.onBlockTick());
-		}
-	}
-
-	@Override
 	@Deprecated
 	public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
 	{

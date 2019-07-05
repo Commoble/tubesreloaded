@@ -17,14 +17,17 @@ import net.minecraft.util.Direction;
 public class ItemInTubeWrapper
 {
 	public ItemStack stack;
-	public Queue<Direction> remainingMoves;
+	public LinkedList<Direction> remainingMoves;
 	public int maximumDurationInTube;	// the amount of ticks that will be spent in the current tube
 	public int ticksElapsed;
-	public float partialTickElapsed = 0;	// used by client
+	public boolean freshlyInserted = false;	// if true, was just inserted into a tube network --
+		// freshlyInserted==true implies an "extra move" is necessary -- this will be the first
+		// move in the move list, but the renderer will handle it differently
 	
 	public static final String MOVES_REMAINING_TAG = "moves";
 	public static final String TICKS_REMAINING_TAG = "ticksRemaining";
 	public static final String TICKS_DURATION_TAG = "maxDurationInTicks";
+	public static final String IS_FRESHLY_INSERTED = "isFreshly";
 	
 	/** It would be a good idea to supply this constructor with a copy of a list when using an existing list **/
 	public ItemInTubeWrapper(ItemStack stack, Queue<Direction> moves, int ticksToTravel)
@@ -39,15 +42,25 @@ public class ItemInTubeWrapper
 		this.maximumDurationInTube = ticksToTravel;
 	}
 	
+	/** Constructor to use when freshly inserting a wrapper into the network **/
+	public ItemInTubeWrapper(ItemStack stack, Queue<Direction> moves, int ticksToTravel, Direction firstMove)
+	{
+		this(stack, moves, ticksToTravel);
+		this.remainingMoves.addFirst(firstMove);
+		this.freshlyInserted = true;
+	}
+	
 	public static ItemInTubeWrapper readFromNBT(CompoundNBT compound)
 	{
 		ItemStack stack = ItemStack.read(compound);
 		int[] moveBuffer = compound.getIntArray(MOVES_REMAINING_TAG);
 		int ticksElapsed = compound.getInt(TICKS_REMAINING_TAG);
 		int maxDuration = compound.getInt(TICKS_DURATION_TAG);
+		boolean isFreshlyInserted = compound.getBoolean(IS_FRESHLY_INSERTED);
 
 		ItemInTubeWrapper wrapper = new ItemInTubeWrapper(stack, decompressMoveList(moveBuffer), maxDuration);
 		wrapper.ticksElapsed = ticksElapsed;
+		wrapper.freshlyInserted = isFreshlyInserted;
 		return wrapper;
 	}
 	
@@ -56,6 +69,7 @@ public class ItemInTubeWrapper
 		compound.put(MOVES_REMAINING_TAG, compressMoveList(this.remainingMoves));
 		compound.putInt(TICKS_REMAINING_TAG, this.ticksElapsed);
 		compound.putInt(TICKS_DURATION_TAG, this.maximumDurationInTube);
+		compound.putBoolean(IS_FRESHLY_INSERTED, this.freshlyInserted);
 		this.stack.write(compound);
 		
 		return compound;

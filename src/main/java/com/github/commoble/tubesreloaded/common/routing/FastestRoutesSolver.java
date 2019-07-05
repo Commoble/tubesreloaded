@@ -37,14 +37,17 @@ public class FastestRoutesSolver
 		// traditionally (for djikstra's) we initialize the map with position:infinity for all positions
 		// we'll just treat "not in map" = infinity
 		// once we find all of these, we use the network's endpoints to put the routes together
-		Object2IntOpenHashMap<BlockPos> dists = new Object2IntOpenHashMap<BlockPos>();
-		dists.put(startPos, 0);	// put the startpos in the map
+		Object2IntOpenHashMap<BlockPos> tubeDists = new Object2IntOpenHashMap<BlockPos>();
+		tubeDists.put(startPos, 0);	// put the startpos in the map
+		Object2IntOpenHashMap<Endpoint> endpointDists = new Object2IntOpenHashMap<Endpoint>();
 		
-		HashSet<BlockPos> visited = new HashSet<BlockPos>();
+		HashSet<BlockPos> visitedTubes = new HashSet<BlockPos>();
+		HashSet<Endpoint> visitedEndpoints = new HashSet<Endpoint>();
 		
 		// mapping of position U : previous position immediately before it on the shortest path from start to U
 		// these all start as null or not in map
-		HashMap<BlockPos, BlockPos> prevs = new HashMap<BlockPos, BlockPos>();
+		HashMap<BlockPos, BlockPos> tubePrevs = new HashMap<BlockPos, BlockPos>();
+		HashMap<Endpoint, BlockPos> endpointPrevs = new HashMap<Endpoint, BlockPos>();
 		
 		// queue of all positions that remain to be looked at, sorted by distance (closest to start first)
 		// Routes implement Comparable so this will keep itself sorted
@@ -56,7 +59,7 @@ public class FastestRoutesSolver
 		{
 			// the next pos in the queue is the nearest one to the starting position
 			PosAndDist node = distQueue.poll();	// this won't be null as the queue is not empty
-			visited.add(node.pos);	// mark it as visited;
+			visitedTubes.add(node.pos);	// mark it as visited; only tubes will be placed in the distqueue
 			
 			// for each position nextPos adjacent to pos, if that position is a tube or endpoint in the network
 			// remove it from the queue
@@ -64,21 +67,34 @@ public class FastestRoutesSolver
 			for (Direction face : Direction.values())
 			{
 				BlockPos checkPos = node.pos.offset(face);
+				Endpoint maybeEndpoint = new Endpoint(checkPos, face.getOpposite());
 				
-				if (!visited.contains(checkPos) && network.contains(checkPos))
+				
+				if (!visitedTubes.contains(checkPos) && network.tubes.contains(checkPos))
 				{
 					int newDist = node.dist + 1;
 					// if the distance through the polled node is shorter than the shortest known distance to the given neighbor
 					// (or the neighbor hasn't been visited yet)
 					// update the known distance to the neighbor, and update the prev tracker
-					if (!dists.containsKey(checkPos) || newDist < dists.getInt(checkPos))
+					if (!tubeDists.containsKey(checkPos) || newDist < tubeDists.getInt(checkPos))
 					{
-						dists.put(checkPos, newDist);
-						prevs.put(checkPos, node.pos);
+						tubeDists.put(checkPos, newDist);
+						tubePrevs.put(checkPos, node.pos);
 					}
 					
 					// either way, as long as it hasn't been visited yet, the neighbor goes into the queue
-					distQueue.add(new PosAndDist(checkPos, dists.getInt(checkPos)));
+					distQueue.add(new PosAndDist(checkPos, tubeDists.getInt(checkPos)));
+				}
+				else if (!visitedEndpoints.contains(maybeEndpoint) && network.endpoints.contains(maybeEndpoint))
+				{
+					visitedEndpoints.add(maybeEndpoint);
+					int newDist = node.dist+1;
+					if (!endpointDists.containsKey(maybeEndpoint) || newDist < endpointDists.getInt(maybeEndpoint))
+					{
+						endpointDists.put(maybeEndpoint, newDist);
+						endpointPrevs.put(maybeEndpoint, node.pos);
+					}
+					// don't add endpoint to distqueue since endpoints are singlesided
 				}
 			}
 			
@@ -109,7 +125,7 @@ public class FastestRoutesSolver
 		// for each endpoint, determine the route to it and add it to the list
 		for (Endpoint endpoint : network.endpoints)
 		{
-			LinkedList<Direction> sequenceOfMoves = getSequenceOfMoves(endpoint.pos, startPos, new LinkedList<Direction>(), prevs);
+			LinkedList<Direction> sequenceOfMoves = getSequenceOfMoves(endpoint, startPos, new LinkedList<Direction>(), tubePrevs, endpointPrevs);
 			if (sequenceOfMoves != null)
 			{
 				routes.add(new Route(endpoint, sequenceOfMoves.size(), sequenceOfMoves));
@@ -119,6 +135,25 @@ public class FastestRoutesSolver
 		routes.sort(null);
 		
 		return routes;
+	}
+	
+	private static LinkedList<Direction> getSequenceOfMoves(Endpoint endpoint, BlockPos startPos, LinkedList<Direction> returnList, HashMap<BlockPos, BlockPos> tubePrevs, HashMap<Endpoint, BlockPos> endpointPrevs)
+	{
+		if (!endpointPrevs.containsKey(endpoint))
+		{
+			return null;
+		}
+		BlockPos prevPos = endpointPrevs.get(endpoint);
+		returnList.addFirst(endpoint.face.getOpposite());
+		
+		if (prevPos.equals(startPos))
+		{
+			return returnList;
+		}
+		else
+		{
+			return getSequenceOfMoves(prevPos, startPos, returnList, tubePrevs);
+		}
 	}
 	
 	// recursively assemble the sequence of moves required to get to a given position from the startPos

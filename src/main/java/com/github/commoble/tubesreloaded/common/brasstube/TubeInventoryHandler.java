@@ -33,7 +33,6 @@ public class TubeInventoryHandler extends ItemStackHandler
 		if (!simulate)
 		{
 			this.tube.enqueueItemStack(stack, this.face);
-			this.tube.getWorld().getPendingBlockTicks().scheduleTick(this.tube.getPos(), BlockRegistrar.BRASS_TUBE, 1);
 			this.tube.markDirty();
 		}
 		return ItemStack.EMPTY;

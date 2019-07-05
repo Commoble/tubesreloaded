@@ -7,7 +7,6 @@ import java.util.Queue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.common.registry.BlockRegistrar;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.common.routing.Endpoint;
 import com.github.commoble.tubesreloaded.common.routing.Route;
@@ -21,6 +20,7 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
@@ -31,7 +31,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
-public class BrassTubeTileEntity extends TileEntity
+public class BrassTubeTileEntity extends TileEntity implements ITickableTileEntity
 {
 	// public static final String DIST_NBT_KEY = "distance";
 	public static final String INV_NBT_KEY_ADD = "inventory_new_items";
@@ -44,7 +44,8 @@ public class BrassTubeTileEntity extends TileEntity
 			.map(dir -> new TubeInventoryHandler(this, dir))
 			.toArray(TubeInventoryHandler[]::new);	// one handler for each direction
 	
-	private Queue<ItemInTubeWrapper> newly_inserted_item_buffer = new LinkedList<ItemInTubeWrapper>();
+	private Queue<ItemInTubeWrapper> wrappers_to_send_to_client = new LinkedList<ItemInTubeWrapper>();
+	private Queue<ItemInTubeWrapper> incoming_wrapper_buffer = new LinkedList<ItemInTubeWrapper>();
 	
 	@Nonnull	// use getNetwork()
 	private RoutingNetwork network = RoutingNetwork.INVALID_NETWORK;
@@ -111,38 +112,53 @@ public class BrassTubeTileEntity extends TileEntity
 			// if the adjacent block is a tube or endpoint but isn't in the network
 			// OR if the adjacent block is in the network but isn't a tube or endpoint
 			// then the network changed
-			if (this.getNetwork().contains(pos) != this.getNetwork().isValidToBeInNetwork(checkPos, world, face))
+			if (this.getNetwork().contains(pos, face.getOpposite()) != this.getNetwork().isValidToBeInNetwork(checkPos, world, face))
 				return true;
 		}
 		return false;
 	}
 	
-	/**
-	 * Called when the block ticks (TE doesn't tick by itself)
-	 * The block only ticks when it needs to, so the TE can do what it needs to
-	 * without ticking every tick
-	 */
-	public void onBlockTick()	// only occurs in server thread; blocks aren't ticked in client thread
+	public void tick()
 	{
-		this.markDirty();
-		//world.createExplosion(null, pos.getX() + 0.5D, pos.getY()+0.5D, pos.getZ()+0.5D, 1F, Explosion.Mode.NONE);
-		Queue<ItemInTubeWrapper> remainingWrappers = new LinkedList<ItemInTubeWrapper>();
-		for (ItemInTubeWrapper wrapper : this.inventory)
+		if (!this.incoming_wrapper_buffer.isEmpty())
 		{
-			wrapper.ticksElapsed++;
-			if (wrapper.ticksElapsed >= wrapper.maximumDurationInTube)
+			for (ItemInTubeWrapper wrapper : this.incoming_wrapper_buffer)
 			{
-				this.sendWrapperOnward(wrapper);
+				this.inventory.add(wrapper);
 			}
-			else
-			{
-				remainingWrappers.add(wrapper);
-			}
+			this.incoming_wrapper_buffer = new LinkedList<ItemInTubeWrapper>();
 		}
-		this.inventory = remainingWrappers;
-		if (!this.inventory.isEmpty())
+		if (!this.inventory.isEmpty())	// if inventory is empty, skip the tick
 		{
-			this.world.getPendingBlockTicks().scheduleTick(this.pos, BlockRegistrar.BRASS_TUBE, 1);
+			if (!this.world.isRemote)	// block has changes that need to be saved (serverside)
+			{
+				this.markDirty();
+			}
+			//world.createExplosion(null, pos.getX() + 0.5D, pos.getY()+0.5D, pos.getZ()+0.5D, 1F, Explosion.Mode.NONE);
+			Queue<ItemInTubeWrapper> remainingWrappers = new LinkedList<ItemInTubeWrapper>();
+			for (ItemInTubeWrapper wrapper : this.inventory)
+			{
+				wrapper.ticksElapsed++;
+				if (wrapper.ticksElapsed >= wrapper.maximumDurationInTube)
+				{
+					if (wrapper.freshlyInserted)
+					{
+						wrapper.freshlyInserted = false;
+						wrapper.remainingMoves.removeFirst();
+						wrapper.ticksElapsed = 0;
+						remainingWrappers.add(wrapper);
+					}
+					else
+					{
+						this.sendWrapperOnward(wrapper);
+					}
+				}
+				else
+				{
+					remainingWrappers.add(wrapper);
+				}
+			}
+			this.inventory = remainingWrappers;
 		}
 	}
 	
@@ -155,7 +171,6 @@ public class BrassTubeTileEntity extends TileEntity
 			if (te instanceof BrassTubeTileEntity) // te exists and is a tube
 			{
 				((BrassTubeTileEntity) te).enqueueItemStack(wrapper.stack, wrapper.remainingMoves);
-				this.world.getPendingBlockTicks().scheduleTick(te.getPos(), BlockRegistrar.BRASS_TUBE, 1);	// does nothing on client
 			}
 			else if (te != null && !world.isRemote)	// te exists but is not a tube
 			{
@@ -206,17 +221,22 @@ public class BrassTubeTileEntity extends TileEntity
 		if (route == null || route.sequenceOfMoves.isEmpty())
 			return stack;
 			
-		this.newly_inserted_item_buffer.add(new ItemInTubeWrapper(stack, route.sequenceOfMoves, 10));
+		this.wrappers_to_send_to_client.add(new ItemInTubeWrapper(stack, route.sequenceOfMoves, 10, face.getOpposite()));
 
 		this.world.notifyBlockUpdate(this.pos, this.getBlockState(), this.getBlockState(), 2);
-		this.world.getPendingBlockTicks().scheduleTick(pos, BlockRegistrar.BRASS_TUBE, 1);
 		
-		return this.enqueueItemStack(stack, route.sequenceOfMoves);
+		return this.enqueueItemStack(new ItemInTubeWrapper(stack, route.sequenceOfMoves, 10, face.getOpposite()));
+	}
+	
+	public ItemStack enqueueItemStack(ItemInTubeWrapper wrapper)
+	{
+		this.incoming_wrapper_buffer.add(wrapper);
+		return ItemStack.EMPTY;
 	}
 
 	public ItemStack enqueueItemStack(ItemStack stack, Queue<Direction> remainingMoves)
 	{
-		this.inventory.add(new ItemInTubeWrapper(stack, remainingMoves, 10));
+		this.incoming_wrapper_buffer.add(new ItemInTubeWrapper(stack, remainingMoves, 10));
 		return ItemStack.EMPTY;
 	}
 
@@ -227,7 +247,13 @@ public class BrassTubeTileEntity extends TileEntity
 			InventoryHelper.spawnItemStack(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(),
 					wrapper.stack);
 		}
+		for (ItemInTubeWrapper wrapper : this.incoming_wrapper_buffer)
+		{
+			InventoryHelper.spawnItemStack(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(),
+					wrapper.stack);
+		}
 		this.inventory = new LinkedList<ItemInTubeWrapper>();	// clear it in case this is being called without destroying the TE
+		this.incoming_wrapper_buffer = new LinkedList<ItemInTubeWrapper>();
 	}
 
 	public static boolean isSpaceForAnythingInItemHandler(IItemHandler handler)
@@ -290,6 +316,11 @@ public class BrassTubeTileEntity extends TileEntity
 	{
 		// compound.setInt(DIST_NBT_KEY, this.distanceToNearestInventory);
 		ListNBT invList = new ListNBT();
+		for (ItemInTubeWrapper wrapper : this.incoming_wrapper_buffer)
+		{
+			this.inventory.add(wrapper);
+		}
+		this.incoming_wrapper_buffer = new LinkedList<ItemInTubeWrapper>();
 
 		for (ItemInTubeWrapper wrapper : this.inventory)
 		{
@@ -331,10 +362,10 @@ public class BrassTubeTileEntity extends TileEntity
 
 		ListNBT invList = new ListNBT();
 
-		while (!this.newly_inserted_item_buffer.isEmpty())
+		while (!this.wrappers_to_send_to_client.isEmpty())
 		{
 			// empty itemstacks are not added to the tube
-			ItemInTubeWrapper wrapper = this.newly_inserted_item_buffer.poll();
+			ItemInTubeWrapper wrapper = this.wrappers_to_send_to_client.poll();
 			CompoundNBT invTag = new CompoundNBT();
 			wrapper.writeToNBT(invTag);
 			invList.add((INBT) invTag);
