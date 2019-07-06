@@ -92,15 +92,19 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 	public void onPossibleNetworkUpdateRequired()
 	{
 		//RoutingNetwork newNetwork = RoutingNetwork.buildNetworkFrom(this.pos, this.world);
-		if (this.network.invalid || this.didNetworkChange())
-		{	// if the existing network has been invalidated or changed,
-			// use the new network, and invalidate the old network
-			// additionally, make sure all tubes in the new network are using the new network
-			// 	(to reduce the amount of network building that must be done)
-			// and invalidate the old network (in case it was changed)
+//		if (this.network.invalid || this.didNetworkChange())
+//		{	// if the existing network has been invalidated or changed,
+//			// use the new network, and invalidate the old network
+//			// additionally, make sure all tubes in the new network are using the new network
+//			// 	(to reduce the amount of network building that must be done)
+//			// and invalidate the old network (in case it was changed)
+//			this.network.invalid = true;
+//			this.network = RoutingNetwork.buildNetworkFrom(this.pos, this.world);
+//			this.network.confirmAllTubes(this.world);
+//		}
+		if (!this.network.invalid && this.didNetworkChange())
+		{
 			this.network.invalid = true;
-			this.network = RoutingNetwork.buildNetworkFrom(this.pos, this.world);
-			this.network.confirmAllTubes(this.world);
 		}
 	}
 	
@@ -112,7 +116,7 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 			// if the adjacent block is a tube or endpoint but isn't in the network
 			// OR if the adjacent block is in the network but isn't a tube or endpoint
 			// then the network changed
-			if (this.getNetwork().contains(pos, face.getOpposite()) != this.getNetwork().isValidToBeInNetwork(checkPos, world, face))
+			if (this.getNetwork().contains(pos, face.getOpposite()) != this.getNetwork().isValidToBeInNetwork(checkPos, world, face.getOpposite()))
 				return true;
 		}
 		return false;

@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import com.github.commoble.tubesreloaded.common.brasstube.BrassTubeTileEntity;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
+import afu.org.checkerframework.checker.javari.qual.ThisMutable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -43,7 +44,7 @@ public class RoutingNetwork
 	// use buildNetworkFrom instead
 	private RoutingNetwork()
 	{
-		
+		System.out.println("Network built");
 	}
 	
 	/** For tubes, only pos of tube is relevant
@@ -89,7 +90,7 @@ public class RoutingNetwork
 				(
 						te instanceof BrassTubeTileEntity
 						||
-						te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite()).isPresent()
+						te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face).isPresent()
 				)
 			);
 		
@@ -164,7 +165,7 @@ public class RoutingNetwork
 			}
 		}
 		
-		
+		network.confirmAllTubes(world);// make sure all tubes in this network are using this network
 		return network;
 	}
 	
