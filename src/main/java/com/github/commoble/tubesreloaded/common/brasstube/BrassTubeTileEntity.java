@@ -45,7 +45,7 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 			.toArray(TubeInventoryHandler[]::new);	// one handler for each direction
 	
 	private Queue<ItemInTubeWrapper> wrappers_to_send_to_client = new LinkedList<ItemInTubeWrapper>();
-	private Queue<ItemInTubeWrapper> incoming_wrapper_buffer = new LinkedList<ItemInTubeWrapper>();
+	public Queue<ItemInTubeWrapper> incoming_wrapper_buffer = new LinkedList<ItemInTubeWrapper>();
 	
 	@Nonnull	// use getNetwork()
 	private RoutingNetwork network = RoutingNetwork.INVALID_NETWORK;

@@ -1,12 +1,11 @@
 package com.github.commoble.tubesreloaded.common.brasstube;
 
 import java.util.HashMap;
-import java.util.Queue;
-import java.util.Random;
 
 import javax.annotation.Nullable;
 
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
+import com.github.commoble.tubesreloaded.common.routing.Route;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -20,7 +19,6 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.particles.ParticleTypes;
 import net.minecraft.pathfinding.PathType;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
@@ -37,8 +35,6 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiquidContainer
@@ -165,14 +161,14 @@ public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiqu
 			ItemStack stack = player.getHeldItem(hand).copy();
 			ItemStack remaining = tube.enqueueItemStack(stack, raytrace.getFace());
 			player.setHeldItem(hand, remaining);
-			// Route bestRoute = tube.getNetwork().getBestRoute(world, pos,
-			// raytrace.getFace(), stack);
-			// if (bestRoute != null)
-			// {
-			// player.setHeldItem(hand, ItemStack.EMPTY);
-			// tube.enqueueItemStack(stack, bestRoute.sequenceOfMoves);
-			// world.getPendingBlockTicks().scheduleTick(pos, this, 1);
-			// }
+			 Route bestRoute = tube.getNetwork().getBestRoute(world, pos,
+			 raytrace.getFace(), stack);
+			 if (bestRoute != null)
+			 {
+			 player.setHeldItem(hand, ItemStack.EMPTY);
+			 tube.enqueueItemStack(stack, bestRoute.sequenceOfMoves);
+			 world.getPendingBlockTicks().scheduleTick(pos, this, 1);
+			 }
 		}
 		return true;
 		// return super.onBlockActivated(state, world, pos, player, hand, side, hitX,
