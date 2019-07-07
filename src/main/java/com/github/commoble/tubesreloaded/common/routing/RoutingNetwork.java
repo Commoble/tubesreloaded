@@ -22,7 +22,7 @@ import net.minecraftforge.items.IItemHandler;
 
 public class RoutingNetwork
 {
-	public static final int MAX_TUBES = 500;
+	public static final int MAX_TUBES = 200;
 	public final Set<BlockPos> tubes = new HashSet<BlockPos>();	// set of the tubes that make up the network interior
 	
 	// set of the faces at the edge of the network
@@ -207,20 +207,16 @@ public class RoutingNetwork
 	{
 		LinkedList<BlockPos> blocksToVisit = new LinkedList<BlockPos>();
 		blocksToVisit.add(startPos);
-		int most = 0;
 		while (!blocksToVisit.isEmpty())
 		{
-			if (visited.size() > MAX_TUBES)
+			if (network.tubes.size() > MAX_TUBES)
+			{
 				break;
+			}
 			
 			
 			BlockPos visitedPos = blocksToVisit.poll();
 			visited.add(visitedPos);
-			if (visited.size() % 100 == 0 && visited.size() > most)
-			{
-				most = visited.size();
-				System.out.println(visited.size());
-			}
 			TileEntity te = world.getTileEntity(visitedPos);
 			if (te instanceof BrassTubeTileEntity)
 			{

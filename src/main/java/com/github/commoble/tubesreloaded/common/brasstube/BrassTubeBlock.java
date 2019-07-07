@@ -171,9 +171,9 @@ public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiqu
 			int xStart = pos.getX();
 			int yStart = pos.getY();
 			int zStart = pos.getZ();
-			for (int x=0; x < 5; x++)
+			for (int x=0; x < 4; x++)
 			{
-				for (int z=0; z<10; z++)
+				for (int z=0; z<4; z++)
 				{
 					for (int y=0; y<10; y++)
 					{
