@@ -32,7 +32,7 @@ public class TubeInventoryHandler extends ItemStackHandler
 		}
 		if (!simulate)
 		{
-			this.tube.enqueueItemStack(stack, this.face);
+			this.tube.enqueueItemStack(stack.copy(), this.face);
 			this.tube.markDirty();
 		}
 		return ItemStack.EMPTY;

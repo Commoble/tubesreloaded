@@ -124,14 +124,7 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 	
 	public void tick()
 	{
-		if (!this.incoming_wrapper_buffer.isEmpty())
-		{
-			for (ItemInTubeWrapper wrapper : this.incoming_wrapper_buffer)
-			{
-				this.inventory.add(wrapper);
-			}
-			this.incoming_wrapper_buffer = new LinkedList<ItemInTubeWrapper>();
-		}
+		this.merge_buffer();
 		if (!this.inventory.isEmpty())	// if inventory is empty, skip the tick
 		{
 			if (!this.world.isRemote)	// block has changes that need to be saved (serverside)
@@ -178,16 +171,12 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 			}
 			else if (te != null && !world.isRemote)	// te exists but is not a tube
 			{
-				ItemStack remaining = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).map(handler -> Endpoint.disperseItemToHandler(wrapper.stack, handler)).orElse(ItemStack.EMPTY);
+				ItemStack remaining = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite()).map(handler -> Endpoint.disperseItemToHandler(wrapper.stack, handler)).orElse(ItemStack.EMPTY);
 
 				if (!remaining.isEmpty())	// target inventory filled up unexpectedly
 				{
 					this.enqueueItemStack(remaining, dir.getOpposite());
 				}
-			}
-			else
-			{
-				this.ejectItem(wrapper.stack);
 			}
 		}
 		else if (!world.isRemote)	// wrapper has no remaining moves -- this isn't expected, eject the item
@@ -223,7 +212,7 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 	{
 		Route route = this.getNetwork().getBestRoute(this.world, this.pos, face, stack);
 		if (route == null || route.sequenceOfMoves.isEmpty())
-			return stack;
+			return stack.copy();
 			
 		this.wrappers_to_send_to_client.add(new ItemInTubeWrapper(stack, route.sequenceOfMoves, 10, face.getOpposite()));
 
@@ -240,24 +229,31 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 
 	public ItemStack enqueueItemStack(ItemStack stack, Queue<Direction> remainingMoves)
 	{
-		this.incoming_wrapper_buffer.add(new ItemInTubeWrapper(stack, remainingMoves, 10));
-		return ItemStack.EMPTY;
+		return enqueueItemStack(new ItemInTubeWrapper(stack, remainingMoves, 10));
+	}
+	
+	public void merge_buffer()
+	{
+		if (!this.incoming_wrapper_buffer.isEmpty())
+		{
+			for (ItemInTubeWrapper wrapper : this.incoming_wrapper_buffer)
+			{
+				this.inventory.add(wrapper);
+			}
+			this.incoming_wrapper_buffer = new LinkedList<ItemInTubeWrapper>();
+		}
 	}
 
 	public void dropItems()
 	{
+		this.merge_buffer();
 		for (ItemInTubeWrapper wrapper : this.inventory)
 		{
 			InventoryHelper.spawnItemStack(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(),
 					wrapper.stack);
 		}
-		for (ItemInTubeWrapper wrapper : this.incoming_wrapper_buffer)
-		{
-			InventoryHelper.spawnItemStack(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(),
-					wrapper.stack);
-		}
+
 		this.inventory = new LinkedList<ItemInTubeWrapper>();	// clear it in case this is being called without destroying the TE
-		this.incoming_wrapper_buffer = new LinkedList<ItemInTubeWrapper>();
 	}
 
 	public static boolean isSpaceForAnythingInItemHandler(IItemHandler handler)
@@ -320,11 +316,7 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 	{
 		// compound.setInt(DIST_NBT_KEY, this.distanceToNearestInventory);
 		ListNBT invList = new ListNBT();
-		for (ItemInTubeWrapper wrapper : this.incoming_wrapper_buffer)
-		{
-			this.inventory.add(wrapper);
-		}
-		this.incoming_wrapper_buffer = new LinkedList<ItemInTubeWrapper>();
+		this.merge_buffer();
 
 		for (ItemInTubeWrapper wrapper : this.inventory)
 		{

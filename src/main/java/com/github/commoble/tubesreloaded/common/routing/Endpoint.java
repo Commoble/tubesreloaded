@@ -98,21 +98,21 @@ public class Endpoint
 
 	// returns the portion of the itemstack that was not inserted
 	// if the returned portion equals the input argument, the itemstack was not inserted
-	public ItemStack insertItem(ItemStack stack, World world)
-	{
-		// TODO Auto-generated method stub
-		ItemStack remainingStack = stack.copy();
-		TileEntity te = world.getTileEntity(this.pos);
-		if (te == null)
-		{
-			return remainingStack;
-		}
-		return te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-				.map(handler -> disperseItemToHandler(remainingStack, handler))
-				.orElse(remainingStack);
-		
-				
-	}
+//	public ItemStack insertItem(ItemStack stack, World world)
+//	{
+//		// TODO Auto-generated method stub
+//		ItemStack remainingStack = stack.copy();
+//		TileEntity te = world.getTileEntity(this.pos);
+//		if (te == null)
+//		{
+//			return remainingStack;
+//		}
+//		return te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+//				.map(handler -> disperseItemToHandler(remainingStack, handler))
+//				.orElse(remainingStack);
+//		
+//				
+//	}
 	
 	// inserts as much of the item as we can into a given handler
 	// we don't copy the itemstack because we assume we are already given a copy of the original stack
@@ -128,10 +128,10 @@ public class Endpoint
 			}
 			if (stack.getCount() == 0)
 			{
-				return stack;
+				return stack.copy();
 			}
 		}
-		return stack;
+		return stack.copy();
 	}
 
 	// returns the slot index of the first available slot in the endpoint block's inventory,

@@ -32,7 +32,7 @@ public class ItemInTubeWrapper
 	/** It would be a good idea to supply this constructor with a copy of a list when using an existing list **/
 	public ItemInTubeWrapper(ItemStack stack, Queue<Direction> moves, int ticksToTravel)
 	{
-		this.stack = stack;
+		this.stack = stack.copy();
 		this.remainingMoves = new LinkedList<Direction>();
 		for (Direction dir : moves)	// copy original list so so changes don't affect the old list
 		{
@@ -46,8 +46,11 @@ public class ItemInTubeWrapper
 	public ItemInTubeWrapper(ItemStack stack, Queue<Direction> moves, int ticksToTravel, Direction firstMove)
 	{
 		this(stack, moves, ticksToTravel);
-		this.remainingMoves.addFirst(firstMove);
-		this.freshlyInserted = true;
+		if (firstMove != null)
+		{
+			this.remainingMoves.addFirst(firstMove);
+			this.freshlyInserted = true;
+		}
 	}
 	
 	public static ItemInTubeWrapper readFromNBT(CompoundNBT compound)

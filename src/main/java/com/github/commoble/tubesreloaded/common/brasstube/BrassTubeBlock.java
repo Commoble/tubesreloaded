@@ -161,14 +161,6 @@ public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiqu
 			ItemStack stack = player.getHeldItem(hand).copy();
 			ItemStack remaining = tube.enqueueItemStack(stack, raytrace.getFace());
 			player.setHeldItem(hand, remaining);
-			 Route bestRoute = tube.getNetwork().getBestRoute(world, pos,
-			 raytrace.getFace(), stack);
-			 if (bestRoute != null)
-			 {
-			 player.setHeldItem(hand, ItemStack.EMPTY);
-			 tube.enqueueItemStack(stack, bestRoute.sequenceOfMoves);
-			 world.getPendingBlockTicks().scheduleTick(pos, this, 1);
-			 }
 		}
 		return true;
 		// return super.onBlockActivated(state, world, pos, player, hand, side, hitX,
