@@ -2,6 +2,7 @@ package com.github.commoble.tubesreloaded.common.routing;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -10,7 +11,6 @@ import javax.annotation.Nullable;
 import com.github.commoble.tubesreloaded.common.brasstube.BrassTubeTileEntity;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
-import afu.org.checkerframework.checker.javari.qual.ThisMutable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -22,6 +22,7 @@ import net.minecraftforge.items.IItemHandler;
 
 public class RoutingNetwork
 {
+	public static final int MAX_TUBES = 500;
 	public final Set<BlockPos> tubes = new HashSet<BlockPos>();	// set of the tubes that make up the network interior
 	
 	// set of the faces at the edge of the network
@@ -44,7 +45,7 @@ public class RoutingNetwork
 	// use buildNetworkFrom instead
 	private RoutingNetwork()
 	{
-		System.out.println("Network built");
+
 	}
 	
 	/** For tubes, only pos of tube is relevant
@@ -145,7 +146,8 @@ public class RoutingNetwork
 		HashSet<BlockPos> visited = new HashSet<BlockPos>();
 		HashSet<BlockPos> potentialEndpoints = new HashSet<BlockPos>();
 		RoutingNetwork network = new RoutingNetwork();
-		recursivelyBuildNetworkFrom(pos, world, network, visited, potentialEndpoints);
+		//recursivelyBuildNetworkFrom(pos, world, network, visited, potentialEndpoints);
+		iterativelyBuildNetworkFrom(pos, world, network, visited, potentialEndpoints);
 		// we now have a set of tubes and a set of potential endpoints
 		// narrow down the endpoint TEs to useable ones
 		for (BlockPos endPos : potentialEndpoints)
@@ -197,6 +199,48 @@ public class RoutingNetwork
 		else
 		{
 			return;	// don't look further
+		}
+	}
+	
+	// very large networks throw stackoverflow if recursion is used
+	private static void iterativelyBuildNetworkFrom(BlockPos startPos, World world, RoutingNetwork network, HashSet<BlockPos> visited, HashSet<BlockPos> potentialEndpoints)
+	{
+		LinkedList<BlockPos> blocksToVisit = new LinkedList<BlockPos>();
+		blocksToVisit.add(startPos);
+		int most = 0;
+		while (!blocksToVisit.isEmpty())
+		{
+			if (visited.size() > MAX_TUBES)
+				break;
+			
+			
+			BlockPos visitedPos = blocksToVisit.poll();
+			visited.add(visitedPos);
+			if (visited.size() % 100 == 0 && visited.size() > most)
+			{
+				most = visited.size();
+				System.out.println(visited.size());
+			}
+			TileEntity te = world.getTileEntity(visitedPos);
+			if (te instanceof BrassTubeTileEntity)
+			{
+				network.tubes.add(visitedPos);
+				for (Direction face : Direction.values())
+				{
+					BlockPos checkPos = visitedPos.offset(face);
+					if (!visited.contains(checkPos))
+					{
+						blocksToVisit.add(checkPos);
+					}
+				}
+			}
+			else if (te != null)	// te exists but isn't tube
+			{
+				// keep track of it for now and reconsider it later
+				potentialEndpoints.add(visitedPos);
+				// but don't look at it again for now
+				// endpoints don't need to be visited more than once, we evaluate the sides later
+			}
 		}
 	}
 	

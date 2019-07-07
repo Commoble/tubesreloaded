@@ -125,16 +125,16 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<BrassTubeTileEnti
 			float zAdjustment = 0F;
 			if (currentModelIndex > 0)
 			{
-				xAdjustment = (random.nextFloat() * 2.0F - 1.0F) * 0.025F;
+				xAdjustment = (random.nextFloat() * 2.0F - 1.0F) * 0.01F;
 				yAdjustment = (random.nextFloat() * 2.0F - 1.0F) * 0.01F;
-				zAdjustment = (random.nextFloat() * 2.0F - 1.0F) * 0.025F;
+				zAdjustment = (random.nextFloat() * 2.0F - 1.0F) * 0.01F;
 				//GlStateManager.translatef((float)x+xAdjustment, (float)y+yAdjustment, (float)z+zAdjustment);
 			}
 			float xTranslate = xLerp + xAdjustment + 0.5F;
-			float yTranslate = yLerp + yAdjustment + 0.375F;
+			float yTranslate = yLerp + yAdjustment + 0.4375F;
 			float zTranslate = zLerp + zAdjustment + 0.5F;
 			GlStateManager.translatef(xTranslate, yTranslate, zTranslate);// aggregate is centered
-			GlStateManager.scalef(0.75F, 0.75F, 0.75F);
+			GlStateManager.scalef(0.5F, 0.5F, 0.5F);
 			
 
 //			IBakedModel transformedModel = net.minecraftforge.client.ForgeHooksClient

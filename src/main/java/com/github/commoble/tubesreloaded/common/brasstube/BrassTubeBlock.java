@@ -60,7 +60,14 @@ public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiqu
 
 	public BrassTubeBlock(Properties properties)
 	{
-		super(properties);
+		super(properties);this.setDefaultState(this.stateContainer.getBaseState()
+				.with(NORTH, Boolean.valueOf(false))
+				.with(EAST, Boolean.valueOf(false))
+				.with(SOUTH, Boolean.valueOf(false))
+				.with(WEST, Boolean.valueOf(false))
+				.with(DOWN, Boolean.valueOf(false))
+				.with(UP, Boolean.valueOf(false))
+				.with(WATERLOGGED, Boolean.valueOf(false)));
 		this.shapes = this.makeShapes();
 	}
 
@@ -157,10 +164,23 @@ public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiqu
 		TileEntity te = world.getTileEntity(pos);
 		if (!world.isRemote() && te instanceof BrassTubeTileEntity)
 		{
-			BrassTubeTileEntity tube = (BrassTubeTileEntity) te;
-			ItemStack stack = player.getHeldItem(hand).copy();
-			ItemStack remaining = tube.enqueueItemStack(stack, raytrace.getFace());
-			player.setHeldItem(hand, remaining);
+//			BrassTubeTileEntity tube = (BrassTubeTileEntity) te;
+//			ItemStack stack = player.getHeldItem(hand).copy();
+//			ItemStack remaining = tube.enqueueItemStack(stack, raytrace.getFace());
+//			player.setHeldItem(hand, remaining);
+			int xStart = pos.getX();
+			int yStart = pos.getY();
+			int zStart = pos.getZ();
+			for (int x=0; x < 5; x++)
+			{
+				for (int z=0; z<10; z++)
+				{
+					for (int y=0; y<10; y++)
+					{
+						world.setBlockState(new BlockPos(xStart+x, yStart+y, zStart+z), this.getDefaultState());
+					}
+				}
+			}
 		}
 		return true;
 		// return super.onBlockActivated(state, world, pos, player, hand, side, hitX,
