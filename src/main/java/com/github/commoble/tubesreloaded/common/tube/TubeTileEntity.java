@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.common.brasstube;
+package com.github.commoble.tubesreloaded.common.tube;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -7,6 +7,7 @@ import java.util.Queue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.commoble.tubesreloaded.common.ConfigValues;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.common.routing.Endpoint;
 import com.github.commoble.tubesreloaded.common.routing.Route;
@@ -31,7 +32,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
-public class BrassTubeTileEntity extends TileEntity implements ITickableTileEntity
+public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 {
 	// public static final String DIST_NBT_KEY = "distance";
 	public static final String INV_NBT_KEY_ADD = "inventory_new_items";
@@ -50,14 +51,14 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 	@Nonnull	// use getNetwork()
 	private RoutingNetwork network = RoutingNetwork.INVALID_NETWORK;
 
-	public BrassTubeTileEntity(TileEntityType<?> tileEntityTypeIn)
+	public TubeTileEntity(TileEntityType<?> tileEntityTypeIn)
 	{
 		super(tileEntityTypeIn);
 	}
 
-	public BrassTubeTileEntity()
+	public TubeTileEntity()
 	{
-		this(TileEntityRegistrar.TE_TYPE_BRASS_TUBE);
+		this(TileEntityRegistrar.TE_TYPE_TUBE);
 	}
 	
 	/**** Getters and Setters	****/
@@ -75,10 +76,10 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 		this.network = network;
 	}
 	
-	public static LazyOptional<BrassTubeTileEntity> getTubeTEAt(World world, BlockPos pos)
+	public static LazyOptional<TubeTileEntity> getTubeTEAt(World world, BlockPos pos)
 	{
 		TileEntity te = world.getTileEntity(pos);
-		return LazyOptional.of(te instanceof BrassTubeTileEntity ? () -> (BrassTubeTileEntity)te : null);
+		return LazyOptional.of(te instanceof TubeTileEntity ? () -> (TubeTileEntity)te : null);
 	}
 	
 	// insertionSide is the side of this block the item was inserted from
@@ -165,9 +166,9 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 		{
 			Direction dir = wrapper.remainingMoves.poll();
 			TileEntity te = this.world.getTileEntity(this.pos.offset(dir));
-			if (te instanceof BrassTubeTileEntity) // te exists and is a tube
+			if (te instanceof TubeTileEntity) // te exists and is a tube
 			{
-				((BrassTubeTileEntity) te).enqueueItemStack(wrapper.stack, wrapper.remainingMoves);
+				((TubeTileEntity) te).enqueueItemStack(wrapper.stack, wrapper.remainingMoves, wrapper.maximumDurationInTube);
 			}
 			else if (te != null && !world.isRemote)	// te exists but is not a tube
 			{
@@ -175,7 +176,7 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 
 				if (!remaining.isEmpty())	// target inventory filled up unexpectedly
 				{
-					this.enqueueItemStack(remaining, dir.getOpposite());
+					this.enqueueItemStack(remaining, dir.getOpposite(), false);
 				}
 			}
 		}
@@ -208,13 +209,17 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 
 	// insert a new itemstack into the tube network from a direction
 	// and determine a route for it
-	public ItemStack enqueueItemStack(ItemStack stack, Direction face)
+	public ItemStack enqueueItemStack(ItemStack stack, Direction face, boolean simulate)
 	{
 		Route route = this.getNetwork().getBestRoute(this.world, this.pos, face, stack);
 		if (route == null || route.sequenceOfMoves.isEmpty())
 			return stack.copy();
 			
-		this.wrappers_to_send_to_client.add(new ItemInTubeWrapper(stack, route.sequenceOfMoves, 10, face.getOpposite()));
+		if (simulate)
+			return ItemStack.EMPTY;
+		
+		int ticks_per_tube = this.getNetwork().getTicksPerTube();
+		this.wrappers_to_send_to_client.add(new ItemInTubeWrapper(stack, route.sequenceOfMoves, ticks_per_tube, face.getOpposite()));
 
 		this.world.notifyBlockUpdate(this.pos, this.getBlockState(), this.getBlockState(), 2);
 		
@@ -227,9 +232,9 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 		return ItemStack.EMPTY;
 	}
 
-	public ItemStack enqueueItemStack(ItemStack stack, Queue<Direction> remainingMoves)
+	public ItemStack enqueueItemStack(ItemStack stack, Queue<Direction> remainingMoves, int ticksPerTube)
 	{
-		return enqueueItemStack(new ItemInTubeWrapper(stack, remainingMoves, 10));
+		return enqueueItemStack(new ItemInTubeWrapper(stack, remainingMoves, ticksPerTube));
 	}
 	
 	public void merge_buffer()
@@ -266,7 +271,7 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 		for (Direction face : Direction.values())
 		{
 			TileEntity te = this.world.getTileEntity(pos.offset(face));
-			if (te != null && !(te instanceof BrassTubeTileEntity))
+			if (te != null && !(te instanceof TubeTileEntity))
 			{
 				// if a nearby inventory that is not a tube exists
 				LazyOptional<IItemHandler> cap = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,
@@ -274,7 +279,7 @@ public class BrassTubeTileEntity extends TileEntity implements ITickableTileEnti
 				IItemHandler handler = cap.orElse(null);
 				if (handler != null)
 				{
-					if (BrassTubeTileEntity.isSpaceForAnythingInItemHandler(handler))
+					if (TubeTileEntity.isSpaceForAnythingInItemHandler(handler))
 					{
 						return true;
 					}

@@ -2,8 +2,8 @@ package com.github.commoble.tubesreloaded.client;
 
 import java.util.Random;
 
-import com.github.commoble.tubesreloaded.common.brasstube.BrassTubeTileEntity;
-import com.github.commoble.tubesreloaded.common.brasstube.ItemInTubeWrapper;
+import com.github.commoble.tubesreloaded.common.tube.ItemInTubeWrapper;
+import com.github.commoble.tubesreloaded.common.tube.TubeTileEntity;
 import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.client.Minecraft;
@@ -18,9 +18,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class TubeTileEntityRenderer extends TileEntityRenderer<BrassTubeTileEntity>
+public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 {
-	public void render(BrassTubeTileEntity tube, double x, double y, double z, float partialTicks, int destroyStage)
+	public void render(TubeTileEntity tube, double x, double y, double z, float partialTicks, int destroyStage)
 	{
 		// render tick happens independantly of regular ticks and often more frequently
 		if (!tube.inventory.isEmpty())
@@ -67,7 +67,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<BrassTubeTileEnti
 	/**
 	 * Renders an itemstack
 	 */
-	public void renderWrapper(BrassTubeTileEntity tube, ItemInTubeWrapper wrapper, double x, double y, double z, float partialTicks)
+	public void renderWrapper(TubeTileEntity tube, ItemInTubeWrapper wrapper, double x, double y, double z, float partialTicks)
 	{
 		Direction nextMove = wrapper.remainingMoves.peek();
 		if (nextMove == null)
@@ -82,15 +82,6 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<BrassTubeTileEnti
 		
 		
 		GlStateManager.pushMatrix();
-//		GlStateManager.enableRescaleNormal();
-//		GlStateManager.alphaFunc(516, 0.1F);
-//		GlStateManager.enableBlend();
-//		RenderHelper.enableStandardItemLighting();
-////		GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
-//				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
-//				GlStateManager.DestFactor.ZERO);
-//		GlStateManager.pushMatrix();
-//		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		int renderedItemCount = this.getModelCount(itemstack);
 		float xStart, yStart, zStart, xEnd, yEnd, zEnd;
 		float lerpFactor = ((float)wrapper.ticksElapsed + partialTicks) / (float)wrapper.maximumDurationInTube;	// factor in range [0,1)
@@ -128,7 +119,6 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<BrassTubeTileEnti
 				xAdjustment = (random.nextFloat() * 2.0F - 1.0F) * 0.01F;
 				yAdjustment = (random.nextFloat() * 2.0F - 1.0F) * 0.01F;
 				zAdjustment = (random.nextFloat() * 2.0F - 1.0F) * 0.01F;
-				//GlStateManager.translatef((float)x+xAdjustment, (float)y+yAdjustment, (float)z+zAdjustment);
 			}
 			float xTranslate = xLerp + xAdjustment + 0.5F;
 			float yTranslate = yLerp + yAdjustment + 0.4375F;
@@ -136,17 +126,11 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<BrassTubeTileEnti
 			GlStateManager.translatef(xTranslate, yTranslate, zTranslate);// aggregate is centered
 			GlStateManager.scalef(0.5F, 0.5F, 0.5F);
 			
-
-//			IBakedModel transformedModel = net.minecraftforge.client.ForgeHooksClient
-//					.handleCameraTransforms(ibakedmodel, ItemCameraTransforms.TransformType.GROUND, false);
 			itemRenderer.renderItem(itemstack, ItemCameraTransforms.TransformType.GROUND);
 			GlStateManager.popMatrix();
 		}
 		itemRenderer.zLevel += 50F;
 
-//		GlStateManager.popMatrix();
-//		GlStateManager.disableRescaleNormal();
-//		GlStateManager.disableBlend();
 		GlStateManager.popMatrix();
 	}
 }

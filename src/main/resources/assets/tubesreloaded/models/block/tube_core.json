@@ -1,8 +1,8 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"all": "tubesreloaded:block/brass_tube",
-		"particle": "tubesreloaded:block/brass_tube"
+		"all": "tubesreloaded:block/tube",
+		"particle": "tubesreloaded:block/tube"
 	},
 	"elements": [
 		{

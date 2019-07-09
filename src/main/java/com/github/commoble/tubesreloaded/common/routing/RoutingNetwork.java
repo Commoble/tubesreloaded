@@ -8,7 +8,8 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.common.brasstube.BrassTubeTileEntity;
+import com.github.commoble.tubesreloaded.common.ConfigValues;
+import com.github.commoble.tubesreloaded.common.tube.TubeTileEntity;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
 import net.minecraft.item.ItemStack;
@@ -40,12 +41,43 @@ public class RoutingNetwork
 	
 	public static final RoutingNetwork INVALID_NETWORK = new RoutingNetwork();
 	static {INVALID_NETWORK.invalid = true;}
+	
+	private int ticksPerTube = 10;	// true value is set when the network is built
 
 	
 	// use buildNetworkFrom instead
 	private RoutingNetwork()
 	{
 
+	}
+	
+	public int getTicksPerTube()
+	{
+		return this.ticksPerTube;
+	}
+	
+	private void setTicksPerTube()
+	{
+		int baseDuration = ConfigValues.ticks_in_tube;
+		int size = this.tubes.size();
+		int softCap = ConfigValues.soft_tube_cap;
+		int hardCap = ConfigValues.hard_tube_cap+1;	// add 1 to avoid divide-by-zero errors
+			// ^ this variable will always be greater than the actual network size now
+		// time dilation is 1:1 if network size <= softcap
+		// if size > softcap, time to traverse network becomes very large as network size approaches hardcap
+		if (size < softCap)
+		{
+			this.ticksPerTube = baseDuration;
+			System.out.println(this.ticksPerTube);
+			return;
+		}
+		
+		float slope = 1F/((float)(softCap-hardCap));
+		float offset = (float)(-hardCap) * slope;
+		float dilation = (float)size * slope + offset;
+		float time = 1F / (dilation * dilation);
+		this.ticksPerTube = (int)(time * (float)baseDuration);
+		System.out.println(this.ticksPerTube);
 	}
 	
 	/** For tubes, only pos of tube is relevant
@@ -89,7 +121,7 @@ public class RoutingNetwork
 		TileEntity te = world.getTileEntity(pos);
 		return (te != null && 
 				(
-						te instanceof BrassTubeTileEntity
+						te instanceof TubeTileEntity
 						||
 						te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face).isPresent()
 				)
@@ -168,38 +200,8 @@ public class RoutingNetwork
 		}
 		
 		network.confirmAllTubes(world);// make sure all tubes in this network are using this network
+		network.setTicksPerTube();
 		return network;
-	}
-	
-	private static void recursivelyBuildNetworkFrom(BlockPos pos, World world, RoutingNetwork network, HashSet<BlockPos> visited, HashSet<BlockPos> potentialEndpoints)
-	{
-		visited.add(pos);
-		
-		TileEntity te = world.getTileEntity(pos);
-		if (te instanceof BrassTubeTileEntity)
-		{
-			network.tubes.add(pos);
-			// build further from tubes
-			for (Direction face : Direction.values())
-			{
-				BlockPos checkPos = pos.offset(face);
-				if (!visited.contains(checkPos))
-				{	// it's okay to only visit endpoints once
-					// it will be determined which of the faces of the block are valid endpoints later
-					recursivelyBuildNetworkFrom(checkPos, world, network, visited, potentialEndpoints);
-				}
-			}
-		}
-		else if (te != null) // TE here but TE isn't a tube
-		{
-			// keep track of it for now and reconsider it later
-			potentialEndpoints.add(pos);
-			return;	// don't look further from here though
-		}
-		else
-		{
-			return;	// don't look further
-		}
 	}
 	
 	// very large networks throw stackoverflow if recursion is used
@@ -218,7 +220,7 @@ public class RoutingNetwork
 			BlockPos visitedPos = blocksToVisit.poll();
 			visited.add(visitedPos);
 			TileEntity te = world.getTileEntity(visitedPos);
-			if (te instanceof BrassTubeTileEntity)
+			if (te instanceof TubeTileEntity)
 			{
 				network.tubes.add(visitedPos);
 				for (Direction face : Direction.values())

@@ -1,7 +1,7 @@
 package com.github.commoble.tubesreloaded.client;
 
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
-import com.github.commoble.tubesreloaded.common.brasstube.BrassTubeTileEntity;
+import com.github.commoble.tubesreloaded.common.tube.TubeTileEntity;
 
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -15,7 +15,7 @@ public class ClientEventHandler
 	@SubscribeEvent
 	public static void onClientSetup(FMLClientSetupEvent event)
 	{
-		ClientRegistry.bindTileEntitySpecialRenderer(BrassTubeTileEntity.class, new TubeTileEntityRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(TubeTileEntity.class, new TubeTileEntityRenderer());
 	}
 
 }

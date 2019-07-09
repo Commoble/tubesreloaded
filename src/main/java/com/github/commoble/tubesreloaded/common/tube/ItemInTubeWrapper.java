@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.common.brasstube;
+package com.github.commoble.tubesreloaded.common.tube;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

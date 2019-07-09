@@ -17,8 +17,8 @@ public class ItemRegistrar
 {
 	// itemblocks
 	
-	@ObjectHolder(BlockNames.BRASS_TUBE_NAME)
-	public static final Item brass_tube = null;
+	@ObjectHolder(BlockNames.TUBE_NAME)
+	public static final Item tube = null;
 	
 	// real items
 	
@@ -27,7 +27,7 @@ public class ItemRegistrar
 	{
 		IForgeRegistry<Item> registry = event.getRegistry();
 		
-		registerItem(registry, new BlockItem(BlockRegistrar.BRASS_TUBE, new Item.Properties().group(CreativeTabs.tab)), BlockNames.BRASS_TUBE_NAME);
+		registerItem(registry, new BlockItem(BlockRegistrar.TUBE, new Item.Properties().group(CreativeTabs.tab)), BlockNames.TUBE_NAME);
 		
 		// real items
 		

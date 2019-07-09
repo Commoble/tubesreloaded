@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.common.brasstube;
+package com.github.commoble.tubesreloaded.common.tube;
 
 import java.util.HashMap;
 
@@ -37,7 +37,7 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
 
-public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiquidContainer
+public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidContainer
 {
 	public static final Direction[] FACING_VALUES = Direction.values();
 
@@ -58,7 +58,7 @@ public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiqu
 
 	protected final VoxelShape[] shapes;
 
-	public BrassTubeBlock(Properties properties)
+	public TubeBlock(Properties properties)
 	{
 		super(properties);this.setDefaultState(this.stateContainer.getBaseState()
 				.with(NORTH, Boolean.valueOf(false))
@@ -88,7 +88,7 @@ public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiqu
 	@Override
 	public TileEntity createTileEntity(BlockState state, IBlockReader world)
 	{
-		return TileEntityRegistrar.TE_TYPE_BRASS_TUBE.create();
+		return TileEntityRegistrar.TE_TYPE_TUBE.create();
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiqu
 		{
 			if (!world.isRemote)
 			{
-				BrassTubeTileEntity.getTubeTEAt(world, pos).ifPresent(te -> te.dropItems());
+				TubeTileEntity.getTubeTEAt(world, pos).ifPresent(te -> te.dropItems());
 			}
 			super.onReplaced(state, world, pos, newState, isMoving);
 		}
@@ -136,7 +136,7 @@ public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiqu
 	{
 		if (!world.isRemote)
 		{
-			BrassTubeTileEntity.getTubeTEAt(world, pos).ifPresent(te -> te.onPossibleNetworkUpdateRequired());
+			TubeTileEntity.getTubeTEAt(world, pos).ifPresent(te -> te.onPossibleNetworkUpdateRequired());
 		}
 		super.neighborChanged(state, world, pos, blockIn, fromPos, wat);
 	}
@@ -151,7 +151,7 @@ public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiqu
 	{
 		if (!world.isRemote)
 		{
-			BrassTubeTileEntity.getTubeTEAt(world, pos).ifPresent(te -> te.onPossibleNetworkUpdateRequired());
+			TubeTileEntity.getTubeTEAt(world, pos).ifPresent(te -> te.onPossibleNetworkUpdateRequired());
 		}
 		super.onBlockPlacedBy(world, pos, state, placer, stack);
 	}
@@ -162,7 +162,7 @@ public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiqu
 			BlockRayTraceResult raytrace)
 	{
 		TileEntity te = world.getTileEntity(pos);
-		if (!world.isRemote() && te instanceof BrassTubeTileEntity)
+		if (!world.isRemote() && te instanceof TubeTileEntity)
 		{
 //			BrassTubeTileEntity tube = (BrassTubeTileEntity) te;
 //			ItemStack stack = player.getHeldItem(hand).copy();
@@ -171,11 +171,11 @@ public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiqu
 			int xStart = pos.getX();
 			int yStart = pos.getY();
 			int zStart = pos.getZ();
-			for (int x=0; x < 4; x++)
+			for (int x=0; x < 2; x++)
 			{
-				for (int z=0; z<4; z++)
+				for (int z=0; z<5; z++)
 				{
-					for (int y=0; y<10; y++)
+					for (int y=0; y<20; y++)
 					{
 						world.setBlockState(new BlockPos(xStart+x, yStart+y, zStart+z), this.getDefaultState());
 					}
@@ -206,7 +206,7 @@ public class BrassTubeBlock extends Block implements IBucketPickupHandler, ILiqu
 	protected boolean canConnectTo(IBlockReader world, BlockPos pos, Direction face)
 	{
 		BlockPos newPos = pos.offset(face);
-		if (world.getBlockState(newPos).getBlock() instanceof BrassTubeBlock)
+		if (world.getBlockState(newPos).getBlock() instanceof TubeBlock)
 			return true;
 
 		TileEntity te = world.getTileEntity(newPos);

@@ -35,12 +35,6 @@ public class RegistryEventHandler
 	}
 	
 	@SubscribeEvent
-	public static void registerSounds(RegistryEvent.Register<SoundEvent> event)
-	{
-		//SoundLedger.registerSounds();
-	}
-	
-	@SubscribeEvent
 	public static void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event)
 	{
 		TileEntityRegistrar.registerTileEntities(event);

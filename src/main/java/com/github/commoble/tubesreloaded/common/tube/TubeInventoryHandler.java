@@ -1,6 +1,4 @@
-package com.github.commoble.tubesreloaded.common.brasstube;
-
-import com.github.commoble.tubesreloaded.common.registry.BlockRegistrar;
+package com.github.commoble.tubesreloaded.common.tube;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
@@ -8,10 +6,10 @@ import net.minecraftforge.items.ItemStackHandler;
 
 public class TubeInventoryHandler extends ItemStackHandler
 {
-	private final BrassTubeTileEntity tube;
+	private final TubeTileEntity tube;
 	private final Direction face;	// face of the tube an item is being inserted into (there shall be one handler for each side)
 
-	public TubeInventoryHandler(BrassTubeTileEntity tube, Direction face)
+	public TubeInventoryHandler(TubeTileEntity tube, Direction face)
 	{
 		super(1);
 		this.tube = tube;
@@ -32,9 +30,8 @@ public class TubeInventoryHandler extends ItemStackHandler
 		}
 		if (!simulate)
 		{
-			this.tube.enqueueItemStack(stack.copy(), this.face);
 			this.tube.markDirty();
 		}
-		return ItemStack.EMPTY;
+		return this.tube.enqueueItemStack(stack.copy(), this.face, simulate);
 	}
 }

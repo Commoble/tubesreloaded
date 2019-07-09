@@ -13,7 +13,7 @@ public class CreativeTabs
 		@Override
 		public ItemStack createIcon()
 		{
-			return new ItemStack(BlockRegistrar.BRASS_TUBE);
+			return new ItemStack(BlockRegistrar.TUBE);
 		}
 	};
 
