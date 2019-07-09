@@ -68,7 +68,6 @@ public class RoutingNetwork
 		if (size < softCap)
 		{
 			this.ticksPerTube = baseDuration;
-			System.out.println(this.ticksPerTube);
 			return;
 		}
 		
@@ -77,7 +76,6 @@ public class RoutingNetwork
 		float dilation = (float)size * slope + offset;
 		float time = 1F / (dilation * dilation);
 		this.ticksPerTube = (int)(time * (float)baseDuration);
-		System.out.println(this.ticksPerTube);
 	}
 	
 	/** For tubes, only pos of tube is relevant

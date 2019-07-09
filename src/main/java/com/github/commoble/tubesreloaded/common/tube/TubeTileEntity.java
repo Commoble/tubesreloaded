@@ -7,7 +7,6 @@ import java.util.Queue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.common.ConfigValues;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.common.routing.Endpoint;
 import com.github.commoble.tubesreloaded.common.routing.Route;
@@ -92,17 +91,6 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	
 	public void onPossibleNetworkUpdateRequired()
 	{
-		//RoutingNetwork newNetwork = RoutingNetwork.buildNetworkFrom(this.pos, this.world);
-//		if (this.network.invalid || this.didNetworkChange())
-//		{	// if the existing network has been invalidated or changed,
-//			// use the new network, and invalidate the old network
-//			// additionally, make sure all tubes in the new network are using the new network
-//			// 	(to reduce the amount of network building that must be done)
-//			// and invalidate the old network (in case it was changed)
-//			this.network.invalid = true;
-//			this.network = RoutingNetwork.buildNetworkFrom(this.pos, this.world);
-//			this.network.confirmAllTubes(this.world);
-//		}
 		if (!this.network.invalid && this.didNetworkChange())
 		{
 			this.network.invalid = true;
@@ -132,7 +120,6 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			{
 				this.markDirty();
 			}
-			//world.createExplosion(null, pos.getX() + 0.5D, pos.getY()+0.5D, pos.getZ()+0.5D, 1F, Explosion.Mode.NONE);
 			Queue<ItemInTubeWrapper> remainingWrappers = new LinkedList<ItemInTubeWrapper>();
 			for (ItemInTubeWrapper wrapper : this.inventory)
 			{
@@ -293,7 +280,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	public void read(CompoundNBT compound)
 	{
 		super.read(compound);
-		// this.distanceToNearestInventory = compound.getInt(DIST_NBT_KEY);
+
 		if (compound.contains(INV_NBT_KEY_RESET))	// only update inventory if the compound has an inv. key
 		{									// this lets the client receive packets without the inventory being cleared
 			ListNBT invList = compound.getList(INV_NBT_KEY_RESET, 10);
@@ -319,13 +306,12 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	@Override	// write entire inventory by default (for server -> hard disk purposes this is what is called)
 	public CompoundNBT write(CompoundNBT compound)
 	{
-		// compound.setInt(DIST_NBT_KEY, this.distanceToNearestInventory);
+
 		ListNBT invList = new ListNBT();
 		this.merge_buffer();
 
 		for (ItemInTubeWrapper wrapper : this.inventory)
 		{
-			// empty itemstacks are not added to the tube
 			CompoundNBT invTag = new CompoundNBT();
 			wrapper.writeToNBT(invTag);
 			invList.add((INBT) invTag);

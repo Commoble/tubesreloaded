@@ -5,7 +5,6 @@ import java.util.HashMap;
 import javax.annotation.Nullable;
 
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
-import com.github.commoble.tubesreloaded.common.routing.Route;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -13,7 +12,6 @@ import net.minecraft.block.IBucketPickupHandler;
 import net.minecraft.block.ILiquidContainer;
 import net.minecraft.block.SixWayBlock;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.fluid.IFluidState;
@@ -26,9 +24,7 @@ import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
@@ -156,37 +152,6 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		super.onBlockPlacedBy(world, pos, state, placer, stack);
 	}
 
-	@Override
-	@Deprecated
-	public boolean onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
-			BlockRayTraceResult raytrace)
-	{
-		TileEntity te = world.getTileEntity(pos);
-		if (!world.isRemote() && te instanceof TubeTileEntity)
-		{
-//			BrassTubeTileEntity tube = (BrassTubeTileEntity) te;
-//			ItemStack stack = player.getHeldItem(hand).copy();
-//			ItemStack remaining = tube.enqueueItemStack(stack, raytrace.getFace());
-//			player.setHeldItem(hand, remaining);
-			int xStart = pos.getX();
-			int yStart = pos.getY();
-			int zStart = pos.getZ();
-			for (int x=0; x < 2; x++)
-			{
-				for (int z=0; z<5; z++)
-				{
-					for (int y=0; y<20; y++)
-					{
-						world.setBlockState(new BlockPos(xStart+x, yStart+y, zStart+z), this.getDefaultState());
-					}
-				}
-			}
-		}
-		return true;
-		// return super.onBlockActivated(state, world, pos, player, hand, side, hitX,
-		// hitY, hitZ);
-	}
-
 	/// connections and states
 
 	@Override
@@ -225,12 +190,6 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	{
 		builder.add(DOWN, UP, NORTH, SOUTH, WEST, EAST, WATERLOGGED);
 	}
-
-	// public BlockFaceShape getBlockFaceShape(IBlockReader worldIn, BlockState
-	// state, BlockPos pos, Direction face)
-	// {
-	// return BlockFaceShape.UNDEFINED;
-	// }
 
 	/**
 	 * Update the provided state given the provided neighbor facing and neighbor
