@@ -7,6 +7,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
+import net.minecraftforge.common.ToolType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.ObjectHolder;
@@ -21,7 +22,7 @@ public class BlockRegistrar
 	{
 		IForgeRegistry<Block> registry = event.getRegistry();
 		
-		registerBlock(registry, new TubeBlock(Block.Properties.create(Material.IRON, MaterialColor.YELLOW_TERRACOTTA).hardnessAndResistance(0.2F, 4F).sound(SoundType.METAL)), BlockNames.TUBE_NAME);
+		registerBlock(registry, new TubeBlock(Block.Properties.create(Material.GLASS, MaterialColor.YELLOW_TERRACOTTA).hardnessAndResistance(0.4F).sound(SoundType.METAL)), BlockNames.TUBE_NAME);
 		
 	}
 	
