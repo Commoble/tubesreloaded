@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.14.3-1.0.0b'
+version = '1.14.3-1.0.1'
 group = 'com.github.Commoble.tubesreloaded' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'tubesreloaded'
 
