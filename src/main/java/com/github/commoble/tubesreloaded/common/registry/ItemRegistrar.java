@@ -19,6 +19,8 @@ public class ItemRegistrar
 	
 	@ObjectHolder(BlockNames.TUBE_NAME)
 	public static final Item tube = null;
+	@ObjectHolder(BlockNames.SHUNT_NAME)
+	public static final Item shunt = null;
 	
 	// real items
 	
@@ -28,6 +30,7 @@ public class ItemRegistrar
 		IForgeRegistry<Item> registry = event.getRegistry();
 		
 		registerItem(registry, new BlockItem(BlockRegistrar.TUBE, new Item.Properties().group(CreativeTabs.tab)), BlockNames.TUBE_NAME);
+		registerItem(registry, new BlockItem(BlockRegistrar.SHUNT, new Item.Properties().group(CreativeTabs.tab)), BlockNames.SHUNT_NAME);
 		
 		// real items
 		
