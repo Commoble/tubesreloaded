@@ -1,0 +1,10 @@
+{
+    "variants": {
+        "facing=down":  { "model": "tubesreloaded:block/shunt", "z": 270 },
+        "facing=up":    { "model": "tubesreloaded:block/shunt", "z": 90 },
+        "facing=north": { "model": "tubesreloaded:block/shunt" },
+        "facing=south": { "model": "tubesreloaded:block/shunt", "y": 180 },
+        "facing=west":  { "model": "tubesreloaded:block/shunt", "y": 270 },
+        "facing=east":  { "model": "tubesreloaded:block/shunt", "y": 90 }
+    }
+}

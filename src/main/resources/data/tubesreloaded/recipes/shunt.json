@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "sts",
+    "t t",
+    "sts"
+  ],
+  "key": {
+    "s": {
+      "tag": "forge:cobblestone"
+    },
+    "t": {
+      "item": "tubesreloaded:tube"
+    }
+  },
+  "result": {
+    "item": "tubesreloaded:shunt",
+    "count": 1
+  }
+}
