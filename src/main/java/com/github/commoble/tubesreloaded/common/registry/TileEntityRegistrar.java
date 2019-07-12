@@ -1,7 +1,7 @@
 package com.github.commoble.tubesreloaded.common.registry;
 
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
-import com.github.commoble.tubesreloaded.common.tube.TubeTileEntity;
+import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
 
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.event.RegistryEvent;

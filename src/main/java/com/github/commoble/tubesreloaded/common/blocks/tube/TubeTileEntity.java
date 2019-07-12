@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.common.tube;
+package com.github.commoble.tubesreloaded.common.blocks.tube;
 
 import java.util.Arrays;
 import java.util.LinkedList;

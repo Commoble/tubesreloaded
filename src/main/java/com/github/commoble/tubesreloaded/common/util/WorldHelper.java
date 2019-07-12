@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.github.commoble.tubesreloaded.common.tube.TubeTileEntity;
+import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;

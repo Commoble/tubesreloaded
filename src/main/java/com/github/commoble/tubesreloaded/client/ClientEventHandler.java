@@ -1,7 +1,7 @@
 package com.github.commoble.tubesreloaded.client;
 
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
-import com.github.commoble.tubesreloaded.common.tube.TubeTileEntity;
+import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

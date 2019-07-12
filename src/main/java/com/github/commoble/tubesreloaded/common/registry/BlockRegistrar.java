@@ -1,7 +1,8 @@
 package com.github.commoble.tubesreloaded.common.registry;
 
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
-import com.github.commoble.tubesreloaded.common.tube.TubeBlock;
+import com.github.commoble.tubesreloaded.common.blocks.shunt.ShuntBlock;
+import com.github.commoble.tubesreloaded.common.blocks.tube.TubeBlock;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -17,12 +18,15 @@ public class BlockRegistrar
 {
 	@ObjectHolder(BlockNames.TUBE_NAME)
 	public static final TubeBlock TUBE = null;
+	@ObjectHolder(BlockNames.SHUNT_NAME)
+	public static final ShuntBlock SHUNT = null;
 
 	public static void registerBlocks(RegistryEvent.Register<Block> event)
 	{
 		IForgeRegistry<Block> registry = event.getRegistry();
 		
 		registerBlock(registry, new TubeBlock(Block.Properties.create(Material.GLASS, MaterialColor.YELLOW_TERRACOTTA).hardnessAndResistance(0.4F).sound(SoundType.METAL)), BlockNames.TUBE_NAME);
+		registerBlock(registry, new ShuntBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), BlockNames.TUBE_NAME);
 		
 	}
 	

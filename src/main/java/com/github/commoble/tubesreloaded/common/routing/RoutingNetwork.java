@@ -9,7 +9,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import com.github.commoble.tubesreloaded.common.ConfigValues;
-import com.github.commoble.tubesreloaded.common.tube.TubeTileEntity;
+import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
 import net.minecraft.item.ItemStack;
