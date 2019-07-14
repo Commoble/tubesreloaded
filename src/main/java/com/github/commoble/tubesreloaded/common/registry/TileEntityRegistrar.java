@@ -14,7 +14,7 @@ public class TileEntityRegistrar
 	@ObjectHolder(BlockNames.TUBE_NAME)
 	public static final TileEntityType<TubeTileEntity> TE_TYPE_TUBE = null;
 	@ObjectHolder(BlockNames.SHUNT_NAME)
-	public static final TileEntityType<TubeTileEntity> TE_TYPE_SHUNT = null;
+	public static final TileEntityType<ShuntTileEntity> TE_TYPE_SHUNT = null;
 	
 	
 	public static void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event)

@@ -11,6 +11,7 @@ import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.common.routing.Endpoint;
 import com.github.commoble.tubesreloaded.common.routing.Route;
 import com.github.commoble.tubesreloaded.common.routing.RoutingNetwork;
+import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.inventory.InventoryHelper;
@@ -157,29 +158,29 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			{
 				((TubeTileEntity) te).enqueueItemStack(wrapper.stack, wrapper.remainingMoves, wrapper.maximumDurationInTube);
 			}
-			else if (te != null && !world.isRemote)	// te exists but is not a tube
+			else if (!world.isRemote)
 			{
-				ItemStack remaining = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite()).map(handler -> Endpoint.disperseItemToHandler(wrapper.stack, handler)).orElse(ItemStack.EMPTY);
-
-				if (!remaining.isEmpty())	// target inventory filled up unexpectedly
+				if (te != null)	// te exists but is not a tube
 				{
-					this.enqueueItemStack(remaining, dir.getOpposite(), false);
+					ItemStack remaining = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite()).map(handler -> Endpoint.disperseItemToHandler(wrapper.stack, handler)).orElse(wrapper.stack.copy());
+	
+					if (!remaining.isEmpty())	// target inventory filled up unexpectedly
+					{
+						this.enqueueItemStack(remaining, dir.getOpposite(), false);
+					}
+				}
+				else	// no TE -- eject stack
+				{
+					System.out.println("ejecty");
+					WorldHelper.ejectItemstack(this.world, this.pos, dir, wrapper.stack);
 				}
 			}
 		}
 		else if (!world.isRemote)	// wrapper has no remaining moves -- this isn't expected, eject the item
 		{
-			this.ejectItem(wrapper.stack);
+			WorldHelper.ejectItemstack(this.world, this.pos, null, wrapper.stack);
 		}
 	}
-	
-	private void ejectItem(ItemStack stack)
-	{
-        ItemEntity itementity = new ItemEntity(this.world, this.pos.getX() + 0.5D, this.pos.getY() + 0.5D, this.pos.getZ() + 0.5D, stack);
-        itementity.setDefaultPickupDelay();
-        this.world.addEntity(itementity);
-	}
-
 	/**** Inventory handling ****/
 
 	@SuppressWarnings("unchecked")
