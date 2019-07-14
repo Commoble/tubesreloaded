@@ -5,25 +5,18 @@ import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DirectionalBlock;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
 
 public class ShuntBlock extends Block
 {
@@ -43,20 +36,6 @@ public class ShuntBlock extends Block
 		super(properties);
 		this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
 		this.shapes=this.makeShapes();
-	}
-	
-	@Override
-	public boolean onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit)
-	{
-		double xOff = pos.getX() + (world.getRandom().nextInt(2) == 0 ? 0.2D : 0.8D);
-		double yOff = pos.getY() + (world.getRandom().nextInt(2) == 0 ? 0.2D : 0.8D);
-		double zOff = pos.getZ() + (world.getRandom().nextInt(2) == 0 ? 0.2D : 0.8D);
-		ItemStack stack = new ItemStack(Items.EGG);
-		ItemEntity itementity = new ItemEntity(world, xOff, yOff, zOff, stack);
-        itementity.setDefaultPickupDelay();
-        itementity.setMotion(0D, 0D, 0D);
-        world.addEntity(itementity);
-		return true;
 	}
 
 	@Override

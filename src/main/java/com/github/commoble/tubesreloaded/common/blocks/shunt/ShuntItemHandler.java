@@ -3,7 +3,6 @@ package com.github.commoble.tubesreloaded.common.blocks.shunt;
 import com.github.commoble.tubesreloaded.common.routing.Endpoint;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;

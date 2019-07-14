@@ -13,7 +13,6 @@ import com.github.commoble.tubesreloaded.common.routing.Route;
 import com.github.commoble.tubesreloaded.common.routing.RoutingNetwork;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -171,7 +170,6 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 				}
 				else	// no TE -- eject stack
 				{
-					System.out.println("ejecty");
 					WorldHelper.ejectItemstack(this.world, this.pos, dir, wrapper.stack);
 				}
 			}
