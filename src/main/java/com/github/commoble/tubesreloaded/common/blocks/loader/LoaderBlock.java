@@ -35,9 +35,16 @@ public class LoaderBlock extends Block
 		ItemStack heldStack = player.getHeldItem(handIn);
 		if (heldStack.getCount() > 0)
 		{
-			this.insertItem(heldStack.copy(), worldIn, pos, state);
-			player.setHeldItem(handIn, ItemStack.EMPTY);
-			return true;
+			ItemStack remaining = this.insertItem(heldStack.copy(), worldIn, pos, state);
+			if (remaining.getCount() < heldStack.getCount())
+			{
+				player.setHeldItem(handIn, remaining);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
 		}
 		else
 		{
@@ -45,9 +52,10 @@ public class LoaderBlock extends Block
 		}
 	}
 
-	private void insertItem(ItemStack stack, World world, BlockPos pos, BlockState state)
+	// returns the portion of the itemstack that wasn't inserted
+	private ItemStack insertItem(ItemStack stack, World world, BlockPos pos, BlockState state)
 	{
-		// attempt to insert item
+		// check if it can insert the item
 		Direction output_dir = state.get(FACING);
 		BlockPos output_pos = pos.offset(output_dir);
 		ItemStack remaining = WorldHelper.getTEItemHandlerAt(world, output_pos, output_dir.getOpposite())
@@ -55,7 +63,20 @@ public class LoaderBlock extends Block
 
 		if (remaining.getCount() > 0) // we have remaining items
 		{
-			WorldHelper.ejectItemstack(world, pos, output_dir, remaining);
+			// check if there is space to eject the item
+			if (world.getBlockState(output_pos).isOpaqueCube(world, output_pos))
+			{	// if output position is solid cube, don't eject item
+				return remaining;
+			}
+			else
+			{	// otherwise eject item
+				WorldHelper.ejectItemstack(world, pos, output_dir, remaining);
+				return ItemStack.EMPTY;
+			}
+		}
+		else	// item was accepted fully
+		{
+			return ItemStack.EMPTY;
 		}
 	}
 
