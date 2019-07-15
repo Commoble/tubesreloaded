@@ -1,6 +1,7 @@
 package com.github.commoble.tubesreloaded.common.registry;
 
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.common.blocks.loader.LoaderTileEntity;
 import com.github.commoble.tubesreloaded.common.blocks.shunt.ShuntTileEntity;
 import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
 
@@ -15,6 +16,8 @@ public class TileEntityRegistrar
 	public static final TileEntityType<TubeTileEntity> TE_TYPE_TUBE = null;
 	@ObjectHolder(BlockNames.SHUNT_NAME)
 	public static final TileEntityType<ShuntTileEntity> TE_TYPE_SHUNT = null;
+	@ObjectHolder(BlockNames.LOADER_NAME)
+	public static final TileEntityType<LoaderTileEntity> TE_TYPE_LOADER = null;
 	
 	
 	public static void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event)
@@ -26,6 +29,10 @@ public class TileEntityRegistrar
 		event.getRegistry().register(TileEntityType.Builder.create(ShuntTileEntity::new,BlockRegistrar.SHUNT)
 				.build(null)
 				.setRegistryName(BlockNames.SHUNT_NAME)
+				);
+		event.getRegistry().register(TileEntityType.Builder.create(LoaderTileEntity::new,BlockRegistrar.LOADER)
+				.build(null)
+				.setRegistryName(BlockNames.LOADER_NAME)
 				);
 	}
 }

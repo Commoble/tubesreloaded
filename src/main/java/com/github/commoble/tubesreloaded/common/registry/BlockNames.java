@@ -5,4 +5,5 @@ public class BlockNames
 {
 	public static final String TUBE_NAME = "tube";
 	public static final String SHUNT_NAME = "shunt";
+	public static final String LOADER_NAME = "loader";	
 }

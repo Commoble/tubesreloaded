@@ -1,6 +1,7 @@
 package com.github.commoble.tubesreloaded.common.registry;
 
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.common.blocks.loader.LoaderBlock;
 import com.github.commoble.tubesreloaded.common.blocks.shunt.ShuntBlock;
 import com.github.commoble.tubesreloaded.common.blocks.tube.TubeBlock;
 
@@ -20,6 +21,8 @@ public class BlockRegistrar
 	public static final TubeBlock TUBE = null;
 	@ObjectHolder(BlockNames.SHUNT_NAME)
 	public static final ShuntBlock SHUNT = null;
+	@ObjectHolder(BlockNames.LOADER_NAME)
+	public static final LoaderBlock LOADER = null;
 
 	public static void registerBlocks(RegistryEvent.Register<Block> event)
 	{
