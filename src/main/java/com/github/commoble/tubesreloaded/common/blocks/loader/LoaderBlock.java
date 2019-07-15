@@ -15,6 +15,8 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
@@ -38,6 +40,7 @@ public class LoaderBlock extends Block
 			ItemStack remaining = this.insertItem(heldStack.copy(), worldIn, pos, state);
 			if (remaining.getCount() < heldStack.getCount())
 			{
+		        worldIn.playSound(null, pos, SoundEvents.BLOCK_PISTON_EXTEND, SoundCategory.BLOCKS, 0.3F, worldIn.rand.nextFloat() * 0.25F + 5F);
 				player.setHeldItem(handIn, remaining);
 				return true;
 			}
@@ -85,8 +88,8 @@ public class LoaderBlock extends Block
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
 		// facing depends on the face of the block that was clicked on
-		Direction clickDir = context.getFace(); // face of the block that was clicked
-		Direction placeDir = context.isPlacerSneaking() ? clickDir.getOpposite() : clickDir;
+		Direction lookDir = context.getNearestLookingDirection();
+		Direction placeDir = context.isPlacerSneaking() ? lookDir : lookDir.getOpposite();
 		return this.getDefaultState().with(FACING, placeDir);
 	}
 
