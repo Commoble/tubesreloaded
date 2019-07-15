@@ -40,8 +40,10 @@ public class LoaderBlock extends Block
 			ItemStack remaining = this.insertItem(heldStack.copy(), worldIn, pos, state);
 			if (remaining.getCount() < heldStack.getCount())
 			{
-		        worldIn.playSound(null, pos, SoundEvents.BLOCK_PISTON_EXTEND, SoundCategory.BLOCKS, 0.3F, worldIn.rand.nextFloat() * 0.25F + 5F);
-				player.setHeldItem(handIn, remaining);
+		        if (!worldIn.isRemote)
+		        {
+					player.setHeldItem(handIn, remaining);
+		        }
 				return true;
 			}
 			else
@@ -74,11 +76,13 @@ public class LoaderBlock extends Block
 			else
 			{	// otherwise eject item
 				WorldHelper.ejectItemstack(world, pos, output_dir, remaining);
+		        world.playSound(null, pos, SoundEvents.BLOCK_PISTON_EXTEND, SoundCategory.BLOCKS, 0.3F, world.rand.nextFloat() * 0.25F + 2F);
 				return ItemStack.EMPTY;
 			}
 		}
 		else	// item was accepted fully
 		{
+	        world.playSound(null, pos, SoundEvents.BLOCK_PISTON_EXTEND, SoundCategory.BLOCKS, 0.3F, world.rand.nextFloat() * 0.25F + 1F);
 			return ItemStack.EMPTY;
 		}
 	}
