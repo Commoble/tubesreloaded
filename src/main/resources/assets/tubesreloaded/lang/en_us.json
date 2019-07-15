@@ -1,5 +1,6 @@
 {
 	"itemGroup.tubesreloaded": "Tubes Reloaded",
 	"block.tubesreloaded.tube": "Tube",
-	"block.tubesreloaded.shunt": "Shunt"
+	"block.tubesreloaded.shunt": "Shunt",
+	"block.tubesreloaded.loader": "Loader"
 }

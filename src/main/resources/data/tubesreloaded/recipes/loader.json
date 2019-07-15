@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "sss",
+    "P S",
+    "sss"
+  ],
+  "key": {
+    "s": {
+      "tag": "forge:cobblestone"
+    },
+    "S": {
+      "item": "tubesreloaded:shunt"
+    },
+    "P": {
+      "item": "minecraft:piston"
+    }
+  },
+  "result": {
+    "item": "tubesreloaded:loader",
+    "count": 1
+  }
+}
