@@ -22,7 +22,7 @@ displayName="Tubes Reloaded" #mandatory
 # A URL for the "homepage" for this mod, displayed in the mod UI
 displayURL="https://github.com/Commoble/tubesreloaded" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
-logoFile="tubesreloaded.png" #optional
+logoFile="TubesReloaded.png" #optional
 # A text field displayed in the mod UI
 credits="I hear the Minecraft Mod Development discord is the cat's bananas" #optional
 # A text field displayed in the mod UI
