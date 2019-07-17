@@ -1,13 +1,8 @@
 package com.github.commoble.tubesreloaded.client;
 
-import javax.annotation.Nonnull;
-
-import com.github.commoble.tubesreloaded.common.capability.issprintkeyheld.IIsSprintKeyHeldCapability;
-import com.github.commoble.tubesreloaded.common.capability.issprintkeyheld.IsSprintKeyHeldProvider;
 import com.github.commoble.tubesreloaded.network.IsWasSprintPacket;
 import com.github.commoble.tubesreloaded.network.PacketHandler;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.DistExecutor;
 
@@ -17,26 +12,17 @@ public class ClientData
 			() -> () -> LazyOptional.of(() -> new ClientData()), 
 			() -> () -> LazyOptional.empty());
 	
-	private LazyOptional<IIsSprintKeyHeldCapability> possibleSprintCap = LazyOptional.empty();
+	public boolean isHoldingSprint = false;
 	
-	private LazyOptional<IIsSprintKeyHeldCapability> getSprintCap(@Nonnull PlayerEntity player)
+	public boolean getWasSprinting()
 	{
-		if (!this.possibleSprintCap.isPresent())
-		{
-			this.possibleSprintCap = player.getCapability(IsSprintKeyHeldProvider.IS_SPRINT_KEY_HELD_CAP);
-		}
-		return this.possibleSprintCap;
+		return this.isHoldingSprint;
 	}
 	
-	public boolean getWasSprinting(@Nonnull PlayerEntity player)
-	{
-		return this.getSprintCap(player).map(cap -> cap.getIsSprintHeld()).orElse(false);
-	}
-	
-	public void setIsSprintingAndNotifyServer(@Nonnull PlayerEntity player, boolean isSprinting)
+	public void setIsSprintingAndNotifyServer(boolean isSprinting)
 	{
 		// mark the capability on the client and send a packet to the server to do the same
-		this.getSprintCap(player).ifPresent(cap -> cap.setIsSprintHeld(isSprinting));
+		this.isHoldingSprint = isSprinting;
 		PacketHandler.INSTANCE.sendToServer(new IsWasSprintPacket(isSprinting));
 	}
 }

@@ -20,10 +20,10 @@ public class InputEventHandler
 		if (mc.player != null)
 		{
 			boolean sprintIsDown = mc.gameSettings.keyBindSprint.isKeyDown();
-			boolean sprintWasDown = ClientData.INSTANCE.map(client -> client.getWasSprinting(mc.player)).orElse(false);
+			boolean sprintWasDown = ClientData.INSTANCE.map(client -> client.isHoldingSprint).orElse(false);
 			if (sprintWasDown != sprintIsDown)	// change in sprint key detected
 			{
-				ClientData.INSTANCE.ifPresent(instance -> instance.setIsSprintingAndNotifyServer(mc.player, sprintIsDown));
+				ClientData.INSTANCE.ifPresent(instance -> instance.setIsSprintingAndNotifyServer(sprintIsDown));
 			}
 		}
 	}
