@@ -18,5 +18,4 @@ public class ClientEventHandler
 	{
 		ClientRegistry.bindTileEntitySpecialRenderer(TubeTileEntity.class, new TubeTileEntityRenderer());
 	}
-
 }

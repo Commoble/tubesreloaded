@@ -1,6 +1,7 @@
 package com.github.commoble.tubesreloaded.common.blocks.loader;
 
 import com.github.commoble.tubesreloaded.common.routing.Endpoint;
+import com.github.commoble.tubesreloaded.common.util.DirectionHelper;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
 import net.minecraft.block.Block;
@@ -91,10 +92,7 @@ public class LoaderBlock extends Block
 
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
-		// facing depends on the face of the block that was clicked on
-		Direction lookDir = context.getNearestLookingDirection();
-		Direction placeDir = context.isPlacerSneaking() ? lookDir : lookDir.getOpposite();
-		return this.getDefaultState().with(FACING, placeDir);
+		return this.getDefaultState().with(FACING, DirectionHelper.getBlockFacingForPlacement(context));
 	}
 
 	public BlockState rotate(BlockState state, Rotation rot)
