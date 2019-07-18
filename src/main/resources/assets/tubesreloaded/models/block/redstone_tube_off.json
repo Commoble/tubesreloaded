@@ -1,6 +1,6 @@
 {
     "parent": "tubesreloaded:block/tube_core",
     "textures": {
-        "texture": "tubesreloaded:block/redstone_tube_off"
+        "all": "tubesreloaded:block/redstone_tube_off"
     }
 }
