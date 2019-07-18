@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " r ",
+    "rtr",
+    " r "
+  ],
+  "key": {
+    "r": {
+      "item": "minecraft:redstone"
+    },
+    "t": {
+      "item": "tubesreloaded:tube"
+    }
+  },
+  "result": {
+    "item": "tubesreloaded:redstone_tube",
+    "count": 1
+  }
+}

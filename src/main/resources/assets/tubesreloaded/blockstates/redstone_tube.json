@@ -1,0 +1,28 @@
+{
+    "multipart": [
+        {   "when": { "powered" : "true"},
+        	"apply": { "model": "tubesreloaded:block/redstone_tube_on" }
+        },
+        {   "when": { "powered" : "false"},
+        	"apply": { "model": "tubesreloaded:block/redstone_tube_off" }
+        },
+        {   "when": { "north": "true" },
+            "apply": { "model": "tubesreloaded:block/tube_extension_north", "uvlock": true }
+        },
+        {   "when": { "east": "true" },
+            "apply": { "model": "tubesreloaded:block/tube_extension_north", "y": 90, "uvlock": true }
+        },
+        {   "when": { "south": "true" },
+            "apply": { "model": "tubesreloaded:block/tube_extension_north", "y": 180, "uvlock": true }
+        },
+        {   "when": { "west": "true" },
+            "apply": { "model": "tubesreloaded:block/tube_extension_north", "y": 270, "uvlock": true }
+        },
+        {   "when": { "up": "true" },
+            "apply": { "model": "tubesreloaded:block/tube_extension_north", "x": 270, "uvlock": true }
+        },
+        {   "when": { "down": "true" },
+            "apply": { "model": "tubesreloaded:block/tube_extension_north", "x": 90, "uvlock": true }
+        }
+    ]
+}
