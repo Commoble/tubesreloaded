@@ -3,6 +3,7 @@ package com.github.commoble.tubesreloaded.common.registry;
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
 import com.github.commoble.tubesreloaded.common.blocks.shunt.ShuntTileEntity;
 import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
+import com.github.commoble.tubesreloaded.common.blocks.tube.redstone_tube.RedstoneTubeTileEntity;
 
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.event.RegistryEvent;
@@ -15,6 +16,8 @@ public class TileEntityRegistrar
 	public static final TileEntityType<TubeTileEntity> TE_TYPE_TUBE = null;
 	@ObjectHolder(BlockNames.SHUNT_NAME)
 	public static final TileEntityType<ShuntTileEntity> TE_TYPE_SHUNT = null;
+	@ObjectHolder(BlockNames.REDSTONE_TUBE_NAME)
+	public static final TileEntityType<RedstoneTubeTileEntity> TE_TYPE_REDSTONE_TUBE = null;
 	
 	
 	public static void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event)
@@ -26,6 +29,10 @@ public class TileEntityRegistrar
 		event.getRegistry().register(TileEntityType.Builder.create(ShuntTileEntity::new,BlockRegistrar.SHUNT)
 				.build(null)
 				.setRegistryName(BlockNames.SHUNT_NAME)
+				);
+		event.getRegistry().register(TileEntityType.Builder.create(RedstoneTubeTileEntity::new,BlockRegistrar.REDSTONE_TUBE)
+				.build(null)
+				.setRegistryName(BlockNames.REDSTONE_TUBE_NAME)
 				);
 	}
 }
