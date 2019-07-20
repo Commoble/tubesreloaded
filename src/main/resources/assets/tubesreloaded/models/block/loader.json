@@ -1,9 +1,9 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"output": "tubesreloaded:block/shunt_output",
+		"output": "tubesreloaded:block/loader_output",
 		"particle": "tubesreloaded:block/shunt_output",
-		"side": "block/piston_bottom"
+		"side": "block/dropper_front_vertical"
 	},
 	"elements": [
 		{
