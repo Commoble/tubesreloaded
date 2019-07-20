@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import javax.annotation.Nullable;
 
+import com.github.commoble.tubesreloaded.common.blocks.loader.LoaderBlock;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 
 import net.minecraft.block.Block;
@@ -171,8 +172,13 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	protected boolean canConnectTo(IBlockReader world, BlockPos pos, Direction face)
 	{
 		BlockPos newPos = pos.offset(face);
-		if (world.getBlockState(newPos).getBlock() instanceof TubeBlock)
+		BlockState state = world.getBlockState(newPos);
+		Block block = state.getBlock();
+		if (block instanceof TubeBlock)
 			return true;
+		
+		if (block instanceof LoaderBlock && state.get(LoaderBlock.FACING).equals(face.getOpposite()))
+			return true;	// todo make this configurable for arbitrary blocks instead of hardcoded
 
 		TileEntity te = world.getTileEntity(newPos);
 
