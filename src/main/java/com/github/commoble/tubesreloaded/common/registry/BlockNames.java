@@ -7,4 +7,5 @@ public class BlockNames
 	public static final String SHUNT_NAME = "shunt";
 	public static final String LOADER_NAME = "loader";	
 	public static final String REDSTONE_TUBE_NAME = "redstone_tube";
+	public static final String EXTRACTOR_NAME = "extractor";
 }

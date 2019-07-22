@@ -25,6 +25,8 @@ public class ItemRegistrar
 	public static final Item loader = null;
 	@ObjectHolder(BlockNames.REDSTONE_TUBE_NAME)
 	public static final Item redstone_tube = null;
+	@ObjectHolder(BlockNames.EXTRACTOR_NAME)
+	public static final Item extractor = null;
 	
 	// real items
 	
@@ -37,7 +39,7 @@ public class ItemRegistrar
 		registerItem(registry, new BlockItem(BlockRegistrar.SHUNT, new Item.Properties().group(CreativeTabs.tab)), BlockNames.SHUNT_NAME);
 		registerItem(registry, new BlockItem(BlockRegistrar.LOADER, new Item.Properties().group(CreativeTabs.tab)), BlockNames.LOADER_NAME);
 		registerItem(registry, new BlockItem(BlockRegistrar.REDSTONE_TUBE, new Item.Properties().group(CreativeTabs.tab)), BlockNames.REDSTONE_TUBE_NAME);
-		
+		registerItem(registry, new BlockItem(BlockRegistrar.EXTRACTOR, new Item.Properties().group(CreativeTabs.tab)), BlockNames.EXTRACTOR_NAME);
 		// real items
 		
 	}
