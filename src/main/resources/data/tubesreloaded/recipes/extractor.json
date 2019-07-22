@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "h",
+    "s"
+  ],
+  "key": {
+    "h": {
+      "item": "minecraft:hopper"
+    },
+    "s": {
+      "item": "tubesreloaded:shunt"
+    }
+  },
+  "result": {
+    "item": "tubesreloaded:extractor",
+    "count": 1
+  }
+}
