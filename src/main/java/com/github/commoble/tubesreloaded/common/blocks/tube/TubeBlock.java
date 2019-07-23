@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import javax.annotation.Nullable;
 
+import com.github.commoble.tubesreloaded.common.blocks.extractor.ExtractorBlock;
 import com.github.commoble.tubesreloaded.common.blocks.loader.LoaderBlock;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 
@@ -179,6 +180,9 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		
 		if (block instanceof LoaderBlock && state.get(LoaderBlock.FACING).equals(face.getOpposite()))
 			return true;	// todo make this configurable for arbitrary blocks instead of hardcoded
+		
+		if (block instanceof ExtractorBlock && state.get(ExtractorBlock.FACING).equals(face.getOpposite()))
+			return true;
 
 		TileEntity te = world.getTileEntity(newPos);
 

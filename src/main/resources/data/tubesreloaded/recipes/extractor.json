@@ -2,11 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "h",
+    "p",
     "s"
   ],
   "key": {
     "h": {
       "item": "minecraft:hopper"
+    },
+    "p": {
+      "item": "minecraft:piston"
     },
     "s": {
       "item": "tubesreloaded:shunt"
