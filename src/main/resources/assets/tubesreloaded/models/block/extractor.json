@@ -1,6 +1,5 @@
 {
 	"credit": "Made with Blockbench -- based on Minecraft's hopper model, couldn't figure out how to parent it properly",
-	"ambientocclusion": false,
 	"textures": {
 		"top": "block/hopper_top",
 		"side": "block/hopper_outside",

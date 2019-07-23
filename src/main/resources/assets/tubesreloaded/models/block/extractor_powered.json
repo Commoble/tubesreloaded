@@ -1,6 +1,5 @@
 {
 	"credit": "Made with Blockbench",
-	"ambientocclusion": false,
 	"textures": {
 		"top": "block/hopper_top",
 		"side": "block/hopper_outside",
