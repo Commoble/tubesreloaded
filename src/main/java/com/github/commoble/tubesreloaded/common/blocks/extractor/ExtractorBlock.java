@@ -178,27 +178,29 @@ public class ExtractorBlock extends Block
 			boolean SOUTH = face == 3;
 			boolean WEST = face == 4;
 			boolean EAST = face == 5;
+			
+			// north==0, south==16
 
 			double input_x_min = WEST ? 10D : 0D;
 			double input_x_max = EAST ? 6D : 16D;
 			double input_y_min = DOWN ? 10D : 0D;
 			double input_y_max = UP ? 6D : 16D;
-			double input_z_min = SOUTH ? 10D : 0D;
-			double input_z_max = NORTH ? 6D : 16D;
+			double input_z_min = NORTH ? 10D : 0D;
+			double input_z_max = SOUTH ? 6D : 16D;
 
 			double mid_x_min = EAST ? 6D : 4D;
 			double mid_x_max = WEST ? 10D : 12D;
 			double mid_y_min = UP ? 6D : 4D;
 			double mid_y_max = DOWN ? 10D : 12D;
-			double mid_z_min = NORTH ? 6D : 4D;
-			double mid_z_max = SOUTH ? 10D : 12D;
+			double mid_z_min = SOUTH ? 6D : 4D;
+			double mid_z_max = NORTH ? 10D : 12D;
 
 			double output_x_min = WEST ? 0D : EAST ? 12D : 6D;
 			double output_x_max = WEST ? 4D : EAST ? 16D : 10D;
 			double output_y_min = DOWN ? 0D : UP ? 12D : 6D;
 			double output_y_max = DOWN ? 4D : UP ? 16D : 10D;
-			double output_z_min = NORTH ? 12D : SOUTH ? 0D : 6D;
-			double output_z_max = NORTH ? 16D : SOUTH ? 4D : 10D;
+			double output_z_min = SOUTH ? 12D : NORTH ? 0D : 6D;
+			double output_z_max = SOUTH ? 16D : NORTH ? 4D : 10D;
 
 			VoxelShape input = Block.makeCuboidShape(input_x_min, input_y_min, input_z_min, input_x_max, input_y_max,
 					input_z_max);
