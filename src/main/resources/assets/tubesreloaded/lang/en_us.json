@@ -4,5 +4,6 @@
 	"block.tubesreloaded.shunt": "Shunt",
 	"block.tubesreloaded.loader": "Loader",
 	"block.tubesreloaded.redstone_tube": "Redstone Tube",
-	"block.tubesreloaded.extractor": "Extractor"
+	"block.tubesreloaded.extractor": "Extractor",
+	"block.tubesreloaded.filter": "Filter"
 }

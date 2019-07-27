@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tubesreloaded:shunt"
+    },
+    {
+      "item": "minecraft:item_frame"
+    }
+  ],
+  "result": {
+    "item": "tubesreloaded:filter"
+  }
+}
