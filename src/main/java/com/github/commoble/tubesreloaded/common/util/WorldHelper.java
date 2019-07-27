@@ -51,6 +51,13 @@ public class WorldHelper
 		return LazyOptional.of(te != null ? () -> te : null);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static <T extends TileEntity> LazyOptional<T> getTileEntityAt(Class<? extends T> clazz, World world, BlockPos pos)
+	{
+		TileEntity te = world.getTileEntity(pos);
+		return LazyOptional.of(te != null && te.getClass().isAssignableFrom(clazz) ? () -> (T)te : null);
+	}
+	
 	public static LazyOptional<IItemHandler> getTEItemHandlerAt(World world, BlockPos pos, Direction faceOfBlockPos)
 	{
 		TileEntity te = world.getTileEntity(pos);

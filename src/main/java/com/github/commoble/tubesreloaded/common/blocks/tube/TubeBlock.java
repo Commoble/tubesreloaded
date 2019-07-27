@@ -5,6 +5,7 @@ import java.util.HashMap;
 import javax.annotation.Nullable;
 
 import com.github.commoble.tubesreloaded.common.blocks.extractor.ExtractorBlock;
+import com.github.commoble.tubesreloaded.common.blocks.filter.FilterBlock;
 import com.github.commoble.tubesreloaded.common.blocks.loader.LoaderBlock;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 
@@ -183,13 +184,16 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		
 		if (block instanceof ExtractorBlock && state.get(ExtractorBlock.FACING).equals(face.getOpposite()))
 			return true;
+		
+		if (block instanceof FilterBlock && state.get(FilterBlock.FACING).equals(face.getOpposite()))
+			return true;
 
 		TileEntity te = world.getTileEntity(newPos);
 
 		if (te == null)
 			return false;
 
-		if (te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face).isPresent())
+		if (te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite()).isPresent())
 		{
 			return true;
 		}
