@@ -3,8 +3,12 @@ package com.github.commoble.tubesreloaded.common.blocks.shunt;
 import com.github.commoble.tubesreloaded.common.routing.Endpoint;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
+import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.Tag;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.items.IItemHandler;
 
@@ -47,7 +51,8 @@ public class ShuntItemHandler implements IItemHandler
 			BlockPos shunt_pos = this.shunt.getPos();
 			Direction output_dir = this.shunt.getBlockState().get(ShuntBlock.FACING);
 			BlockPos output_pos = shunt_pos.offset(output_dir);
-			ItemStack remaining = WorldHelper.getTEItemHandlerAtIf(shunt.getWorld(), output_pos, output_dir.getOpposite(), te -> !(te instanceof ShuntTileEntity))
+			Tag<Block> shuntTag = BlockTags.getCollection().get(new ResourceLocation("tubesreloaded", "shunts"));
+			ItemStack remaining = WorldHelper.getTEItemHandlerAtIf(shunt.getWorld(), output_pos, output_dir.getOpposite(), te -> !shuntTag.contains(te.getBlockState().getBlock()))
 			.map(handler -> Endpoint.disperseItemToHandler(stack, handler))
 			.orElse(stack.copy());
 			
