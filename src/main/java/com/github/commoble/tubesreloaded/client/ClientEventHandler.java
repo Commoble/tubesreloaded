@@ -1,6 +1,7 @@
 package com.github.commoble.tubesreloaded.client;
 
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.common.blocks.filter.FilterTileEntity;
 import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
 
 import net.minecraftforge.api.distmarker.Dist;
@@ -16,6 +17,8 @@ public class ClientEventHandler
 	@SubscribeEvent
 	public static void onClientSetup(FMLClientSetupEvent event)
 	{
+		// register TE renderers
 		ClientRegistry.bindTileEntitySpecialRenderer(TubeTileEntity.class, new TubeTileEntityRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(FilterTileEntity.class, new FilterTileEntityRenderer());
 	}
 }

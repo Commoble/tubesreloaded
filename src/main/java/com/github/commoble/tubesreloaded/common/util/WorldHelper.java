@@ -3,6 +3,7 @@ package com.github.commoble.tubesreloaded.common.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -52,10 +53,10 @@ public class WorldHelper
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T extends TileEntity> LazyOptional<T> getTileEntityAt(Class<? extends T> clazz, World world, BlockPos pos)
+	public static <T extends TileEntity> Optional<T> getTileEntityAt(Class<? extends T> clazz, World world, BlockPos pos)
 	{
 		TileEntity te = world.getTileEntity(pos);
-		return LazyOptional.of(te != null && te.getClass().isAssignableFrom(clazz) ? () -> (T)te : null);
+		return Optional.ofNullable(te != null && te.getClass().isAssignableFrom(clazz) ? (T)te : null);
 	}
 	
 	public static LazyOptional<IItemHandler> getTEItemHandlerAt(World world, BlockPos pos, Direction faceOfBlockPos)

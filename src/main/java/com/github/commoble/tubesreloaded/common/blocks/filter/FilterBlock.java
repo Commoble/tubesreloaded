@@ -1,5 +1,7 @@
 package com.github.commoble.tubesreloaded.common.blocks.filter;
 
+import java.util.Optional;
+
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.common.util.DirectionHelper;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
@@ -24,7 +26,6 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.LazyOptional;
 
 public class FilterBlock extends Block
 {
@@ -57,7 +58,7 @@ public class FilterBlock extends Block
 		ItemStack heldStack = player.getHeldItem(handIn);
 		ItemStack filterStack = heldStack.copy();
 		filterStack.setCount(1);
-		LazyOptional<FilterTileEntity> te = WorldHelper.getTileEntityAt(FilterTileEntity.class, worldIn, pos);
+		Optional<FilterTileEntity> te = WorldHelper.getTileEntityAt(FilterTileEntity.class, worldIn, pos);
 		te.ifPresent(filter -> filter.filterStack = filterStack);
 
 		return true;
