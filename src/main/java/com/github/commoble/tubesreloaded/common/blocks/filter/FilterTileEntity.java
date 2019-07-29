@@ -61,28 +61,45 @@ public class FilterTileEntity extends TileEntity
 		return super.getCapability(cap, side);
 	}
 	
-	public void onActivated(PlayerEntity player, Direction sideOfBlock, ItemStack stackInHand)
+	// returns true if the filter's storage was manipulated, false otherwise (allowing other things to happen like block placement)
+	public boolean onActivated(PlayerEntity player, Direction sideOfBlock, ItemStack stackInHand)
 	{
 		if (stackInHand.getCount() <= 0)
 		// empty hand
 		{
-			ItemStack filtered = this.filterStack.copy();
-			this.setFilterStackAndSaveAndSync(stackInHand.split(1));
-			player.addItemStackToInventory(filtered);
+			if (!this.world.isRemote)
+			{
+				ItemStack filtered = this.filterStack.copy();
+				this.setFilterStackAndSaveAndSync(stackInHand.split(1));
+				player.addItemStackToInventory(filtered);
+			}
+			return true; // because hand is empty so nothing else would happen anyway
 			
 		}
 		else if (stackInHand.getItem().equals(this.filterStack.getItem()))
 		{	// item in hand matches filter item, retrieve item from filter
-			ItemStack filtered = this.filterStack.copy();
-			this.setFilterStackAndSaveAndSync(ItemStack.EMPTY);
-			if (!player.addItemStackToInventory(filtered))	// attempt to put item in inventory
-			{	// if we failed to do that
-				WorldHelper.ejectItemstack(world, this.pos, sideOfBlock, filtered);
+			if (!this.world.isRemote)
+			{
+				ItemStack filtered = this.filterStack.copy();
+				this.setFilterStackAndSaveAndSync(ItemStack.EMPTY);
+				if (!player.addItemStackToInventory(filtered))	// attempt to put item in inventory
+				{	// if we failed to do that
+					WorldHelper.ejectItemstack(world, this.pos, sideOfBlock, filtered);
+				}
 			}
+			return true;
 		}
 		else if (this.filterStack.getCount() <= 0)
 		{
-			this.setFilterStackAndSaveAndSync(stackInHand.split(1));
+			if (!this.world.isRemote)
+			{
+				this.setFilterStackAndSaveAndSync(stackInHand.split(1));
+			}
+			return true;
+		}
+		else
+		{
+			return false;
 		}
 	}
 	

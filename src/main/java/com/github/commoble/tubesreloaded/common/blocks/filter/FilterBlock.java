@@ -2,7 +2,6 @@ package com.github.commoble.tubesreloaded.common.blocks.filter;
 
 import java.util.Optional;
 
-import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.common.util.DirectionHelper;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
@@ -12,7 +11,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.DirectionalBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
@@ -56,13 +54,8 @@ public class FilterBlock extends Block
 	@Override
 	public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
 	{
-		if (!worldIn.isRemote)
-		{
-			Optional<FilterTileEntity> te = WorldHelper.getTileEntityAt(FilterTileEntity.class, worldIn, pos);
-			te.ifPresent(filter -> filter.onActivated(player, hit.getFace(), player.getHeldItem(handIn)));
-		}
-
-		return true;
+		Optional<FilterTileEntity> te = WorldHelper.getTileEntityAt(FilterTileEntity.class, worldIn, pos);
+		return te.map(filter -> filter.onActivated(player, hit.getFace(), player.getHeldItem(handIn))).orElse(false);
 	}
 	
 	@Override
