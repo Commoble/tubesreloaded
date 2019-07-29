@@ -2,6 +2,7 @@ package com.github.commoble.tubesreloaded.common.blocks.filter;
 
 import java.util.Optional;
 
+import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.common.util.DirectionHelper;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
@@ -55,13 +56,33 @@ public class FilterBlock extends Block
 	@Override
 	public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
 	{
-		ItemStack heldStack = player.getHeldItem(handIn);
-		ItemStack filterStack = heldStack.copy();
-		filterStack.setCount(1);
-		Optional<FilterTileEntity> te = WorldHelper.getTileEntityAt(FilterTileEntity.class, worldIn, pos);
-		te.ifPresent(filter -> filter.filterStack = filterStack);
+		if (!worldIn.isRemote)
+		{
+			Optional<FilterTileEntity> te = WorldHelper.getTileEntityAt(FilterTileEntity.class, worldIn, pos);
+			te.ifPresent(filter -> filter.onActivated(player, hit.getFace(), player.getHeldItem(handIn)));
+		}
 
 		return true;
+	}
+	
+	@Override
+	@Deprecated
+	public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
+	{
+		if (state.getBlock() == newState.getBlock())
+		{
+			// only thing super.onReplaced does is remove the tile entity
+			// if the block stays the same, we specifically do NOT remove the tile entity
+			// so don't do anything here
+		}
+		else
+		{
+			if (!world.isRemote)
+			{
+				WorldHelper.getTileEntityAt(FilterTileEntity.class, world, pos).ifPresent(te -> te.dropItems());
+			}
+			super.onReplaced(state, world, pos, newState, isMoving);
+		}
 	}
 	
 	//// facing and blockstate boilerplate

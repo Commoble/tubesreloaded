@@ -12,11 +12,11 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.items.IItemHandler;
 
-public class FilterItemHandler implements IItemHandler
+public class FilterShuntingItemHandler implements IItemHandler
 {
 	public FilterTileEntity filter;
 	
-	public FilterItemHandler (FilterTileEntity filter)
+	public FilterShuntingItemHandler (FilterTileEntity filter)
 	{
 		this.filter = filter;
 	}

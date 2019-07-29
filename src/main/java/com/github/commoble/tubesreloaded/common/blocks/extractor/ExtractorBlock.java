@@ -123,7 +123,7 @@ public class ExtractorBlock extends Block
 
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
-		return this.getDefaultState().with(FACING, DirectionHelper.getBlockFacingForPlacement(context));
+		return this.getDefaultState().with(FACING, DirectionHelper.getBlockFacingForPlacement(context).getOpposite());
 	}
 
 	public BlockState rotate(BlockState state, Rotation rot)

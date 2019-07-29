@@ -165,7 +165,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	
 					if (!remaining.isEmpty())	// target inventory filled up unexpectedly
 					{
-						this.enqueueItemStack(remaining, dir.getOpposite(), false);
+						this.enqueueItemStack(remaining, dir, false); // re-enqueue the item on that side
 					}
 				}
 				else	// no TE -- eject stack
