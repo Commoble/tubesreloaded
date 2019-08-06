@@ -2,13 +2,9 @@ package com.github.commoble.tubesreloaded.common.event;
 
 import com.github.commoble.tubesreloaded.common.ConfigValues;
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
-import com.github.commoble.tubesreloaded.common.capability.issprintkeyheld.IIsSprintKeyHeldCapability;
-import com.github.commoble.tubesreloaded.common.capability.issprintkeyheld.IsSprintKeyHeldCapability;
-import com.github.commoble.tubesreloaded.common.capability.issprintkeyheld.IsSprintKeyHeldStorage;
 import com.github.commoble.tubesreloaded.network.IsWasSprintPacket;
 import com.github.commoble.tubesreloaded.network.PacketHandler;
 
-import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -24,9 +20,6 @@ public class InitEventHandler
 	{
 		// register configs
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ConfigValues.SERVER_SPEC);
-		
-		// register capabilities
-		CapabilityManager.INSTANCE.register(IIsSprintKeyHeldCapability.class, new IsSprintKeyHeldStorage(), IsSprintKeyHeldCapability::new);
 		
 		// register packets
 		int packetID=0;

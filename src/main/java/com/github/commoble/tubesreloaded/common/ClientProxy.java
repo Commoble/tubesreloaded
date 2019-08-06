@@ -1,16 +1,17 @@
-package com.github.commoble.tubesreloaded.client;
+package com.github.commoble.tubesreloaded.common;
+
+import java.util.Optional;
 
 import com.github.commoble.tubesreloaded.network.IsWasSprintPacket;
 import com.github.commoble.tubesreloaded.network.PacketHandler;
 
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.DistExecutor;
 
-public class ClientData
+public class ClientProxy
 {
-	public static final LazyOptional<ClientData> INSTANCE = DistExecutor.runForDist(
-			() -> () -> LazyOptional.of(() -> new ClientData()), 
-			() -> () -> LazyOptional.empty());
+	public static final Optional<ClientProxy> INSTANCE = DistExecutor.runForDist(
+			() -> () -> Optional.of(new ClientProxy()), 
+			() -> () -> Optional.empty());
 	
 	public boolean isHoldingSprint = false;
 	

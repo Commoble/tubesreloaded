@@ -2,7 +2,7 @@ package com.github.commoble.tubesreloaded.network;
 
 import java.util.function.Supplier;
 
-import com.github.commoble.tubesreloaded.common.capability.issprintkeyheld.IsSprintKeyHeldProvider;
+import com.github.commoble.tubesreloaded.common.PlayerData;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
@@ -32,7 +32,7 @@ public class IsWasSprintPacket
 		ServerPlayerEntity player = context.get().getSender();
 		if (player != null)
 		{
-			player.getCapability(IsSprintKeyHeldProvider.IS_SPRINT_KEY_HELD_CAP).ifPresent(cap -> cap.setIsSprintHeld(this.isSprintHeld));
+			PlayerData.setSprinting(player.getUniqueID(), this.isSprintHeld);
 		}
 	}
 }

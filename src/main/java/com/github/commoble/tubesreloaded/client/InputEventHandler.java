@@ -1,5 +1,6 @@
 package com.github.commoble.tubesreloaded.client;
 
+import com.github.commoble.tubesreloaded.common.ClientProxy;
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
 
 import net.minecraft.client.Minecraft;
@@ -20,10 +21,10 @@ public class InputEventHandler
 		if (mc.player != null)
 		{
 			boolean sprintIsDown = mc.gameSettings.keyBindSprint.isKeyDown();
-			boolean sprintWasDown = ClientData.INSTANCE.map(client -> client.isHoldingSprint).orElse(false);
+			boolean sprintWasDown = ClientProxy.INSTANCE.map(client -> client.isHoldingSprint).orElse(false);
 			if (sprintWasDown != sprintIsDown)	// change in sprint key detected
 			{
-				ClientData.INSTANCE.ifPresent(instance -> instance.setIsSprintingAndNotifyServer(sprintIsDown));
+				ClientProxy.INSTANCE.ifPresent(instance -> instance.setIsSprintingAndNotifyServer(sprintIsDown));
 			}
 		}
 	}

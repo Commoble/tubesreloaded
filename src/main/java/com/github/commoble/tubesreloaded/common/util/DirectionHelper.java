@@ -1,7 +1,7 @@
 package com.github.commoble.tubesreloaded.common.util;
 
-import com.github.commoble.tubesreloaded.client.ClientData;
-import com.github.commoble.tubesreloaded.common.capability.issprintkeyheld.IsSprintKeyHeldProvider;
+import com.github.commoble.tubesreloaded.common.ClientProxy;
+import com.github.commoble.tubesreloaded.common.PlayerData;
 
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.util.Direction;
@@ -16,13 +16,11 @@ public class DirectionHelper
 		boolean isSprintKeyHeld;
 		if (context.getWorld().isRemote)	// client thread
 		{
-			isSprintKeyHeld = ClientData.INSTANCE.map(client -> client.isHoldingSprint).orElse(false);
+			isSprintKeyHeld = ClientProxy.INSTANCE.map(client -> client.isHoldingSprint).orElse(false);
 		}
 		else	// server thread
 		{
-			isSprintKeyHeld = context.getPlayer().getCapability(IsSprintKeyHeldProvider.IS_SPRINT_KEY_HELD_CAP)
-					.map(cap -> cap.getIsSprintHeld())
-					.orElse(false);
+			isSprintKeyHeld = PlayerData.getSprinting(context.getPlayer().getUniqueID());
 		}
 				
 		Direction placeDir = isSprintKeyHeld ? context.getFace().getOpposite() : context.getNearestLookingDirection();
