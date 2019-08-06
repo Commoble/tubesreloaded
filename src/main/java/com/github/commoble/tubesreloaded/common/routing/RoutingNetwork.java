@@ -149,7 +149,7 @@ public class RoutingNetwork
 		}
 		else
 		{
-			routes = this.generateRoutes(startPos);
+			routes = this.generateRoutes(world, startPos);
 			this.bestRoutes.put(startPos, routes);
 		}
 		
@@ -166,9 +166,9 @@ public class RoutingNetwork
 		return null;	// no valid routes
 	}
 	
-	private List<Route> generateRoutes(BlockPos startPos)
+	private List<Route> generateRoutes(World world, BlockPos startPos)
 	{
-		return FastestRoutesSolver.generateRoutes(this, startPos);
+		return FastestRoutesSolver.generateRoutes(this, world, startPos);
 	}
 	
 	public static RoutingNetwork buildNetworkFrom(BlockPos pos, World world)
@@ -221,7 +221,8 @@ public class RoutingNetwork
 			if (te instanceof TubeTileEntity)
 			{
 				network.tubes.add(visitedPos);
-				for (Direction face : Direction.values())
+				List<Direction> dirs = ((TubeTileEntity)te).getConnectedDirections();
+				for (Direction face : dirs)
 				{
 					BlockPos checkPos = visitedPos.offset(face);
 					if (!visited.contains(checkPos))

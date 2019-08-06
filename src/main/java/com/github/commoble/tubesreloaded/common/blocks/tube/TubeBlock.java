@@ -1,6 +1,8 @@
 package com.github.commoble.tubesreloaded.common.blocks.tube;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -177,7 +179,7 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		BlockState state = world.getBlockState(newPos);
 		Block block = state.getBlock();
 		if (block instanceof TubeBlock)
-			return true;
+			return this.isTubeCompatible((TubeBlock) block);
 		
 		if (block instanceof LoaderBlock && state.get(LoaderBlock.FACING).equals(face.getOpposite()))
 			return true;	// todo make this configurable for arbitrary blocks instead of hardcoded
@@ -198,6 +200,28 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 			return true;
 		}
 		return false;
+	}
+	
+	public boolean isTubeCompatible(TubeBlock tube)
+	{
+		return true;
+	}
+	
+	public static List<Direction> getConnectedDirections(BlockState state)
+	{
+		Block block = state.getBlock();
+		ArrayList<Direction> dirs = new ArrayList<Direction>();
+		if (block instanceof TubeBlock)
+		{
+			for (Direction dir : Direction.values())
+			{
+				if (state.get(SixWayBlock.FACING_TO_PROPERTY_MAP.get(dir)))
+				{
+					dirs.add(dir);
+				}
+			}
+		}
+		return dirs;
 	}
 
 	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)

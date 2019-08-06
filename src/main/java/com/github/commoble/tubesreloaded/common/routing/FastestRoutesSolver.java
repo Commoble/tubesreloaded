@@ -7,11 +7,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import com.github.commoble.tubesreloaded.common.blocks.tube.TubeBlock;
+import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
 import com.github.commoble.tubesreloaded.common.util.PosHelper;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 /**
  * Used by the routing network to determine the routes to all endpoints from a given tube in the network
@@ -25,7 +29,7 @@ public class FastestRoutesSolver
 	 * @param startPos
 	 * @return
 	 */
-	public static List<Route> generateRoutes(RoutingNetwork network, BlockPos startPos)
+	public static List<Route> generateRoutes(RoutingNetwork network, World world, BlockPos startPos)
 	{
 		// currently uses Djikstra's algorithm
 		// this necessitates that all positions are looked at to guarantee the shortest paths are found
@@ -64,7 +68,10 @@ public class FastestRoutesSolver
 			// for each position nextPos adjacent to pos, if that position is a tube or endpoint in the network
 			// remove it from the queue
 			// TODO handle support for noneuclidean tubes
-			for (Direction face : Direction.values())
+			BlockState state = world.getBlockState(node.pos);
+
+			List<Direction> dirs = TubeBlock.getConnectedDirections(state);
+			for (Direction face : dirs)
 			{
 				BlockPos checkPos = node.pos.offset(face);
 				Endpoint maybeEndpoint = new Endpoint(checkPos, face.getOpposite());

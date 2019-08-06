@@ -2,6 +2,7 @@ package com.github.commoble.tubesreloaded.common.blocks.tube;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 import javax.annotation.Nonnull;
@@ -13,6 +14,8 @@ import com.github.commoble.tubesreloaded.common.routing.Route;
 import com.github.commoble.tubesreloaded.common.routing.RoutingNetwork;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -73,6 +76,23 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	public void setNetwork(RoutingNetwork network)
 	{
 		this.network = network;
+	}
+	
+	public boolean isTubeCompatible (TubeTileEntity tube)
+	{
+		Block thisBlock = this.getBlockState().getBlock();
+		Block otherBlock = tube.getBlockState().getBlock();
+		if (thisBlock instanceof TubeBlock && otherBlock instanceof TubeBlock)
+		{
+			return ((TubeBlock)thisBlock).isTubeCompatible((TubeBlock)otherBlock);
+		}
+		return false;
+	}
+	
+	public List<Direction> getConnectedDirections()
+	{
+		BlockState state = this.getBlockState();
+		return TubeBlock.getConnectedDirections(state);
 	}
 	
 	public static LazyOptional<TubeTileEntity> getTubeTEAt(World world, BlockPos pos)
@@ -153,9 +173,9 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		{
 			Direction dir = wrapper.remainingMoves.poll();
 			TileEntity te = this.world.getTileEntity(this.pos.offset(dir));
-			if (te instanceof TubeTileEntity) // te exists and is a tube
+			if (te instanceof TubeTileEntity && this.isTubeCompatible((TubeTileEntity)te)) // te exists and is a valid tube
 			{
-				((TubeTileEntity) te).enqueueItemStack(wrapper.stack, wrapper.remainingMoves, wrapper.maximumDurationInTube);
+				((TubeTileEntity)te).enqueueItemStack(wrapper.stack, wrapper.remainingMoves, wrapper.maximumDurationInTube);
 			}
 			else if (!world.isRemote)
 			{

@@ -46,10 +46,10 @@ public class WorldHelper
 		return filteredStream.map(te -> (TubeTileEntity) te);
 	}
 	
-	public static LazyOptional<TileEntity> getTileEntityAt(World world, BlockPos pos)
+	public static Optional<TileEntity> getTileEntityAt(World world, BlockPos pos)
 	{
 		TileEntity te = world.getTileEntity(pos);
-		return LazyOptional.of(te != null ? () -> te : null);
+		return Optional.ofNullable(te);
 	}
 	
 	@SuppressWarnings("unchecked")
