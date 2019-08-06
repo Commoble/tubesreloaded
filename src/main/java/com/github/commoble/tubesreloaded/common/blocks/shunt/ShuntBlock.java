@@ -25,13 +25,6 @@ public class ShuntBlock extends Block
 	
 	protected final VoxelShape[] shapes;
 
-	public static final double MIN_VOXEL = 0D;
-	public static final double ONE_QUARTER = 4D;
-	public static final double THREE_QUARTERS = 12D;
-	public static final double SIX_SIXTEENTHS = 6D;
-	public static final double TEN_SIXTEENTHS = 10D;
-	public static final double MAX_VOXEL = 16D;
-
 	public ShuntBlock(Properties properties)
 	{
 		super(properties);
@@ -77,6 +70,13 @@ public class ShuntBlock extends Block
 
 	protected VoxelShape[] makeShapes()
 	{
+		final double MIN_VOXEL = 0D;
+		final double ONE_QUARTER = 4D;
+		final double THREE_QUARTERS = 12D;
+		final double SIX_SIXTEENTHS = 6D;
+		final double TEN_SIXTEENTHS = 10D;
+		final double MAX_VOXEL = 16D;
+		
 		// one set of shapes for each state * six directional states = 6 sets of shapes
 		VoxelShape[] shapes = new VoxelShape[6];
 

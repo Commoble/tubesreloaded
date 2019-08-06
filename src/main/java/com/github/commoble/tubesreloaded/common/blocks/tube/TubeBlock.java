@@ -50,13 +50,6 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	public static final BooleanProperty EAST = SixWayBlock.EAST;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
-	public static final double MIN_VOXEL = 0D;
-	public static final double ONE_QUARTER = 4D;
-	public static final double THREE_QUARTERS = 12D;
-	public static final double SIX_SIXTEENTHS = 6D;
-	public static final double TEN_SIXTEENTHS = 10D;
-	public static final double MAX_VOXEL = 16D;
-
 	protected final VoxelShape[] shapes;
 
 	public TubeBlock(Properties properties)
@@ -257,6 +250,13 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 
 	protected VoxelShape[] makeShapes()
 	{
+		final double MIN_VOXEL = 0D;
+		final double ONE_QUARTER = 4D;
+		final double THREE_QUARTERS = 12D;
+		final double SIX_SIXTEENTHS = 6D;
+		final double TEN_SIXTEENTHS = 10D;
+		final double MAX_VOXEL = 16D;
+		
 		// 6 different state flags = 2^6 = 64 different state models (waterlogging
 		// doesn't affect model)
 		VoxelShape[] shapes = new VoxelShape[64];
