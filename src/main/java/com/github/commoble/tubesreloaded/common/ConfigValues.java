@@ -22,7 +22,8 @@ public class ConfigValues
 	// the actual values our java will reference
 	public static int soft_tube_cap = 100;
 	public static int hard_tube_cap = 200;
-	public static int ticks_in_tube = 10; 
+	public static int ticks_in_tube = 10;
+	public static int max_items_in_tube = Integer.MAX_VALUE;
 	
 	// config the configs
 	static
@@ -48,6 +49,7 @@ public class ConfigValues
 		public final ForgeConfigSpec.IntValue soft_tube_cap;
 		public final ForgeConfigSpec.IntValue hard_tube_cap;
 		public final ForgeConfigSpec.IntValue ticks_in_tube;
+		public final ForgeConfigSpec.IntValue max_items_in_tube;
 		
 		ServerConfig(ForgeConfigSpec.Builder builder)
 		{
@@ -64,6 +66,10 @@ public class ConfigValues
 					.comment("Base time in ticks that a moving itemstack spends in each individual tube block. Adjusted by other factors.")
 					.translation("tubesreloaded.config.ticks_in_tube")
 					.defineInRange("ticks_in_tube", 10, 1, 72000);
+			max_items_in_tube = builder
+					.comment("Max items that can fit in a single tube. A tube block will break of the number of itemstacks contained with them is greater than this value, dropping their items on the ground")
+					.translation("tubesreloaded.config.max_items_in_tube")
+					.defineInRange("max_items_in_tube", Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
 			builder.pop();
 		}
 	}
@@ -72,5 +78,7 @@ public class ConfigValues
 	{
 		soft_tube_cap = SERVER.soft_tube_cap.get();
 		hard_tube_cap = SERVER.hard_tube_cap.get();
+		ticks_in_tube = SERVER.ticks_in_tube.get();
+		max_items_in_tube = SERVER.max_items_in_tube.get();
 	}
 }

@@ -118,7 +118,7 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		{
 			if (!world.isRemote)
 			{
-				TubeTileEntity.getTubeTEAt(world, pos).ifPresent(te -> te.dropItems());
+				TubeTileEntity.getTubeTEAt(world, pos).ifPresent(te -> te.onBlockRemoved());
 			}
 			super.onReplaced(state, world, pos, newState, isMoving);
 		}

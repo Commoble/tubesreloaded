@@ -3,11 +3,13 @@ package com.github.commoble.tubesreloaded.common.blocks.tube;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.commoble.tubesreloaded.common.ConfigValues;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.common.routing.Route;
 import com.github.commoble.tubesreloaded.common.routing.RoutingNetwork;
@@ -45,6 +47,11 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	protected final TubeInventoryHandler[] inventoryHandlers = Arrays.stream(Direction.values())
 			.map(dir -> new TubeInventoryHandler(this, dir))
 			.toArray(TubeInventoryHandler[]::new);	// one handler for each direction
+	
+	@SuppressWarnings("unchecked")
+	protected final LazyOptional<IItemHandler>[] handlerOptionals = Arrays.stream(inventoryHandlers)
+		.map(handler -> LazyOptional.of(() -> handler))
+		.toArray(size -> (LazyOptional<IItemHandler>[])new LazyOptional[size]);
 	
 	private Queue<ItemInTubeWrapper> wrappers_to_send_to_client = new LinkedList<ItemInTubeWrapper>();
 	public Queue<ItemInTubeWrapper> incoming_wrapper_buffer = new LinkedList<ItemInTubeWrapper>();
@@ -94,10 +101,10 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		return TubeBlock.getConnectedDirections(state);
 	}
 	
-	public static LazyOptional<TubeTileEntity> getTubeTEAt(World world, BlockPos pos)
+	public static Optional<TubeTileEntity> getTubeTEAt(World world, BlockPos pos)
 	{
 		TileEntity te = world.getTileEntity(pos);
-		return LazyOptional.of(te instanceof TubeTileEntity ? () -> (TubeTileEntity)te : null);
+		return Optional.ofNullable(te instanceof TubeTileEntity ? (TubeTileEntity)te : null);
 	}
 	
 	// insertionSide is the side of this block the item was inserted from
@@ -107,6 +114,13 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	}
 
 	/**** Event Handling ****/
+	
+	public void onBlockRemoved()
+	{
+		this.dropItems();
+		this.network.invalid = true;
+		Arrays.stream(this.handlerOptionals).forEach(optional -> optional.invalidate());
+	}
 	
 	public void onPossibleNetworkUpdateRequired()
 	{
@@ -164,6 +178,10 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			}
 			this.inventory = remainingWrappers;
 		}
+		if (!this.world.isRemote && this.inventory.size() > ConfigValues.max_items_in_tube)
+		{
+			this.world.removeBlock(this.pos, false);
+		}
 	}
 	
 	public void sendWrapperOnward(ItemInTubeWrapper wrapper)
@@ -200,14 +218,13 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	}
 	/**** Inventory handling ****/
 
-	@SuppressWarnings("unchecked")
 	@Override
 	@Nonnull
 	public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side)
 	{
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 		{
-			return LazyOptional.of(() -> (T)inventoryHandlers[side.getIndex()]);	// T is <IItemHandler> here, which our handler implements
+			return this.handlerOptionals[side.getIndex()].cast();	// T is <IItemHandler> here, which our handler implements
 		}
 		return super.getCapability(cap, side);
 	}
