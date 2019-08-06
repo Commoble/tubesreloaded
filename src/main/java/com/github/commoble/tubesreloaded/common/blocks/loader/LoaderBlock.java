@@ -1,6 +1,5 @@
 package com.github.commoble.tubesreloaded.common.blocks.loader;
 
-import com.github.commoble.tubesreloaded.common.routing.Endpoint;
 import com.github.commoble.tubesreloaded.common.util.DirectionHelper;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
@@ -65,7 +64,7 @@ public class LoaderBlock extends Block
 		Direction output_dir = state.get(FACING);
 		BlockPos output_pos = pos.offset(output_dir);
 		ItemStack remaining = WorldHelper.getTEItemHandlerAt(world, output_pos, output_dir.getOpposite())
-				.map(handler -> Endpoint.disperseItemToHandler(stack, handler)).orElse(stack.copy());
+				.map(handler -> WorldHelper.disperseItemToHandler(stack, handler)).orElse(stack.copy());
 
 		if (remaining.getCount() > 0) // we have remaining items
 		{

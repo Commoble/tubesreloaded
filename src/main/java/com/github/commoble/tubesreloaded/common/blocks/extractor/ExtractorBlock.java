@@ -81,7 +81,7 @@ public class ExtractorBlock extends Block
 			if (outputCap.isPresent() || !world.getBlockState(output_pos).isOpaqueCube(world, output_pos))
 			{
 				ItemStack stack = inputCap.map(inputHandler -> this.extractNextStack(inputHandler)).orElse(ItemStack.EMPTY);
-				if (!stack.isEmpty())
+				if (stack.getCount() > 0)
 				{
 					ItemStack remaining = outputCap.map(outputHandler -> this.putStackInHandler(stack, outputHandler)).orElse(stack.copy());
 					WorldHelper.ejectItemstack(world, pos, output_dir, remaining);
@@ -96,7 +96,7 @@ public class ExtractorBlock extends Block
 		for (int i=0; i<slots; i++)
 		{
 			ItemStack stack = handler.extractItem(i, 64, false);
-			if (!stack.isEmpty())
+			if (stack.getCount() > 0)
 			{
 				return stack.copy();
 			}
@@ -111,7 +111,7 @@ public class ExtractorBlock extends Block
 		for (int i=0; i<slots; i++)
 		{
 			remaining = handler.insertItem(i, remaining, false);
-			if (remaining.isEmpty())
+			if (remaining.getCount() <= 0)
 			{
 				return ItemStack.EMPTY;
 			}

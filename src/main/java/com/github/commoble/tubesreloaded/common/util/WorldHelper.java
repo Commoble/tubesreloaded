@@ -121,4 +121,24 @@ public class WorldHelper
         itementity.setMotion(xVel,yVel,zVel);
         world.addEntity(itementity);
 	}
+
+	// inserts as much of the item as we can into a given handler
+	// we don't copy the itemstack because we assume we are already given a copy of the original stack
+	// return the portion that was not inserted
+	public static ItemStack disperseItemToHandler(ItemStack stack, IItemHandler handler)
+	{
+		int slotCount = handler.getSlots();
+		for (int i=0; i<slotCount; i++)
+		{
+			if (handler.isItemValid(i, stack))
+			{
+				stack = handler.insertItem(i, stack, false);
+			}
+			if (stack.getCount() == 0)
+			{
+				return stack.copy();
+			}
+		}
+		return stack.copy();
+	}
 }

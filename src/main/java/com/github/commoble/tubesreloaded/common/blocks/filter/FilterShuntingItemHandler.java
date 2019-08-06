@@ -1,6 +1,5 @@
 package com.github.commoble.tubesreloaded.common.blocks.filter;
 
-import com.github.commoble.tubesreloaded.common.routing.Endpoint;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
 import net.minecraft.block.Block;
@@ -51,7 +50,7 @@ public class FilterShuntingItemHandler implements IItemHandler
 			// if the block we are attempting to insert the item into is a shuntlike block, do not insert
 			Tag<Block> shuntTag = BlockTags.getCollection().get(new ResourceLocation("tubesreloaded", "shunts"));
 			ItemStack remaining = WorldHelper.getTEItemHandlerAtIf(filter.getWorld(), output_pos, output_dir.getOpposite(), te -> !shuntTag.contains(te.getBlockState().getBlock()))
-			.map(handler -> Endpoint.disperseItemToHandler(stack, handler))
+			.map(handler -> WorldHelper.disperseItemToHandler(stack, handler))
 			.orElse(stack.copy());
 			
 			if (remaining.getCount() > 0) // we have remaining items

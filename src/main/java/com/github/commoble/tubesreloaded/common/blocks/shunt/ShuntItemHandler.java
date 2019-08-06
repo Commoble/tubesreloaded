@@ -1,6 +1,5 @@
 package com.github.commoble.tubesreloaded.common.blocks.shunt;
 
-import com.github.commoble.tubesreloaded.common.routing.Endpoint;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
 import net.minecraft.block.Block;
@@ -53,7 +52,7 @@ public class ShuntItemHandler implements IItemHandler
 			BlockPos output_pos = shunt_pos.offset(output_dir);
 			Tag<Block> shuntTag = BlockTags.getCollection().get(new ResourceLocation("tubesreloaded", "shunts"));
 			ItemStack remaining = WorldHelper.getTEItemHandlerAtIf(shunt.getWorld(), output_pos, output_dir.getOpposite(), te -> !shuntTag.contains(te.getBlockState().getBlock()))
-			.map(handler -> Endpoint.disperseItemToHandler(stack, handler))
+			.map(handler -> WorldHelper.disperseItemToHandler(stack, handler))
 			.orElse(stack.copy());
 			
 			if (remaining.getCount() > 0) // we have remaining items

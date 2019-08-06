@@ -9,7 +9,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
-import com.github.commoble.tubesreloaded.common.routing.Endpoint;
 import com.github.commoble.tubesreloaded.common.routing.Route;
 import com.github.commoble.tubesreloaded.common.routing.RoutingNetwork;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
@@ -181,7 +180,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			{
 				if (te != null)	// te exists but is not a tube
 				{
-					ItemStack remaining = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite()).map(handler -> Endpoint.disperseItemToHandler(wrapper.stack, handler)).orElse(wrapper.stack.copy());
+					ItemStack remaining = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite()).map(handler -> WorldHelper.disperseItemToHandler(wrapper.stack, handler)).orElse(wrapper.stack.copy());
 	
 					if (!remaining.isEmpty())	// target inventory filled up unexpectedly
 					{
