@@ -6,7 +6,9 @@ import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
 
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.ObjectHolder;
 
@@ -28,7 +30,14 @@ public class ItemRegistrar
 		registerItem(registry, new BlockItem(BlockRegistrar.EXTRACTOR, new Item.Properties().group(CreativeTabs.tab)), BlockNames.EXTRACTOR_NAME);
 		registerItem(registry, new BlockItem(BlockRegistrar.FILTER, new Item.Properties().group(CreativeTabs.tab)), BlockNames.FILTER_NAME);
 		
-		IntStream.range(0, 16).forEach(i -> registerItem(registry, new BlockItem(BlockRegistrar.COLORED_TUBE_BLOCKS[i], new Item.Properties().group(CreativeTabs.tab)), BlockNames.COLORED_TUBE_NAMES[i]));
+		IntStream.range(0, 16).forEach(
+				i -> registerItem(
+						registry,
+						new BlockItem(
+								ForgeRegistries.BLOCKS.getValue(new ResourceLocation(TubesReloadedMod.MODID, BlockNames.COLORED_TUBE_NAMES[i])),
+								new Item.Properties().group(CreativeTabs.tab)),
+						BlockNames.COLORED_TUBE_NAMES[i])
+				);
 		// real items
 		
 	}

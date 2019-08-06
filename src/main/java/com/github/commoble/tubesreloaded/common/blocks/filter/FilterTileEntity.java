@@ -18,6 +18,7 @@ import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 public class FilterTileEntity extends TileEntity
 {
@@ -26,6 +27,8 @@ public class FilterTileEntity extends TileEntity
 	public ItemStack filterStack = ItemStack.EMPTY;
 	public FilterShuntingItemHandler shuntingHandler = new FilterShuntingItemHandler(this);
 	public FilterStorageItemHandler storageHandler = new FilterStorageItemHandler(this);
+	private LazyOptional<IItemHandler> shuntingOptional = LazyOptional.of(() -> this.shuntingHandler);
+	private LazyOptional<IItemHandler> storageOptional = LazyOptional.of(() -> this.storageHandler);
 	
 	public FilterTileEntity()
 	{
@@ -51,11 +54,11 @@ public class FilterTileEntity extends TileEntity
 			Direction output_dir = this.getBlockState().get(ShuntBlock.FACING);
 			if (side == output_dir.getOpposite())
 			{
-				return LazyOptional.of(() -> this.shuntingHandler).cast();
+				return shuntingOptional.cast();
 			}
 			else if (side != output_dir)
 			{
-				return LazyOptional.of(() -> this.storageHandler).cast();
+				return storageOptional.cast();
 			}
 		}
 		return super.getCapability(cap, side);

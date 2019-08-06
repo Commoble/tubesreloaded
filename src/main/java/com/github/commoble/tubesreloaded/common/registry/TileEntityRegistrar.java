@@ -10,7 +10,9 @@ import com.github.commoble.tubesreloaded.common.blocks.tube.redstone_tube.Redsto
 
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ObjectHolder;
 
 @ObjectHolder(TubesReloadedMod.MODID)
@@ -30,8 +32,8 @@ public class TileEntityRegistrar
 	{
 		// register standard tube and colored tubes with the same TE
 		Block[] tubes = new Block[17];
-		IntStream.range(0, 16).forEach(i -> tubes[i] = BlockRegistrar.COLORED_TUBE_BLOCKS[i]);
-		tubes[16] = BlockRegistrar.TUBE;
+		IntStream.range(0, 16).forEach(i -> tubes[i] = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(TubesReloadedMod.MODID, BlockNames.COLORED_TUBE_NAMES[i])));
+		tubes[16] = BlockRegistrar.TUBE;	// need an array with all the color tubes + the original tube since they use the same TE
 		event.getRegistry().register(TileEntityType.Builder.create(TubeTileEntity::new, tubes)
 				.build(null)
 				.setRegistryName(BlockNames.TUBE_NAME)

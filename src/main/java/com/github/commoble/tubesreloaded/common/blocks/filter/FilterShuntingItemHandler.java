@@ -9,11 +9,15 @@ import net.minecraft.tags.Tag;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 
 public class FilterShuntingItemHandler implements IItemHandler
 {
 	public FilterTileEntity filter;
+	
+	// inventory of the block we may be sending items to
+	private LazyOptional<IItemHandler> targetInventory = LazyOptional.empty();
 	
 	public FilterShuntingItemHandler (FilterTileEntity filter)
 	{
@@ -47,11 +51,9 @@ public class FilterShuntingItemHandler implements IItemHandler
 			BlockPos pos = this.filter.getPos();
 			Direction output_dir = this.filter.getBlockState().get(FilterBlock.FACING);
 			BlockPos output_pos = pos.offset(output_dir);
-			// if the block we are attempting to insert the item into is a shuntlike block, do not insert
-			Tag<Block> shuntTag = BlockTags.getCollection().get(new ResourceLocation("tubesreloaded", "shunts"));
-			ItemStack remaining = WorldHelper.getTEItemHandlerAtIf(filter.getWorld(), output_pos, output_dir.getOpposite(), te -> !shuntTag.contains(te.getBlockState().getBlock()))
-			.map(handler -> WorldHelper.disperseItemToHandler(stack, handler))
-			.orElse(stack.copy());
+			ItemStack remaining = this.getOutputOptional(output_pos,output_dir)
+					.map(handler -> WorldHelper.disperseItemToHandler(stack, handler))
+					.orElse(stack.copy());
 			
 			if (remaining.getCount() > 0) // we have remaining items
 			{
@@ -60,6 +62,17 @@ public class FilterShuntingItemHandler implements IItemHandler
 		}
 		
 		return ItemStack.EMPTY;
+	}
+	
+	private LazyOptional<IItemHandler> getOutputOptional(BlockPos output_pos, Direction output_dir)
+	{
+		if (!this.targetInventory.isPresent())
+		{
+			// if the block we are attempting to insert the item into is a shuntlike block, do not insert
+			Tag<Block> shuntTag = BlockTags.getCollection().get(new ResourceLocation("tubesreloaded", "shunts"));
+			this.targetInventory = WorldHelper.getTEItemHandlerAtIf(filter.getWorld(), output_pos, output_dir.getOpposite(), te -> !shuntTag.contains(te.getBlockState().getBlock()));
+		}
+		return this.targetInventory;
 	}
 
 	@Override

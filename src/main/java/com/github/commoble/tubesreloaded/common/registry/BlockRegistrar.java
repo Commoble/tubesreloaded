@@ -37,7 +37,7 @@ public class BlockRegistrar
 	@ObjectHolder(BlockNames.FILTER_NAME)
 	public static final FilterBlock FILTER = null;
 	
-	public static ColoredTubeBlock[] COLORED_TUBE_BLOCKS = new ColoredTubeBlock[16];
+	// no object holder for color tubes since there's too many of them
 
 	public static void registerBlocks(RegistryEvent.Register<Block> event)
 	{
@@ -50,16 +50,15 @@ public class BlockRegistrar
 		registerBlock(registry, new ExtractorBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), BlockNames.EXTRACTOR_NAME);
 		registerBlock(registry, new FilterBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), BlockNames.FILTER_NAME);
 		
-		IntStream.range(0, 16).forEach(i -> 
-			BlockRegistrar.COLORED_TUBE_BLOCKS[i] = registerBlock(
-					registry,
-					new ColoredTubeBlock(
-							DyeColor.values()[i],
-							Block.Properties.create(Material.GLASS)
-								.hardnessAndResistance(0.4F)
-								.harvestTool(ToolType.PICKAXE)
-								.sound(SoundType.METAL)),
-					BlockNames.COLORED_TUBE_NAMES[i]));
+		IntStream.range(0, 16).forEach(i -> registerBlock(
+			registry,
+			new ColoredTubeBlock(
+					DyeColor.values()[i],
+					Block.Properties.create(Material.GLASS)
+						.hardnessAndResistance(0.4F)
+						.harvestTool(ToolType.PICKAXE)
+						.sound(SoundType.METAL)),
+			BlockNames.COLORED_TUBE_NAMES[i]));
 	}
 	
 	private static <T extends Block> T registerBlock(IForgeRegistry<Block> registry, T newBlock, String name)
