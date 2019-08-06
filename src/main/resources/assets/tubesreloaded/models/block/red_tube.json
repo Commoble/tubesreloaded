@@ -1,0 +1,8 @@
+{
+	"parent": "tubesreloaded:block/tube_core",
+	"textures:"
+	{
+		"all": "tubesreloaded:block/red_tube",
+		"particle": "tubesreloaded:block/red_tube"
+	}
+}

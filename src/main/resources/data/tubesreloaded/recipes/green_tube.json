@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "gGg"
+  ],
+  "key": {
+    "g": {
+      "item": "minecraft:gold_ingot"
+    },
+    "G": {
+      "item": "minecraft:green_stained_glass"
+    }
+  },
+  "result": {
+    "item": "tubesreloaded:green_tube",
+    "count": 8
+  }
+}
