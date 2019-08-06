@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import com.github.commoble.tubesreloaded.common.blocks.tube.TubeBlock;
-import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
 import com.github.commoble.tubesreloaded.common.util.PosHelper;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;

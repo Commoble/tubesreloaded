@@ -7,9 +7,4 @@ import net.minecraftforge.fml.common.Mod;
 public class TubesReloadedMod
 {
 	public static final String MODID = "tubesreloaded";
-	
-	public TubesReloadedMod()
-	{
-		
-	}
 }
