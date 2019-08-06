@@ -24,7 +24,7 @@ public class TubeInventoryHandler extends ItemStackHandler
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
 	{
-		if (stack.isEmpty())
+		if (stack.getCount() <= 0)
 		{
 			return ItemStack.EMPTY;
 		}

@@ -138,7 +138,7 @@ public class RoutingNetwork
 	@Nullable
 	public Route getBestRoute(World world, BlockPos startPos, Direction insertionSide, ItemStack stack)
 	{
-		if (stack.isEmpty())
+		if (stack.getCount() <= 0)
 			return null;	// can't fit round pegs in square holes
 		
 		// lazily generate the routes if they don't exist yet

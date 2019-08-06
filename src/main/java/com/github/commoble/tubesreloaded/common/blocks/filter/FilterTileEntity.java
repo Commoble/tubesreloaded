@@ -34,7 +34,7 @@ public class FilterTileEntity extends TileEntity
 	
 	public boolean canItemPassThroughFilter(ItemStack stack)
 	{
-		if (this.filterStack.isEmpty())
+		if (this.filterStack.getCount() <= 0)
 		{
 			return true;
 		}
