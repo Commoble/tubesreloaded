@@ -1,6 +1,6 @@
 {
 	"parent": "tubesreloaded:block/tube_core",
-	"textures:"
+	"textures":
 	{
 		"all": "tubesreloaded:block/blue_tube",
 		"particle": "tubesreloaded:block/blue_tube"

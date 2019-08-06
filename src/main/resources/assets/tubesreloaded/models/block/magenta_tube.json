@@ -1,6 +1,6 @@
 {
 	"parent": "tubesreloaded:block/tube_core",
-	"textures:"
+	"textures":
 	{
 		"all": "tubesreloaded:block/magenta_tube",
 		"particle": "tubesreloaded:block/magenta_tube"

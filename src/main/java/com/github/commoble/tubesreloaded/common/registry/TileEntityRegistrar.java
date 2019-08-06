@@ -1,11 +1,14 @@
 package com.github.commoble.tubesreloaded.common.registry;
 
+import java.util.stream.IntStream;
+
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
 import com.github.commoble.tubesreloaded.common.blocks.filter.FilterTileEntity;
 import com.github.commoble.tubesreloaded.common.blocks.shunt.ShuntTileEntity;
 import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
 import com.github.commoble.tubesreloaded.common.blocks.tube.redstone_tube.RedstoneTubeTileEntity;
 
+import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.registries.ObjectHolder;
@@ -25,7 +28,11 @@ public class TileEntityRegistrar
 	
 	public static void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event)
 	{
-		event.getRegistry().register(TileEntityType.Builder.create(TubeTileEntity::new,BlockRegistrar.TUBE)
+		// register standard tube and colored tubes with the same TE
+		Block[] tubes = new Block[17];
+		IntStream.range(0, 16).forEach(i -> tubes[i] = BlockRegistrar.COLORED_TUBE_BLOCKS[i]);
+		tubes[16] = BlockRegistrar.TUBE;
+		event.getRegistry().register(TileEntityType.Builder.create(TubeTileEntity::new, tubes)
 				.build(null)
 				.setRegistryName(BlockNames.TUBE_NAME)
 				);
@@ -41,5 +48,7 @@ public class TileEntityRegistrar
 				.build(null)
 				.setRegistryName(BlockNames.FILTER_NAME)
 				);
+		
+		
 	}
 }

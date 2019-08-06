@@ -1,5 +1,7 @@
 package com.github.commoble.tubesreloaded.common.registry;
 
+import java.util.stream.IntStream;
+
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
 
 import net.minecraft.item.BlockItem;
@@ -14,25 +16,7 @@ import net.minecraftforge.registries.ObjectHolder;
  */
 @ObjectHolder(TubesReloadedMod.MODID)
 public class ItemRegistrar
-{
-	// itemblocks
-	
-	@ObjectHolder(BlockNames.TUBE_NAME)
-	public static final Item tube = null;
-	@ObjectHolder(BlockNames.SHUNT_NAME)
-	public static final Item shunt = null;
-	@ObjectHolder(BlockNames.LOADER_NAME)
-	public static final Item loader = null;
-	@ObjectHolder(BlockNames.REDSTONE_TUBE_NAME)
-	public static final Item redstone_tube = null;
-	@ObjectHolder(BlockNames.EXTRACTOR_NAME)
-	public static final Item extractor = null;
-	@ObjectHolder(BlockNames.FILTER_NAME)
-	public static final Item filter = null;
-	
-	// real items
-	
-	
+{	
 	public static void registerItems(RegistryEvent.Register<Item> event)
 	{
 		IForgeRegistry<Item> registry = event.getRegistry();
@@ -43,6 +27,8 @@ public class ItemRegistrar
 		registerItem(registry, new BlockItem(BlockRegistrar.REDSTONE_TUBE, new Item.Properties().group(CreativeTabs.tab)), BlockNames.REDSTONE_TUBE_NAME);
 		registerItem(registry, new BlockItem(BlockRegistrar.EXTRACTOR, new Item.Properties().group(CreativeTabs.tab)), BlockNames.EXTRACTOR_NAME);
 		registerItem(registry, new BlockItem(BlockRegistrar.FILTER, new Item.Properties().group(CreativeTabs.tab)), BlockNames.FILTER_NAME);
+		
+		IntStream.range(0, 16).forEach(i -> registerItem(registry, new BlockItem(BlockRegistrar.COLORED_TUBE_BLOCKS[i], new Item.Properties().group(CreativeTabs.tab)), BlockNames.COLORED_TUBE_NAMES[i]));
 		// real items
 		
 	}

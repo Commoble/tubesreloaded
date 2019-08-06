@@ -1,6 +1,6 @@
 {
 	"parent": "tubesreloaded:block/tube_core",
-	"textures:"
+	"textures":
 	{
 		"all": "tubesreloaded:block/lime_tube",
 		"particle": "tubesreloaded:block/lime_tube"

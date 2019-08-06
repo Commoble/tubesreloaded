@@ -1,6 +1,6 @@
 {
 	"parent": "tubesreloaded:block/tube_extension_north",
-	"textures:"
+	"textures":
 	{
 		"all": "tubesreloaded:block/black_tube",
 		"particle": "tubesreloaded:block/black_tube"
