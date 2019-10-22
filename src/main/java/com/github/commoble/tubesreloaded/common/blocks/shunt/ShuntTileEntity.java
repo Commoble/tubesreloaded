@@ -35,7 +35,7 @@ public class ShuntTileEntity extends TileEntity
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 		{
 			Direction output_dir = this.getBlockState().get(ShuntBlock.FACING);
-			return (LazyOptional<T>) LazyOptional.of(() -> side.equals(output_dir) ? output_handler : input_handler);
+			return (LazyOptional<T>) LazyOptional.of(() -> side == output_dir ? output_handler : input_handler);
 		}
 		return super.getCapability(cap, side);
 	}

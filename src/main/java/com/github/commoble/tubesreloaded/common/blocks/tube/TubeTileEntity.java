@@ -20,7 +20,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
@@ -49,7 +48,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			.toArray(TubeInventoryHandler[]::new);	// one handler for each direction
 	
 	@SuppressWarnings("unchecked")
-	protected final LazyOptional<IItemHandler>[] handlerOptionals = Arrays.stream(inventoryHandlers)
+	protected final LazyOptional<IItemHandler>[] handlerOptionals = Arrays.stream(this.inventoryHandlers)
 		.map(handler -> LazyOptional.of(() -> handler))
 		.toArray(size -> (LazyOptional<IItemHandler>[])new LazyOptional[size]);
 	
@@ -138,12 +137,13 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			// if the adjacent block is a tube or endpoint but isn't in the network
 			// OR if the adjacent block is in the network but isn't a tube or endpoint
 			// then the network changed
-			if (this.getNetwork().contains(pos, face.getOpposite()) != this.getNetwork().isValidToBeInNetwork(checkPos, world, face.getOpposite()))
+			if (this.getNetwork().contains(this.pos, face.getOpposite()) != this.getNetwork().isValidToBeInNetwork(checkPos, this.world, face.getOpposite()))
 				return true;
 		}
 		return false;
 	}
 	
+	@Override
 	public void tick()
 	{
 		this.merge_buffer();
@@ -194,7 +194,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			{
 				((TubeTileEntity)te).enqueueItemStack(wrapper.stack, wrapper.remainingMoves, wrapper.maximumDurationInTube);
 			}
-			else if (!world.isRemote)
+			else if (!this.world.isRemote)
 			{
 				if (te != null)	// te exists but is not a tube
 				{
@@ -211,7 +211,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 				}
 			}
 		}
-		else if (!world.isRemote)	// wrapper has no remaining moves -- this isn't expected, eject the item
+		else if (!this.world.isRemote)	// wrapper has no remaining moves -- this isn't expected, eject the item
 		{
 			WorldHelper.ejectItemstack(this.world, this.pos, null, wrapper.stack);
 		}
@@ -222,7 +222,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	@Nonnull
 	public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side)
 	{
-		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && side != null)
 		{
 			return this.handlerOptionals[side.getIndex()].cast();	// T is <IItemHandler> here, which our handler implements
 		}
@@ -256,7 +256,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 
 	public ItemStack enqueueItemStack(ItemStack stack, Queue<Direction> remainingMoves, int ticksPerTube)
 	{
-		return enqueueItemStack(new ItemInTubeWrapper(stack, remainingMoves, ticksPerTube));
+		return this.enqueueItemStack(new ItemInTubeWrapper(stack, remainingMoves, ticksPerTube));
 	}
 	
 	public void merge_buffer()
@@ -292,7 +292,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	{
 		for (Direction face : Direction.values())
 		{
-			TileEntity te = this.world.getTileEntity(pos.offset(face));
+			TileEntity te = this.world.getTileEntity(this.pos.offset(face));
 			if (te != null && !(te instanceof TubeTileEntity))
 			{
 				// if a nearby inventory that is not a tube exists
@@ -349,7 +349,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		{
 			CompoundNBT invTag = new CompoundNBT();
 			wrapper.writeToNBT(invTag);
-			invList.add((INBT) invTag);
+			invList.add(invTag);
 		}
 		if (!invList.isEmpty())
 		{
@@ -368,7 +368,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	@Override
 	public CompoundNBT getUpdateTag()
 	{
-		return write(new CompoundNBT());	// okay to send entire inventory on chunk load
+		return this.write(new CompoundNBT());	// okay to send entire inventory on chunk load
 	}
 
 	/**
@@ -390,14 +390,14 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			ItemInTubeWrapper wrapper = this.wrappers_to_send_to_client.poll();
 			CompoundNBT invTag = new CompoundNBT();
 			wrapper.writeToNBT(invTag);
-			invList.add((INBT) invTag);
+			invList.add(invTag);
 		}
 		if (!invList.isEmpty())
 		{
 			nbt.put(INV_NBT_KEY_ADD, invList);
 		}
 		
-		return new SUpdateTileEntityPacket(getPos(), 1, nbt);
+		return new SUpdateTileEntityPacket(this.getPos(), 1, nbt);
 	}
 
 	/**
