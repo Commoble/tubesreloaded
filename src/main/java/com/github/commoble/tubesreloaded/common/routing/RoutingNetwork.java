@@ -23,7 +23,6 @@ import net.minecraftforge.items.IItemHandler;
 
 public class RoutingNetwork
 {
-	public static final int MAX_TUBES = 200;
 	public final Set<BlockPos> tubes = new HashSet<BlockPos>();	// set of the tubes that make up the network interior
 	
 	// set of the faces at the edge of the network
@@ -71,11 +70,11 @@ public class RoutingNetwork
 			return;
 		}
 		
-		float slope = 1F/((float)(softCap-hardCap));
-		float offset = (float)(-hardCap) * slope;
-		float dilation = (float)size * slope + offset;
+		float slope = 1F/(softCap-hardCap);
+		float offset = (-hardCap) * slope;
+		float dilation = size * slope + offset;
 		float time = 1F / (dilation * dilation);
-		this.ticksPerTube = (int)(time * (float)baseDuration);
+		this.ticksPerTube = (int)(time * baseDuration);
 	}
 	
 	/** For tubes, only pos of tube is relevant
@@ -209,7 +208,7 @@ public class RoutingNetwork
 		blocksToVisit.add(startPos);
 		while (!blocksToVisit.isEmpty())
 		{
-			if (network.tubes.size() > MAX_TUBES)
+			if (network.tubes.size() > ConfigValues.hard_tube_cap)
 			{
 				break;
 			}
