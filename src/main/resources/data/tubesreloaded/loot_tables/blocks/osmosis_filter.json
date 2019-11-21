@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:block",
+	"pools": [
+		{
+			"name": "osmosis_filter",
+			"rolls": 1,
+			"entries": [
+				{
+					"type": "minecraft:item",
+					"name": "tubesreloaded:osmosis_filter"
+				}
+			],
+			"conditions": [
+				{
+					"condition": "minecraft:survives_explosion"
+				}
+			]
+		}
+	]
+}

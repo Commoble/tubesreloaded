@@ -13,6 +13,7 @@ public class BlockNames
 	public static final String REDSTONE_TUBE_NAME = "redstone_tube";
 	public static final String EXTRACTOR_NAME = "extractor";
 	public static final String FILTER_NAME = "filter";
+	public static final String OSMOSIS_FILTER_NAME = "osmosis_filter";
 	
 	public static final String[] COLORED_TUBE_NAMES = Arrays.stream(DyeColor.values()).map(color -> color.toString() + "_tube").toArray(String[]::new);
 }

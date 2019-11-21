@@ -28,7 +28,7 @@ import net.minecraft.world.World;
 
 public class FilterBlock extends Block
 {
-	public static final DirectionProperty FACING = DirectionalBlock.FACING;
+	public static final DirectionProperty FACING = DirectionalBlock.FACING;	// facing of output
 
 	protected final VoxelShape[] shapes;
 
@@ -80,21 +80,25 @@ public class FilterBlock extends Block
 	
 	//// facing and blockstate boilerplate
 
+	@Override
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
 		return this.getDefaultState().with(FACING, DirectionHelper.getBlockFacingForPlacement(context));
 	}
 
+	@Override
 	public BlockState rotate(BlockState state, Rotation rot)
 	{
 		return state.with(FACING, rot.rotate(state.get(FACING)));
 	}
 
+	@Override
 	public BlockState mirror(BlockState state, Mirror mirrorIn)
 	{
 		return state.rotate(mirrorIn.toRotation(state.get(FACING)));
 	}
 
+	@Override
 	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
 	{
 		builder.add(FACING);

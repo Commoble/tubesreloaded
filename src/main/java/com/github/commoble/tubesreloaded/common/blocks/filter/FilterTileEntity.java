@@ -42,7 +42,7 @@ public class FilterTileEntity extends TileEntity
 			return true;
 		}
 		
-		return this.filterStack.getItem().equals(stack.getItem());
+		return stack.getCount() > 0 && this.filterStack.getItem().equals(stack.getItem());
 	}
 	
 	@Override
@@ -54,11 +54,11 @@ public class FilterTileEntity extends TileEntity
 			Direction output_dir = this.getBlockState().get(ShuntBlock.FACING);
 			if (side == output_dir.getOpposite())
 			{
-				return shuntingOptional.cast();
+				return this.shuntingOptional.cast();
 			}
 			else if (side != output_dir)
 			{
-				return storageOptional.cast();
+				return this.storageOptional.cast();
 			}
 		}
 		return super.getCapability(cap, side);
@@ -87,7 +87,7 @@ public class FilterTileEntity extends TileEntity
 				this.setFilterStackAndSaveAndSync(ItemStack.EMPTY);
 				if (!player.addItemStackToInventory(filtered))	// attempt to put item in inventory
 				{	// if we failed to do that
-					WorldHelper.ejectItemstack(world, this.pos, sideOfBlock, filtered);
+					WorldHelper.ejectItemstack(this.world, this.pos, sideOfBlock, filtered);
 				}
 			}
 			return true;
@@ -142,7 +142,7 @@ public class FilterTileEntity extends TileEntity
 	@Override
 	public CompoundNBT getUpdateTag()
 	{
-		return write(new CompoundNBT());	// okay to send entire inventory on chunk load
+		return this.write(new CompoundNBT());	// okay to send entire inventory on chunk load
 	}
 	
 	@Override
@@ -151,7 +151,7 @@ public class FilterTileEntity extends TileEntity
 		CompoundNBT nbt = new CompoundNBT();
 		this.write(nbt);
 		
-		return new SUpdateTileEntityPacket(getPos(), 1, nbt);
+		return new SUpdateTileEntityPacket(this.getPos(), 1, nbt);
 	}
 	
 	@Override

@@ -29,6 +29,7 @@ public class ItemRegistrar
 		registerItem(registry, new BlockItem(BlockRegistrar.REDSTONE_TUBE, new Item.Properties().group(CreativeTabs.tab)), BlockNames.REDSTONE_TUBE_NAME);
 		registerItem(registry, new BlockItem(BlockRegistrar.EXTRACTOR, new Item.Properties().group(CreativeTabs.tab)), BlockNames.EXTRACTOR_NAME);
 		registerItem(registry, new BlockItem(BlockRegistrar.FILTER, new Item.Properties().group(CreativeTabs.tab)), BlockNames.FILTER_NAME);
+		registerItem(registry, new BlockItem(BlockRegistrar.OSMOSIS_FILTER, new Item.Properties().group(CreativeTabs.tab)), BlockNames.OSMOSIS_FILTER_NAME);
 		
 		IntStream.range(0, 16).forEach(
 				i -> registerItem(

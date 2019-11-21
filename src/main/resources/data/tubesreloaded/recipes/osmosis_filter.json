@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "f",
+    "s",
+    "h"
+  ],
+  "key": {
+    "f": {
+      "item": "tubesreloaded:filter"
+    },
+    "s": {
+      "item": "minecraft:slime_block"
+    },
+    "h": {
+      "item": "minecraft:hopper"
+    }
+  },
+  "result": {
+    "item": "tubesreloaded:osmosis_filter",
+    "count": 1
+  }
+}

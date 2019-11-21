@@ -16,6 +16,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -53,7 +54,7 @@ public class WorldHelper
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T extends TileEntity> Optional<T> getTileEntityAt(Class<? extends T> clazz, World world, BlockPos pos)
+	public static <T extends TileEntity> Optional<T> getTileEntityAt(Class<? extends T> clazz, IWorldReader world, BlockPos pos)
 	{
 		TileEntity te = world.getTileEntity(pos);
 		return Optional.ofNullable(te != null && te.getClass().isAssignableFrom(clazz) ? (T)te : null);
