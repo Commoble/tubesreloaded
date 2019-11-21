@@ -13,6 +13,7 @@ import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -44,6 +45,17 @@ public class OsmosisFilterBlock extends FilterBlock
 		return TileEntityRegistrar.TE_TYPE_OSMOSIS_FILTER.create();
 	}
 
+	/**
+	 * Gets the render layer this block will render on. SOLID for solid blocks,
+	 * CUTOUT or CUTOUT_MIPPED for on-off transparency (glass, reeds), TRANSLUCENT
+	 * for fully blended transparency (stained glass)
+	 */
+	@Override
+	public BlockRenderLayer getRenderLayer()
+	{
+		return BlockRenderLayer.TRANSLUCENT;
+	}
+
 	@Override
 	public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
 	{
@@ -56,14 +68,15 @@ public class OsmosisFilterBlock extends FilterBlock
 	{
 		boolean dormant = ClassHelper.as(worldReader, World.class).map(world -> {
 			boolean isFilterNotPowered = !world.isBlockPowered(pos);
-			if (isFilterNotPowered != state.get(ENABLED))	// if state has changed
+			if (isFilterNotPowered != state.get(ENABLED)) // if state has changed
 			{
 				world.setBlockState(pos, state.with(ENABLED, Boolean.valueOf(isFilterNotPowered)), 4);
 			}
 			return Boolean.valueOf(!isFilterNotPowered);
 		}).orElse(false);
-		
-		WorldHelper.getTileEntityAt(OsmosisFilterTileEntity.class, worldReader, pos).ifPresent(te -> te.isDormant = dormant);;
+
+		WorldHelper.getTileEntityAt(OsmosisFilterTileEntity.class, worldReader, pos).ifPresent(te -> te.isDormant = dormant);
+		;
 	}
 
 }
