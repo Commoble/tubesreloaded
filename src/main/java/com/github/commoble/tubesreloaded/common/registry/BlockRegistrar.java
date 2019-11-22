@@ -6,6 +6,7 @@ import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
 import com.github.commoble.tubesreloaded.common.blocks.extractor.ExtractorBlock;
 import com.github.commoble.tubesreloaded.common.blocks.filter.FilterBlock;
 import com.github.commoble.tubesreloaded.common.blocks.filter.OsmosisFilterBlock;
+import com.github.commoble.tubesreloaded.common.blocks.filter.OsmosisSlimeBlock;
 import com.github.commoble.tubesreloaded.common.blocks.loader.LoaderBlock;
 import com.github.commoble.tubesreloaded.common.blocks.shunt.ShuntBlock;
 import com.github.commoble.tubesreloaded.common.blocks.tube.TubeBlock;
@@ -39,6 +40,8 @@ public class BlockRegistrar
 	public static final FilterBlock FILTER = null;
 	@ObjectHolder(BlockNames.OSMOSIS_FILTER_NAME)
 	public static final OsmosisFilterBlock OSMOSIS_FILTER = null;
+	@ObjectHolder(BlockNames.OSMOSIS_SLIME_NAME)
+	public static final OsmosisSlimeBlock OSMOSIS_SLIME = null;
 	
 	// no object holder for color tubes since there's too many of them
 
@@ -53,6 +56,7 @@ public class BlockRegistrar
 		registerBlock(registry, new ExtractorBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), BlockNames.EXTRACTOR_NAME);
 		registerBlock(registry, new FilterBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), BlockNames.FILTER_NAME);
 		registerBlock(registry, new OsmosisFilterBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), BlockNames.OSMOSIS_FILTER_NAME);
+		registerBlock(registry, new OsmosisSlimeBlock(Block.Properties.create(Material.CLAY)), BlockNames.OSMOSIS_SLIME_NAME);
 		
 		IntStream.range(0, 16).forEach(i -> registerBlock(
 			registry,

@@ -162,19 +162,6 @@
 				"up": {"uv": [0, 0, 1, 14], "texture": "#front"},
 				"down": {"uv": [0, 0, 1, 14], "texture": "#front"}
 			}
-		},
-		{
-			"name": "slime",
-			"from": [2, 2, 2],
-			"to": [14, 14, 6],
-			"faces": {
-				"north": {"uv": [2, 2, 14, 14], "texture": "#missing"},
-				"east": {"uv": [10, 2, 14, 14], "texture": "#slime"},
-				"south": {"uv": [2, 2, 14, 14], "texture": "#slime"},
-				"west": {"uv": [2, 2, 7, 14], "texture": "#slime"},
-				"up": {"uv": [2, 2, 14, 6], "texture": "#slime"},
-				"down": {"uv": [2, 10, 14, 14], "texture": "#slime"}
-			}
 		}
 	],
 	"display": {
