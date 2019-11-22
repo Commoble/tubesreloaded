@@ -57,7 +57,7 @@ public class WorldHelper
 	public static <T extends TileEntity> Optional<T> getTileEntityAt(Class<? extends T> clazz, IWorldReader world, BlockPos pos)
 	{
 		TileEntity te = world.getTileEntity(pos);
-		return Optional.ofNullable(te != null && te.getClass().isAssignableFrom(clazz) ? (T)te : null);
+		return Optional.ofNullable(te != null && clazz.isInstance(te) ? (T)te : null);
 	}
 	
 	public static LazyOptional<IItemHandler> getTEItemHandlerAt(World world, BlockPos pos, Direction faceOfBlockPos)

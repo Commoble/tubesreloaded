@@ -14,6 +14,7 @@ import net.minecraft.util.Direction.Axis;
 
 public class FilterTileEntityRenderer extends TileEntityRenderer<FilterTileEntity>
 {
+	@Override
 	public void render(FilterTileEntity te, double x, double y, double z, float partialTicks, int destroyStage)
 	{
 		if (te.filterStack.getCount() > 0)

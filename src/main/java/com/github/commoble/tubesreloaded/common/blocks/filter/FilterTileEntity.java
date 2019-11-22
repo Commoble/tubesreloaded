@@ -14,6 +14,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -30,19 +31,28 @@ public class FilterTileEntity extends TileEntity
 	private LazyOptional<IItemHandler> shuntingOptional = LazyOptional.of(() -> this.shuntingHandler);
 	private LazyOptional<IItemHandler> storageOptional = LazyOptional.of(() -> this.storageHandler);
 	
+	public FilterTileEntity(TileEntityType<?> teType)
+	{
+		super(teType);
+	}
+	
 	public FilterTileEntity()
 	{
-		super(TileEntityRegistrar.TE_TYPE_FILTER);
+		this(TileEntityRegistrar.TE_TYPE_FILTER);
 	}
 	
 	public boolean canItemPassThroughFilter(ItemStack stack)
 	{
+		if (stack.getCount() <= 0)
+		{
+			return false;
+		}
 		if (this.filterStack.getCount() <= 0)
 		{
 			return true;
 		}
 		
-		return stack.getCount() > 0 && this.filterStack.getItem().equals(stack.getItem());
+		return this.filterStack.getItem().equals(stack.getItem());
 	}
 	
 	@Override
