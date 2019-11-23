@@ -1,6 +1,8 @@
 package com.github.commoble.tubesreloaded.common.blocks.filter;
 
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
+import com.github.commoble.tubesreloaded.common.util.ClassHelper;
+import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -14,7 +16,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraftforge.items.CapabilityItemHandler;
 
 public class OsmosisFilterBlock extends FilterBlock
 {
@@ -24,7 +28,7 @@ public class OsmosisFilterBlock extends FilterBlock
 	{
 		super(properties);
 
-		this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(TRANSFERRING_ITEMS, true));
+		this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(TRANSFERRING_ITEMS, false));
 	}
 
 	@Override
@@ -50,25 +54,52 @@ public class OsmosisFilterBlock extends FilterBlock
 	
 	private void updateState(World world, BlockPos pos, BlockState state)
 	{
-		boolean hasRedstoneSignal = world.isBlockPowered(pos);
-		if (hasRedstoneSignal == state.get(TRANSFERRING_ITEMS)) // if state has changed
+		if (!world.isRemote)
 		{
-			world.setBlockState(pos, state.with(TRANSFERRING_ITEMS, Boolean.valueOf(!hasRedstoneSignal)), 6);
+			final boolean hasRedstoneSignal = world.isBlockPowered(pos);
+			final boolean active = state.get(TRANSFERRING_ITEMS);
+			final Direction outputDirection = state.get(FACING);
+			final Direction inputDirection = outputDirection.getOpposite();
+			final boolean canExtractItems = WorldHelper.getTileEntityAt(OsmosisFilterTileEntity.class, world, pos)
+				.filter(filter ->
+					WorldHelper.getTileEntityAt(world, pos.offset(inputDirection))
+					.filter(te ->
+						te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, outputDirection)
+						.filter(handler -> (Boolean)WorldHelper.doesItemHandlerHaveAnyExtractableItems(handler, filter::canItemPassThroughFilter))
+						.isPresent())
+					.isPresent())
+				.isPresent();
+			if (active && (hasRedstoneSignal || !canExtractItems))
+			{
+				world.setBlockState(pos, state.with(TRANSFERRING_ITEMS, Boolean.valueOf(false)), 6);
+			}
+			else if (!active && !hasRedstoneSignal && canExtractItems)
+			{
+				world.setBlockState(pos, state.with(TRANSFERRING_ITEMS, Boolean.valueOf(true)), 6);
+			}
 		}
 	}
 
 	@Override
 	public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
 	{
+		boolean activated = super.onBlockActivated(state, worldIn, pos, player, handIn, hit);
 		this.updateState(worldIn, pos, state);
-		return super.onBlockActivated(state, worldIn, pos, player, handIn, hit);
+		return activated;
 	}
 	
 	@Override
-	public void neighborChanged(BlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
+	public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
 	{
-		super.neighborChanged(state, world, pos, blockIn, fromPos, isMoving);
-		this.updateState(world, pos, state);
+		super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
+		this.updateState(worldIn, pos, state);
+	}
+	
+	@Override
+	public void onNeighborChange(BlockState state, IWorldReader worldReader, BlockPos pos, BlockPos neighbor)
+	{
+		super.onNeighborChange(state, worldReader, pos, neighbor);
+		ClassHelper.as(worldReader, World.class).ifPresent(world -> this.updateState(world, pos, state));
 	}
 
 }

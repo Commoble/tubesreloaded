@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -141,5 +142,12 @@ public class WorldHelper
 			}
 		}
 		return stack.copy();
+	}
+	
+	public static boolean doesItemHandlerHaveAnyExtractableItems(IItemHandler handler, Predicate<ItemStack> doesCallerWantItem)
+	{
+		return IntStream.range(0,handler.getSlots())
+			.mapToObj(i -> handler.extractItem(i, 1, true))
+			.anyMatch(stack -> stack.getCount() > 0 && doesCallerWantItem.test(stack));
 	}
 }

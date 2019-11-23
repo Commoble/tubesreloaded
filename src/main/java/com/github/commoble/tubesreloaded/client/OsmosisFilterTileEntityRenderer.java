@@ -42,27 +42,25 @@ public class OsmosisFilterTileEntityRenderer extends FilterTileEntityRenderer
 		long transferhash = blockpos.hashCode();
 		int rate = ConfigValues.osmosis_filter_transfer_rate;
 		double ticks = te.getWorld().getDayTime() + transferhash + partialTicks;
-		double minScale = 0.2D;
+		double minScale = 0.25D;
 		double lengthScale = minScale + (te.getBlockState().get(OsmosisFilterBlock.TRANSFERRING_ITEMS)
 			? (-Math.cos(2 * Math.PI * ticks / rate) + 1D) * 0.25D
-			: (-Math.cos(2 * Math.PI * ticks / rate) + 1D) * 0.25D);//0D);
+			: 0D);
 		double lengthTranslateFactor = 1D - lengthScale;
 		
 		
 		
 		
-		double translateX, translateY, translateZ, scaleX, scaleY, scaleZ;
 
 		double zFightFix = 0.9999D;
-		scaleZ = zFightFix;
 		
 		int dirOffsetX = dir.getXOffset();
 		int dirOffsetY = dir.getYOffset();
 		int dirOffsetZ = dir.getZOffset();
 		
-		scaleX = dirOffsetX == 0 ? zFightFix : lengthScale;
-		scaleY = dirOffsetY == 0 ? zFightFix : lengthScale;
-		scaleZ = dirOffsetZ == 0 ? zFightFix : lengthScale;
+		double scaleX = dirOffsetX == 0 ? zFightFix : lengthScale;
+		double scaleY = dirOffsetY == 0 ? zFightFix : lengthScale;
+		double scaleZ = dirOffsetZ == 0 ? zFightFix : lengthScale;
 		
 		int translateFactorX = dirOffsetX == 0 ? 0 : 1;
 		int translateFactorY = dirOffsetY == 0 ? 0 : 1;
@@ -72,48 +70,9 @@ public class OsmosisFilterTileEntityRenderer extends FilterTileEntityRenderer
 		double tY = dirOffsetY > 0 ? y+1D : y;
 		double tZ = dirOffsetZ > 0 ? z+1D : z;
 		
-		translateX = translateFactorX * (tX * lengthTranslateFactor - 0.125D*dirOffsetX);
-		translateY = translateFactorY * (tY * lengthTranslateFactor - 0.125D*dirOffsetY);
-		translateZ = translateFactorZ * (tZ * lengthTranslateFactor - 0.125D*dirOffsetZ);
-		
-//		if (dir.getZOffset() < 0)
-//		{
-//			translateX = -dir.getXOffset() * x * lengthTranslateFactor;
-//			translateY = -dir.getYOffset() * y * lengthTranslateFactor;
-//			translateZ = -dir.getZOffset() * (z * lengthTranslateFactor + 0.125D);
-//		}
-//		else if (dir.getZOffset() > 0)
-//		{
-//			translateX = dir.getXOffset() * x * lengthTranslateFactor;
-//			translateY = dir.getYOffset() * y * lengthTranslateFactor;
-//			translateZ = dir.getZOffset() * ((z+1D)*lengthTranslateFactor - 0.125D);
-//		}
-//
-//		else if (dir.getXOffset() < 0)
-//		{
-//			translateX = -dir.getXOffset() * (x * lengthTranslateFactor + 0.125D);
-//			translateY = -dir.getYOffset() * y * lengthTranslateFactor;
-//			translateZ = -dir.getZOffset() * z * lengthTranslateFactor;
-//		}
-//		else if (dir.getXOffset() > 0)
-//		{
-//			translateX = dir.getXOffset() * ((x+1D) * lengthTranslateFactor - 0.125D);
-//			translateY = dir.getYOffset() * y * lengthTranslateFactor;
-//			translateZ = dir.getZOffset() * z * lengthTranslateFactor;
-//		}
-//
-//		else if (dir.getYOffset() < 0)
-//		{
-//			translateX = -dir.getXOffset() * (x * lengthTranslateFactor + 0.125D);
-//			translateY = -dir.getYOffset() * (y * lengthTranslateFactor + 0.125D);
-//			translateZ = -dir.getZOffset() * z * lengthTranslateFactor;
-//		}
-//		else // y > 0
-//		{
-//			translateX = dir.getXOffset() * ((x+1D) * lengthTranslateFactor - 0.125D);
-//			translateY = dir.getYOffset() * ((y+1D) * lengthTranslateFactor - 0.125D);
-//			translateZ = dir.getZOffset() * z * lengthTranslateFactor;
-//		}
+		double translateX = translateFactorX * (tX * lengthTranslateFactor - 0.125D*dirOffsetX);
+		double translateY = translateFactorY * (tY * lengthTranslateFactor - 0.125D*dirOffsetY);
+		double translateZ = translateFactorZ * (tZ * lengthTranslateFactor - 0.125D*dirOffsetZ);
 		
 		GlStateManager.pushMatrix();
 		//GlStateManager.translated(0, 0, z * lengthTranslateFactor + 0.125D);
