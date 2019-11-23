@@ -168,7 +168,6 @@
 			"from": [2, 2, 2],
 			"to": [14, 14, 6],
 			"faces": {
-				"north": {"uv": [2, 2, 14, 14], "texture": "#missing"},
 				"east": {"uv": [10, 2, 14, 14], "texture": "#slime"},
 				"south": {"uv": [2, 2, 14, 14], "texture": "#slime"},
 				"west": {"uv": [2, 2, 7, 14], "texture": "#slime"},
