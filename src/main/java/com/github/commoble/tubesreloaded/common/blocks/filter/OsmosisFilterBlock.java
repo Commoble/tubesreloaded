@@ -1,5 +1,7 @@
 package com.github.commoble.tubesreloaded.common.blocks.filter;
 
+import java.util.Optional;
+
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.common.util.ClassHelper;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
@@ -60,23 +62,30 @@ public class OsmosisFilterBlock extends FilterBlock
 			final boolean active = state.get(TRANSFERRING_ITEMS);
 			final Direction outputDirection = state.get(FACING);
 			final Direction inputDirection = outputDirection.getOpposite();
-			final boolean canExtractItems = WorldHelper.getTileEntityAt(OsmosisFilterTileEntity.class, world, pos)
-				.filter(filter ->
-					!(filter.transferredItemsThisTick) &&
-					WorldHelper.getTileEntityAt(world, pos.offset(inputDirection))
-					.filter(te ->
-						te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, outputDirection)
-						.filter(handler -> (Boolean)WorldHelper.doesItemHandlerHaveAnyExtractableItems(handler, filter::canItemPassThroughFilter))
+
+			Optional<OsmosisFilterTileEntity> maybeFilter = WorldHelper.getTileEntityAt(OsmosisFilterTileEntity.class, world, pos);
+			
+			boolean checkedItemsThisTick = maybeFilter.map(OsmosisFilterTileEntity::getCheckedItemsAndMarkChecked).orElse(true);
+			
+			if (!checkedItemsThisTick)
+			{
+				final boolean canExtractItems = maybeFilter
+					.filter(filter ->
+						WorldHelper.getTileEntityAt(world, pos.offset(inputDirection))
+						.filter(te ->
+							te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, outputDirection)
+							.filter(handler -> (Boolean)WorldHelper.doesItemHandlerHaveAnyExtractableItems(handler, filter::canItemPassThroughFilter))
+							.isPresent())
 						.isPresent())
-					.isPresent())
-				.isPresent();
-			if (active && (hasRedstoneSignal || !canExtractItems))
-			{
-				world.setBlockState(pos, state.with(TRANSFERRING_ITEMS, Boolean.valueOf(false)), 6);
-			}
-			else if (!active && !hasRedstoneSignal && canExtractItems)
-			{
-				world.setBlockState(pos, state.with(TRANSFERRING_ITEMS, Boolean.valueOf(true)), 6);
+					.isPresent();
+				if (active && (hasRedstoneSignal || !canExtractItems))
+				{
+					world.setBlockState(pos, state.with(TRANSFERRING_ITEMS, Boolean.valueOf(false)), 6);
+				}
+				else if (!active && !hasRedstoneSignal && canExtractItems)
+				{
+					world.setBlockState(pos, state.with(TRANSFERRING_ITEMS, Boolean.valueOf(true)), 6);
+				}
 			}
 		}
 	}

@@ -19,7 +19,7 @@ import net.minecraftforge.items.IItemHandler;
 public class OsmosisFilterTileEntity extends FilterTileEntity implements ITickableTileEntity
 {
 	public long transferHash;
-	public boolean transferredItemsThisTick = false;
+	public boolean checkedItemsThisTick = false;
 
 	public OsmosisFilterTileEntity()
 	{
@@ -32,13 +32,20 @@ public class OsmosisFilterTileEntity extends FilterTileEntity implements ITickab
 		super.read(compound);
 		this.transferHash = this.pos.hashCode();
 	}
+	
+	public boolean getCheckedItemsAndMarkChecked()
+	{
+		boolean checked = this.checkedItemsThisTick;
+		this.checkedItemsThisTick = true;
+		return checked;
+	}
 
 	@Override
 	public void tick()
 	{
 		if (!this.world.isRemote)
 		{
-			this.transferredItemsThisTick = false;
+			this.checkedItemsThisTick = false;
 			if ((this.world.getGameTime() + this.transferHash) % ConfigValues.osmosis_filter_transfer_rate == 0
 				&& this.getBlockState().get(OsmosisFilterBlock.TRANSFERRING_ITEMS))
 			{
@@ -54,7 +61,6 @@ public class OsmosisFilterTileEntity extends FilterTileEntity implements ITickab
 				}
 				else
 				{
-					this.transferredItemsThisTick = true;
 					this.world.playSound(null, this.pos, SoundEvents.BLOCK_SLIME_BLOCK_PLACE, SoundCategory.BLOCKS,
 						this.world.rand.nextFloat()*0.1F, this.world.rand.nextFloat());//this.world.rand.nextFloat()*0.01f + 0.005f);
 				}
