@@ -41,7 +41,7 @@ public class OsmosisFilterTileEntityRenderer extends FilterTileEntityRenderer
 		BlockState renderState = BlockRegistrar.OSMOSIS_SLIME.getDefaultState().with(OsmosisSlimeBlock.FACING, dir);
 		long transferhash = blockpos.hashCode();
 		int rate = ConfigValues.osmosis_filter_transfer_rate;
-		double ticks = te.getWorld().getDayTime() + transferhash + partialTicks;
+		double ticks = te.getWorld().getGameTime() + transferhash + partialTicks;
 		double minScale = 0.25D;
 		double lengthScale = minScale + (te.getBlockState().get(OsmosisFilterBlock.TRANSFERRING_ITEMS)
 			? (-Math.cos(2 * Math.PI * ticks / rate) + 1D) * 0.25D

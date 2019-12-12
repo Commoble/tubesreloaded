@@ -37,7 +37,7 @@ public class OsmosisFilterTileEntity extends FilterTileEntity implements ITickab
 	{
 		if (!this.world.isRemote)
 		{
-			if ((this.world.getDayTime() + this.transferHash) % ConfigValues.osmosis_filter_transfer_rate == 0
+			if ((this.world.getGameTime() + this.transferHash) % ConfigValues.osmosis_filter_transfer_rate == 0
 				&& this.getBlockState().get(OsmosisFilterBlock.TRANSFERRING_ITEMS))
 			{
 				Direction filterOutputDirection = this.getBlockState().get(FilterBlock.FACING);
