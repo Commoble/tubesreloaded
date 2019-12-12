@@ -19,6 +19,7 @@ import net.minecraftforge.items.IItemHandler;
 public class OsmosisFilterTileEntity extends FilterTileEntity implements ITickableTileEntity
 {
 	public long transferHash;
+	public boolean transferredItemsThisTick = false;
 
 	public OsmosisFilterTileEntity()
 	{
@@ -37,21 +38,23 @@ public class OsmosisFilterTileEntity extends FilterTileEntity implements ITickab
 	{
 		if (!this.world.isRemote)
 		{
+			this.transferredItemsThisTick = false;
 			if ((this.world.getGameTime() + this.transferHash) % ConfigValues.osmosis_filter_transfer_rate == 0
 				&& this.getBlockState().get(OsmosisFilterBlock.TRANSFERRING_ITEMS))
 			{
 				Direction filterOutputDirection = this.getBlockState().get(FilterBlock.FACING);
 				Direction filterInputDirection = filterOutputDirection.getOpposite();
-				boolean transferredItemThisTick = WorldHelper.getTEItemHandlerAt(this.world, this.pos.offset(filterInputDirection), filterOutputDirection)
+				boolean successfulTransfer = WorldHelper.getTEItemHandlerAt(this.world, this.pos.offset(filterInputDirection), filterOutputDirection)
 					.map(inventory -> this.getFirstValidItem(inventory))
 					.map(stack -> this.attemptExtractionAndReturnSuccess(stack))
 					.orElse(false);
-				if (!transferredItemThisTick)
+				if (!successfulTransfer)
 				{	// set dormant if no items were found
 					this.world.setBlockState(this.pos, this.getBlockState().with(OsmosisFilterBlock.TRANSFERRING_ITEMS, false));
 				}
 				else
 				{
+					this.transferredItemsThisTick = true;
 					this.world.playSound(null, this.pos, SoundEvents.BLOCK_SLIME_BLOCK_PLACE, SoundCategory.BLOCKS,
 						this.world.rand.nextFloat()*0.1F, this.world.rand.nextFloat());//this.world.rand.nextFloat()*0.01f + 0.005f);
 				}

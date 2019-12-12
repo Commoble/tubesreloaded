@@ -62,6 +62,7 @@ public class OsmosisFilterBlock extends FilterBlock
 			final Direction inputDirection = outputDirection.getOpposite();
 			final boolean canExtractItems = WorldHelper.getTileEntityAt(OsmosisFilterTileEntity.class, world, pos)
 				.filter(filter ->
+					!(filter.transferredItemsThisTick) &&
 					WorldHelper.getTileEntityAt(world, pos.offset(inputDirection))
 					.filter(te ->
 						te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, outputDirection)
