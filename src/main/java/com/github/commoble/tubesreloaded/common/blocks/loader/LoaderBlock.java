@@ -11,6 +11,7 @@ import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Mirror;
@@ -31,30 +32,25 @@ public class LoaderBlock extends Block
 		this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
 	}
 
+	// onBlockActivated
 	@Override
-	public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
+	public ActionResultType func_225533_a_(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace)
 	{
-		ItemStack heldStack = player.getHeldItem(handIn);
+		ItemStack heldStack = player.getHeldItem(hand);
 		if (heldStack.getCount() > 0)
 		{
-			ItemStack remaining = this.insertItem(heldStack.copy(), worldIn, pos, state);
+			ItemStack remaining = this.insertItem(heldStack.copy(), world, pos, state);
 			if (remaining.getCount() < heldStack.getCount())
 			{
-		        if (!worldIn.isRemote)
+		        if (!world.isRemote)
 		        {
-					player.setHeldItem(handIn, remaining);
+					player.setHeldItem(hand, remaining);
 		        }
-				return true;
-			}
-			else
-			{
-				return false;
+				return ActionResultType.SUCCESS;
 			}
 		}
-		else
-		{
-			return false;
-		}
+
+		return super.func_225533_a_(state, world, pos, player, hand, rayTrace);
 	}
 
 	// returns the portion of the itemstack that wasn't inserted
@@ -89,21 +85,25 @@ public class LoaderBlock extends Block
 
 	//// facing and blockstate boilerplate
 
+	@Override
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
 		return this.getDefaultState().with(FACING, DirectionHelper.getBlockFacingForPlacement(context));
 	}
 
+	@Override
 	public BlockState rotate(BlockState state, Rotation rot)
 	{
 		return state.with(FACING, rot.rotate(state.get(FACING)));
 	}
 
+	@Override
 	public BlockState mirror(BlockState state, Mirror mirrorIn)
 	{
 		return state.rotate(mirrorIn.toRotation(state.get(FACING)));
 	}
 
+	@Override
 	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
 	{
 		builder.add(FACING);

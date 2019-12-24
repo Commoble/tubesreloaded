@@ -27,7 +27,6 @@ import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
@@ -83,16 +82,6 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	public TileEntity createTileEntity(BlockState state, IBlockReader world)
 	{
 		return TileEntityRegistrar.TE_TYPE_TUBE.create();
-	}
-
-	/**
-	 * Gets the render layer this block will render on. SOLID for solid blocks,
-	 * CUTOUT or CUTOUT_MIPPED for on-off transparency (glass, reeds), TRANSLUCENT
-	 * for fully blended transparency (stained glass)
-	 */
-	public BlockRenderLayer getRenderLayer()
-	{
-		return BlockRenderLayer.CUTOUT;
 	}
 
 	// block behaviour
@@ -158,11 +147,11 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		IBlockReader world = context.getWorld();
 		BlockPos pos = context.getPos();
 		IFluidState fluidstate = context.getWorld().getFluidState(context.getPos());
-		return super.getStateForPlacement(context).with(DOWN, canConnectTo(world, pos, Direction.DOWN))
-				.with(UP, canConnectTo(world, pos, Direction.UP)).with(NORTH, canConnectTo(world, pos, Direction.NORTH))
-				.with(SOUTH, canConnectTo(world, pos, Direction.SOUTH))
-				.with(WEST, canConnectTo(world, pos, Direction.WEST))
-				.with(EAST, canConnectTo(world, pos, Direction.EAST))
+		return super.getStateForPlacement(context).with(DOWN, this.canConnectTo(world, pos, Direction.DOWN))
+				.with(UP, this.canConnectTo(world, pos, Direction.UP)).with(NORTH, this.canConnectTo(world, pos, Direction.NORTH))
+				.with(SOUTH, this.canConnectTo(world, pos, Direction.SOUTH))
+				.with(WEST, this.canConnectTo(world, pos, Direction.WEST))
+				.with(EAST, this.canConnectTo(world, pos, Direction.EAST))
 				.with(WATERLOGGED, Boolean.valueOf(fluidstate.getFluid() == Fluids.WATER));
 	}
 
@@ -217,6 +206,7 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		return dirs;
 	}
 
+	@Override
 	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
 	{
 		builder.add(DOWN, UP, NORTH, SOUTH, WEST, EAST, WATERLOGGED);

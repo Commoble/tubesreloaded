@@ -14,6 +14,7 @@ import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Mirror;
@@ -51,11 +52,13 @@ public class FilterBlock extends Block
 		return TileEntityRegistrar.TE_TYPE_FILTER.create();
 	}
 	
+	// onBlockActivated
 	@Override
-	public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
+	public ActionResultType func_225533_a_(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit)
 	{
-		Optional<FilterTileEntity> te = WorldHelper.getTileEntityAt(FilterTileEntity.class, worldIn, pos);
-		return te.map(filter -> filter.onActivated(player, hit.getFace(), player.getHeldItem(handIn))).orElse(false);
+		Optional<FilterTileEntity> te = WorldHelper.getTileEntityAt(FilterTileEntity.class, world, pos);
+		boolean success = te.map(filter -> filter.onActivated(player, hit.getFace(), player.getHeldItem(hand))).orElse(false);
+		return success ? ActionResultType.SUCCESS : super.func_225533_a_(state, world, pos, player, hand, hit);
 	}
 	
 	@Override
