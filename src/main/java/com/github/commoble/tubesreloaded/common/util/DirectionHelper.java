@@ -24,7 +24,7 @@ public class DirectionHelper
 		}
 				
 		Direction placeDir = isSprintKeyHeld ? context.getFace().getOpposite() : context.getNearestLookingDirection();
-		placeDir = context.isPlacerSneaking() ? placeDir : placeDir.getOpposite();
+		placeDir = context.func_225518_g_() ? placeDir : placeDir.getOpposite();	// is player sneaking
 		return placeDir;		
 	}
 }

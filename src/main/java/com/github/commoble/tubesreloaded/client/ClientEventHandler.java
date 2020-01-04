@@ -2,11 +2,13 @@ package com.github.commoble.tubesreloaded.client;
 
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
 import com.github.commoble.tubesreloaded.common.registry.BlockRegistrar;
+import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -43,9 +45,11 @@ public class ClientEventHandler
 	{
 		// set render types
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.TUBE, RenderType.func_228643_e_());	// cutout
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.OSMOSIS_SLIME, RenderType.func_228645_f_());
 		// register TE renderers
-//		ClientRegistry.bindTileEntitySpecialRenderer(TubeTileEntity.class, new TubeTileEntityRenderer());
-//		ClientRegistry.bindTileEntitySpecialRenderer(FilterTileEntity.class, new FilterTileEntityRenderer());
-//		ClientRegistry.bindTileEntitySpecialRenderer(OsmosisFilterTileEntity.class, new OsmosisFilterTileEntityRenderer());
+		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.TE_TYPE_TUBE, TubeTileEntityRenderer::new);
+		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.TE_TYPE_REDSTONE_TUBE, TubeTileEntityRenderer::new);
+		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.TE_TYPE_FILTER, FilterTileEntityRenderer::new);
+		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.TE_TYPE_OSMOSIS_FILTER, OsmosisFilterTileEntityRenderer::new);
 	}
 }
