@@ -14,8 +14,8 @@ import net.minecraftforge.items.CapabilityItemHandler;
 
 public class ShuntTileEntity extends TileEntity
 {
-	public LazyOptional<ShuntItemHandler> output_handler = LazyOptional.of(() -> new ShuntItemHandler(this, false));
-	public LazyOptional<ShuntItemHandler> input_handler = LazyOptional.of(() -> new ShuntItemHandler(this, true));
+	public LazyOptional<ShuntItemHandler> output_handler = this.getItemHandler(false);
+	public LazyOptional<ShuntItemHandler> input_handler = this.getItemHandler(true);
 
 	public ShuntTileEntity(TileEntityType<?> tileEntityTypeIn)
 	{
@@ -25,6 +25,11 @@ public class ShuntTileEntity extends TileEntity
 	public ShuntTileEntity()
 	{
 		this(TileEntityRegistrar.TE_TYPE_SHUNT);
+	}
+	
+	public LazyOptional<ShuntItemHandler> getItemHandler(boolean canInsertItems)
+	{
+		return LazyOptional.of(() -> new ShuntItemHandler(this, canInsertItems));
 	}
 	
 	@Override
