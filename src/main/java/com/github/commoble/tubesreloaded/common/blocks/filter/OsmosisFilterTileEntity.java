@@ -4,7 +4,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.github.commoble.tubesreloaded.common.ConfigValues;
+import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
@@ -46,7 +46,7 @@ public class OsmosisFilterTileEntity extends FilterTileEntity implements ITickab
 		if (!this.world.isRemote)
 		{
 			this.checkedItemsThisTick = false;
-			if ((this.world.getGameTime() + this.transferHash) % ConfigValues.osmosis_filter_transfer_rate == 0
+			if ((this.world.getGameTime() + this.transferHash) % TubesReloadedMod.config.osmosis_filter_transfer_rate.get() == 0
 				&& this.getBlockState().get(OsmosisFilterBlock.TRANSFERRING_ITEMS))
 			{
 				Direction filterOutputDirection = this.getBlockState().get(FilterBlock.FACING);

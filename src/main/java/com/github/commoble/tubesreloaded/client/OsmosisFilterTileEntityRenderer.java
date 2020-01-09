@@ -2,7 +2,7 @@ package com.github.commoble.tubesreloaded.client;
 
 import java.util.Random;
 
-import com.github.commoble.tubesreloaded.common.ConfigValues;
+import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
 import com.github.commoble.tubesreloaded.common.blocks.filter.FilterTileEntity;
 import com.github.commoble.tubesreloaded.common.blocks.filter.OsmosisFilterBlock;
 import com.github.commoble.tubesreloaded.common.blocks.filter.OsmosisSlimeBlock;
@@ -46,7 +46,7 @@ public class OsmosisFilterTileEntityRenderer extends FilterTileEntityRenderer
 		Direction dir = filterState.get(OsmosisFilterBlock.FACING);
 		BlockState renderState = BlockRegistrar.OSMOSIS_SLIME.getDefaultState().with(OsmosisSlimeBlock.FACING, dir);
 		long transferhash = blockpos.hashCode();
-		int rate = ConfigValues.osmosis_filter_transfer_rate;
+		int rate = TubesReloadedMod.config.osmosis_filter_transfer_rate.get();
 		double ticks = te.getWorld().getGameTime() + transferhash + partialTicks;
 		double minScale = 0.25D;
 		double lengthScale = minScale + (te.getBlockState().get(OsmosisFilterBlock.TRANSFERRING_ITEMS)

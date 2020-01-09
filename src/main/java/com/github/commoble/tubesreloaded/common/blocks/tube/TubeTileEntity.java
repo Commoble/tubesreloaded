@@ -9,7 +9,7 @@ import java.util.Queue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.common.ConfigValues;
+import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.common.routing.Route;
 import com.github.commoble.tubesreloaded.common.routing.RoutingNetwork;
@@ -178,7 +178,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			}
 			this.inventory = remainingWrappers;
 		}
-		if (!this.world.isRemote && this.inventory.size() > ConfigValues.max_items_in_tube)
+		if (!this.world.isRemote && this.inventory.size() > TubesReloadedMod.config.max_items_in_tube.get())
 		{
 			this.world.removeBlock(this.pos, false);
 		}
