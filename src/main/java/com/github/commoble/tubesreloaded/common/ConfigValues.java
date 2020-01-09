@@ -20,11 +20,11 @@ public class ConfigValues
 		this.soft_tube_cap = subscriber.subscribe(builder
 				.comment("Soft cap on how many tubes can exist in a contiguous network of tubes. Items are transported slowlier in networks of greater size than this value.")
 				.translation("tubesreloaded.config.soft_tube_cap")
-				.defineInRange("soft_tube_cap", 100, 1, 10000));
+				.defineInRange("soft_tube_cap", 400, 1, 10000));
 		this.hard_tube_cap = subscriber.subscribe(builder
 				.comment("Hard cap on how many tubes can exist in a contiguous network of tubes. If a player attempts to make a network of greater size from this value, not all tubes in the attempted network will become part of that network.")
 				.translation("tubesreloaded.config.hard_tube_cap")
-				.defineInRange("hard_tube_cap", 200, 1, 10000));
+				.defineInRange("hard_tube_cap", 500, 1, 10000));
 		this.ticks_in_tube = subscriber.subscribe(builder
 				.comment("Base time in ticks that a moving itemstack spends in each individual tube block. Adjusted by other factors.")
 				.translation("tubesreloaded.config.ticks_in_tube")
