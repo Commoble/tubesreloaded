@@ -16,7 +16,6 @@ import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -32,23 +31,19 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 	@Override
 	public void func_225616_a_(TubeTileEntity tube, float partialTicks, MatrixStack matrix, IRenderTypeBuffer buffer, int intA, int intB)
 	{
-		BlockPos pos = tube.getPos();
-		int x = pos.getX();
-		int y = pos.getZ();
-		int z = pos.getZ();
 		// render tick happens independently of regular ticks and often more frequently
 		if (!tube.inventory.isEmpty())
 		{
 			for (ItemInTubeWrapper wrapper : tube.inventory)
 			{
-				this.renderWrapper(tube, wrapper, x, y, z, partialTicks, matrix, buffer, intA);
+				this.renderWrapper(tube, wrapper, partialTicks, matrix, buffer, intA);
 			}
 		}
 		if (!tube.incoming_wrapper_buffer.isEmpty())
 		{
 			for (ItemInTubeWrapper wrapper : tube.incoming_wrapper_buffer)
 			{
-				this.renderWrapper(tube, wrapper, 0,0,0, partialTicks, matrix, buffer, intA);
+				this.renderWrapper(tube, wrapper, partialTicks, matrix, buffer, intA);
 			}
 		}
 	}
@@ -81,7 +76,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 	/**
 	 * Renders an itemstack
 	 */
-	public void renderWrapper(TubeTileEntity tube, ItemInTubeWrapper wrapper, double x, double y, double z, float partialTicks,
+	public void renderWrapper(TubeTileEntity tube, ItemInTubeWrapper wrapper, float partialTicks,
 		MatrixStack matrix, IRenderTypeBuffer buffer, int intA)
 	{
 		Direction nextMove = wrapper.remainingMoves.peek();
@@ -102,9 +97,6 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 		float lerpFactor = (wrapper.ticksElapsed + partialTicks) / wrapper.maximumDurationInTube;	// factor in range [0,1)
 		if (wrapper.freshlyInserted)	// first move
 		{
-//			xEnd = (float)x;
-//			yEnd = (float)y;
-//			zEnd = (float)z;
 			xEnd = 0F;
 			yEnd = 0F;
 			zEnd = 0F;
@@ -114,9 +106,6 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 		}
 		else	// any other move
 		{
-//			xStart = (float)x;
-//			yStart = (float)y;
-//			zStart = (float)z;
 			xStart = 0F;
 			yStart = 0F;
 			zStart = 0F;

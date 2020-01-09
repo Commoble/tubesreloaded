@@ -19,6 +19,9 @@ import net.minecraftforge.registries.ObjectHolder;
 @ObjectHolder(TubesReloadedMod.MODID)
 public class ItemRegistrar
 {	
+	@ObjectHolder(BlockNames.OSMOSIS_SLIME_NAME)
+	public static final BlockItem OSMOSIS_SLIME = null;
+	
 	public static void registerItems(RegistryEvent.Register<Item> event)
 	{
 		IForgeRegistry<Item> registry = event.getRegistry();
@@ -30,6 +33,7 @@ public class ItemRegistrar
 		registerItem(registry, new BlockItem(BlockRegistrar.EXTRACTOR, new Item.Properties().group(CreativeTabs.tab)), BlockNames.EXTRACTOR_NAME);
 		registerItem(registry, new BlockItem(BlockRegistrar.FILTER, new Item.Properties().group(CreativeTabs.tab)), BlockNames.FILTER_NAME);
 		registerItem(registry, new BlockItem(BlockRegistrar.OSMOSIS_FILTER, new Item.Properties().group(CreativeTabs.tab)), BlockNames.OSMOSIS_FILTER_NAME);
+		registerItem(registry, new BlockItem(BlockRegistrar.OSMOSIS_SLIME, new Item.Properties()), BlockNames.OSMOSIS_SLIME_NAME);
 		
 		IntStream.range(0, 16).forEach(
 				i -> registerItem(

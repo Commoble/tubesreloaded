@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.math.BlockPos;
 
 public class FilterTileEntityRenderer extends TileEntityRenderer<FilterTileEntity>
 {
@@ -29,21 +28,17 @@ public class FilterTileEntityRenderer extends TileEntityRenderer<FilterTileEntit
 	{
 		if (te.filterStack.getCount() > 0)
 		{
-			BlockPos pos = te.getPos();
-			int x = pos.getX();
-			int y = pos.getY();
-			int z = pos.getZ();
-			this.renderItem(te.filterStack, x, y, z, te.getBlockState().get(FilterBlock.FACING), matrix, buffer, intA);
+			this.renderItem(te.filterStack, te.getBlockState().get(FilterBlock.FACING), matrix, buffer, intA);
 		}
 	}
 
-	private void renderItem(ItemStack stack, double x, double y, double z, Direction facing, MatrixStack matrix, IRenderTypeBuffer buffer, int intA)
+	private void renderItem(ItemStack stack, Direction facing, MatrixStack matrix, IRenderTypeBuffer buffer, int intA)
 	{
 		ItemRenderer renderer = Minecraft.getInstance().getItemRenderer();
 
 		matrix.func_227860_a_();	// push
 
-		matrix.func_227861_a_(x + 0.501D, y + 0.502D, z + 0.503D);	// translation
+		matrix.func_227861_a_(0.501D, 0.502D, 0.503D);	// translation
 		matrix.func_227862_a_(0.9F, 0.9F, 0.9F);	// scale
 		if (facing.getAxis() == Axis.X)
 		{
@@ -54,6 +49,8 @@ public class FilterTileEntityRenderer extends TileEntityRenderer<FilterTileEntit
 		
 		//renderer.renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
 		renderer.func_229110_a_(stack, ItemCameraTransforms.TransformType.FIXED, intA, OverlayTexture.field_229196_a_, matrix, buffer);
+		
+		
 
 		matrix.func_227865_b_();	// pop
 	}
