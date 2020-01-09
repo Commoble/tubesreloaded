@@ -36,14 +36,33 @@ public class Route implements Comparable<Route>
 		}
 		
 		// otherwise, return whether the item is valid for the route's endpoint
-		return destination.canInsertItem(world, stack);
+		return this.destination.canInsertItem(world, stack);
 	}
 
 	@Override
 	public int compareTo(Route other)
 	{
-		// TODO Auto-generated method stub
-		return this.length - other.length;
+		if (this.length != other.length)
+		{
+			return this.length - other.length;
+		}
+		else
+		{
+			BlockPos thisEnd = this.destination.pos;
+			BlockPos otherEnd = other.destination.pos;
+			if (thisEnd.getY() != otherEnd.getY())
+			{
+				return thisEnd.getY() - otherEnd.getY();
+			}
+			else if (thisEnd.getZ() != otherEnd.getZ())
+			{
+				return thisEnd.getZ() - otherEnd.getZ();
+			}
+			else
+			{
+				return thisEnd.getX() - otherEnd.getX();
+			}
+		}
 	}
 	
 	
