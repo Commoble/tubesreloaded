@@ -41,6 +41,14 @@ public class FilterTileEntity extends TileEntity
 		this(TileEntityRegistrar.TE_TYPE_FILTER);
 	}
 	
+	@Override
+	public void remove()
+	{
+		this.shuntingOptional.invalidate();
+		this.storageOptional.invalidate();
+		super.remove();
+	}
+	
 	public boolean canItemPassThroughFilter(ItemStack stack)
 	{
 		if (stack.getCount() <= 0)

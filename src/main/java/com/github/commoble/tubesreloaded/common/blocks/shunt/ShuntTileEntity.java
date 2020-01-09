@@ -14,8 +14,8 @@ import net.minecraftforge.items.CapabilityItemHandler;
 
 public class ShuntTileEntity extends TileEntity
 {
-	public ShuntItemHandler output_handler = new ShuntItemHandler(this, false);
-	public ShuntItemHandler input_handler = new ShuntItemHandler(this, true);
+	public LazyOptional<ShuntItemHandler> output_handler = LazyOptional.of(() -> new ShuntItemHandler(this, false));
+	public LazyOptional<ShuntItemHandler> input_handler = LazyOptional.of(() -> new ShuntItemHandler(this, true));
 
 	public ShuntTileEntity(TileEntityType<?> tileEntityTypeIn)
 	{
@@ -27,7 +27,14 @@ public class ShuntTileEntity extends TileEntity
 		this(TileEntityRegistrar.TE_TYPE_SHUNT);
 	}
 	
-	@SuppressWarnings("unchecked")
+	@Override
+	public void remove()
+	{
+		this.output_handler.invalidate();
+		this.input_handler.invalidate();
+		super.remove();
+	}
+	
 	@Override
 	@Nonnull
 	public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side)
@@ -35,7 +42,7 @@ public class ShuntTileEntity extends TileEntity
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 		{
 			Direction output_dir = this.getBlockState().get(ShuntBlock.FACING);
-			return (LazyOptional<T>) LazyOptional.of(() -> side == output_dir ? output_handler : input_handler);
+			return side == output_dir ? this.output_handler.cast() : this.input_handler.cast();
 		}
 		return super.getCapability(cap, side);
 	}

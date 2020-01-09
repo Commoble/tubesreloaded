@@ -114,11 +114,13 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 
 	/**** Event Handling ****/
 	
-	public void onBlockRemoved()
+	@Override
+	public void remove()
 	{
 		this.dropItems();
 		this.network.invalid = true;
 		Arrays.stream(this.handlerOptionals).forEach(optional -> optional.invalidate());
+		super.remove();
 	}
 	
 	public void onPossibleNetworkUpdateRequired()
