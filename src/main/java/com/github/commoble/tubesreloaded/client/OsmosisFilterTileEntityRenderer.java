@@ -33,10 +33,10 @@ public class OsmosisFilterTileEntityRenderer extends FilterTileEntityRenderer
 	}
 
 	@Override
-	public void func_225616_a_(FilterTileEntity te, float partialTicks, MatrixStack matrix, IRenderTypeBuffer buffer, int intA, int intB)
+	public void render(FilterTileEntity te, float partialTicks, MatrixStack matrix, IRenderTypeBuffer buffer, int intA, int intB)
 	{
 		this.renderSlime(te, partialTicks, matrix, buffer, intA, intB);
-		super.func_225616_a_(te, partialTicks, matrix, buffer, intA, intB);
+		super.render(te, partialTicks, matrix, buffer, intA, intB);
 	}
 
 	private void renderSlime(FilterTileEntity te, float partialTicks, MatrixStack matrix, IRenderTypeBuffer buffer, int intA, int intB)
@@ -80,10 +80,10 @@ public class OsmosisFilterTileEntityRenderer extends FilterTileEntityRenderer
 		double translateY = translateFactorY * (tY * lengthTranslateFactor - 0.125D*dirOffsetY);
 		double translateZ = translateFactorZ * (tZ * lengthTranslateFactor - 0.125D*dirOffsetZ);
 		
-		matrix.func_227860_a_();	// push
-		matrix.func_227861_a_(translateX, translateY, translateZ);	// translate
-		matrix.func_227862_a_(scaleX, scaleY, scaleZ);	// scale
-		RenderType renderType = RenderTypeLookup.func_228394_b_(renderState);
+		matrix.push();	// push
+		matrix.translate(translateX, translateY, translateZ);
+		matrix.scale(scaleX, scaleY, scaleZ);
+		RenderType renderType = RenderTypeLookup.getRenderType(renderState);
 		net.minecraftforge.client.ForgeHooksClient.setRenderLayer(renderType);
 		
 		BlockRendererDispatcher blockDispatcher = Minecraft.getInstance().getBlockRendererDispatcher();
@@ -97,10 +97,10 @@ public class OsmosisFilterTileEntityRenderer extends FilterTileEntityRenderer
       	  false,
       	  new Random(),
       	  renderState.getPositionRandom(blockpos),
-      	  OverlayTexture.field_229196_a_,
+      	  OverlayTexture.DEFAULT_LIGHT,
       	  net.minecraftforge.client.model.data.EmptyModelData.INSTANCE
       	 );
-		matrix.func_227865_b_();	// pop
+		matrix.pop();
 	}
 
 //	private boolean renderStateModel(BlockPos pos, BlockState state, BufferBuilder buffer, World p_188186_4_, boolean checkSides)

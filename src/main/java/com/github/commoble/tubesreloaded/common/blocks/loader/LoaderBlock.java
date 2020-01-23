@@ -34,7 +34,7 @@ public class LoaderBlock extends Block
 
 	// onBlockActivated
 	@Override
-	public ActionResultType func_225533_a_(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace)
+	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace)
 	{
 		ItemStack heldStack = player.getHeldItem(hand);
 		if (heldStack.getCount() > 0)
@@ -50,7 +50,7 @@ public class LoaderBlock extends Block
 			}
 		}
 
-		return super.func_225533_a_(state, world, pos, player, hand, rayTrace);
+		return super.onBlockActivated(state, world, pos, player, hand, rayTrace);
 	}
 
 	// returns the portion of the itemstack that wasn't inserted

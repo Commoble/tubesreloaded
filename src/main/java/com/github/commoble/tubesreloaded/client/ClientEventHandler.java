@@ -44,8 +44,8 @@ public class ClientEventHandler
 	public static void onClientSetup(FMLClientSetupEvent event)
 	{
 		// set render types
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.TUBE, RenderType.func_228643_e_());	// cutout
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.OSMOSIS_SLIME, RenderType.func_228645_f_());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.TUBE, RenderType.cutout());	// cutout
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.OSMOSIS_SLIME, RenderType.translucent());
 		// register TE renderers
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.TE_TYPE_TUBE, TubeTileEntityRenderer::new);
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.TE_TYPE_REDSTONE_TUBE, TubeTileEntityRenderer::new);

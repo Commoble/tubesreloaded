@@ -92,9 +92,9 @@ public class OsmosisFilterBlock extends FilterBlock
 	}
 
 	@Override
-	public ActionResultType func_225533_a_(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
+	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
 	{
-		ActionResultType result = super.func_225533_a_(state, worldIn, pos, player, handIn, hit);
+		ActionResultType result = super.onBlockActivated(state, worldIn, pos, player, handIn, hit);
 		this.updateState(worldIn, pos, state);
 		return result;
 	}

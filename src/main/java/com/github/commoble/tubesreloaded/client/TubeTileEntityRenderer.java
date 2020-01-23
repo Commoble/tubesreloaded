@@ -29,7 +29,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 	}
 
 	@Override
-	public void func_225616_a_(TubeTileEntity tube, float partialTicks, MatrixStack matrix, IRenderTypeBuffer buffer, int intA, int intB)
+	public void render(TubeTileEntity tube, float partialTicks, MatrixStack matrix, IRenderTypeBuffer buffer, int intA, int intB)
 	{
 		// render tick happens independently of regular ticks and often more frequently
 		if (!tube.inventory.isEmpty())
@@ -91,7 +91,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 		random.setSeed(i);
 		
 
-		matrix.func_227860_a_();	// push
+		matrix.push();
 		int renderedItemCount = this.getModelCount(itemstack);
 		float xStart, yStart, zStart, xEnd, yEnd, zEnd;
 		float lerpFactor = (wrapper.ticksElapsed + partialTicks) / wrapper.maximumDurationInTube;	// factor in range [0,1)
@@ -120,7 +120,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 		itemRenderer.zLevel -= 50F;
 		for (int currentModelIndex = 0; currentModelIndex < renderedItemCount; ++currentModelIndex)
 		{
-			matrix.func_227860_a_();	// push
+			matrix.push();
 			float xAdjustment = 0F;
 			float yAdjustment = 0F;
 			float zAdjustment = 0F;
@@ -133,14 +133,14 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 			float xTranslate = xLerp + xAdjustment + 0.5F;
 			float yTranslate = yLerp + yAdjustment + 0.4375F;
 			float zTranslate = zLerp + zAdjustment + 0.5F;
-			matrix.func_227861_a_(xTranslate, yTranslate, zTranslate);// translation // aggregate is centered
-			matrix.func_227862_a_(0.5F, 0.5F, 0.5F);	// scale
+			matrix.translate(xTranslate, yTranslate, zTranslate);// aggregate is centered
+			matrix.scale(0.5F, 0.5F, 0.5F);
 			
-			itemRenderer.func_229110_a_(itemstack, ItemCameraTransforms.TransformType.GROUND, intA, OverlayTexture.field_229196_a_, matrix, buffer);
-			matrix.func_227865_b_();	// pop
+			itemRenderer.renderItem(itemstack, ItemCameraTransforms.TransformType.GROUND, intA, OverlayTexture.DEFAULT_LIGHT, matrix, buffer);
+			matrix.pop();
 		}
 		itemRenderer.zLevel += 50F;
 
-		matrix.func_227865_b_();	// pop
+		matrix.pop();
 	}
 }

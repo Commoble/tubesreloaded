@@ -24,7 +24,7 @@ public class FilterTileEntityRenderer extends TileEntityRenderer<FilterTileEntit
 	}
 
 	@Override
-	public void func_225616_a_(FilterTileEntity te, float partialTicks, MatrixStack matrix, IRenderTypeBuffer buffer, int intA, int intB)
+	public void render(FilterTileEntity te, float partialTicks, MatrixStack matrix, IRenderTypeBuffer buffer, int intA, int intB)
 	{
 		if (te.filterStack.getCount() > 0)
 		{
@@ -36,22 +36,22 @@ public class FilterTileEntityRenderer extends TileEntityRenderer<FilterTileEntit
 	{
 		ItemRenderer renderer = Minecraft.getInstance().getItemRenderer();
 
-		matrix.func_227860_a_();	// push
+		matrix.push();	// push
 
-		matrix.func_227861_a_(0.501D, 0.502D, 0.503D);	// translation
-		matrix.func_227862_a_(0.9F, 0.9F, 0.9F);	// scale
+		matrix.translate(0.501D, 0.502D, 0.503D);	// translation
+		matrix.scale(0.9F, 0.9F, 0.9F);	// scale
 		if (facing.getAxis() == Axis.X)
 		{
-			matrix.func_227863_a_(Vector3f.field_229181_d_.func_229187_a_(90F));	// rotate 90 degrees about y-axis
+			matrix.rotate(Vector3f.YP.rotationDegrees(90F));	// rotate 90 degrees about y-axis
 			//matrix.func_227863_a_(90D, 0D, 1D, 0D);
 		}
 
 		
 		//renderer.renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
-		renderer.func_229110_a_(stack, ItemCameraTransforms.TransformType.FIXED, intA, OverlayTexture.field_229196_a_, matrix, buffer);
+		renderer.renderItem(stack, ItemCameraTransforms.TransformType.FIXED, intA, OverlayTexture.DEFAULT_LIGHT, matrix, buffer);
 		
 		
 
-		matrix.func_227865_b_();	// pop
+		matrix.pop();
 	}
 }

@@ -54,11 +54,11 @@ public class FilterBlock extends Block
 	
 	// onBlockActivated
 	@Override
-	public ActionResultType func_225533_a_(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit)
+	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit)
 	{
 		Optional<FilterTileEntity> te = WorldHelper.getTileEntityAt(FilterTileEntity.class, world, pos);
 		boolean success = te.map(filter -> filter.onActivated(player, hit.getFace(), player.getHeldItem(hand))).orElse(false);
-		return success ? ActionResultType.SUCCESS : super.func_225533_a_(state, world, pos, player, hand, hit);
+		return success ? ActionResultType.SUCCESS : super.onBlockActivated(state, world, pos, player, hand, hit);
 	}
 	
 	@Override
