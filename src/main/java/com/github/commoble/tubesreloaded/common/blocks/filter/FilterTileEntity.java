@@ -38,7 +38,7 @@ public class FilterTileEntity extends TileEntity
 	
 	public FilterTileEntity()
 	{
-		this(TileEntityRegistrar.TE_TYPE_FILTER);
+		this(TileEntityRegistrar.FILTER);
 	}
 	
 	@Override

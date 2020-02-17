@@ -23,7 +23,7 @@ public class OsmosisFilterTileEntity extends FilterTileEntity implements ITickab
 
 	public OsmosisFilterTileEntity()
 	{
-		super(TileEntityRegistrar.TE_TYPE_OSMOSIS_FILTER);
+		super(TileEntityRegistrar.OSMOSIS_FILTER);
 	}
 
 	@Override

@@ -12,7 +12,7 @@ public class RedstoneTubeTileEntity extends TubeTileEntity
 {
 	public RedstoneTubeTileEntity()
 	{
-		super(TileEntityRegistrar.TE_TYPE_REDSTONE_TUBE);
+		super(TileEntityRegistrar.REDSTONE_TUBE);
 	}
 
 	@Override

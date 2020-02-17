@@ -43,7 +43,7 @@ public class OsmosisFilterBlock extends FilterBlock
 	@Override
 	public TileEntity createTileEntity(BlockState state, IBlockReader world)
 	{
-		return TileEntityRegistrar.TE_TYPE_OSMOSIS_FILTER.create();
+		return TileEntityRegistrar.OSMOSIS_FILTER.create();
 	}   
 	
 	@Override

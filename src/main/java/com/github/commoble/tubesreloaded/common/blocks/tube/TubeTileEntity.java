@@ -65,7 +65,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 
 	public TubeTileEntity()
 	{
-		this(TileEntityRegistrar.TE_TYPE_TUBE);
+		this(TileEntityRegistrar.TUBE);
 	}
 	
 	/**** Getters and Setters	****/

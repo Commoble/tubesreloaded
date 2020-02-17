@@ -23,6 +23,6 @@ public class DistributorBlock extends Block
 	@Override
 	public TileEntity createTileEntity(BlockState state, IBlockReader world)
 	{
-		return TileEntityRegistrar.TE_TYPE_DISTRIBUTOR.create();
+		return TileEntityRegistrar.DISTRIBUTOR.create();
 	}
 }

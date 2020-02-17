@@ -24,7 +24,7 @@ public class ShuntTileEntity extends TileEntity
 
 	public ShuntTileEntity()
 	{
-		this(TileEntityRegistrar.TE_TYPE_SHUNT);
+		this(TileEntityRegistrar.SHUNT);
 	}
 	
 	public LazyOptional<ShuntItemHandler> getItemHandler(boolean canInsertItems)

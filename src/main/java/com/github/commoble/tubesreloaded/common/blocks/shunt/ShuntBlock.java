@@ -41,7 +41,7 @@ public class ShuntBlock extends Block
 	@Override
 	public TileEntity createTileEntity(BlockState state, IBlockReader world)
 	{
-		return TileEntityRegistrar.TE_TYPE_SHUNT.create();
+		return TileEntityRegistrar.SHUNT.create();
 	}
 
 	//// facing and blockstate boilerplate

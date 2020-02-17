@@ -39,7 +39,7 @@ public class RedstoneTubeBlock extends TubeBlock
 	@Override
 	public TileEntity createTileEntity(BlockState state, IBlockReader world)
 	{
-		return TileEntityRegistrar.TE_TYPE_REDSTONE_TUBE.create();
+		return TileEntityRegistrar.REDSTONE_TUBE.create();
 	}
 
 	/**

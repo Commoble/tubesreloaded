@@ -8,7 +8,7 @@ public class DistributorTileEntity extends TileEntity
 {
 	public DistributorTileEntity()
 	{
-		super(TileEntityRegistrar.TE_TYPE_DISTRIBUTOR);
+		super(TileEntityRegistrar.DISTRIBUTOR);
 	}
 
 	

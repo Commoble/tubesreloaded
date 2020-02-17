@@ -49,7 +49,7 @@ public class FilterBlock extends Block
 	@Override
 	public TileEntity createTileEntity(BlockState state, IBlockReader world)
 	{
-		return TileEntityRegistrar.TE_TYPE_FILTER.create();
+		return TileEntityRegistrar.FILTER.create();
 	}
 	
 	// onBlockActivated

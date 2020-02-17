@@ -20,18 +20,18 @@ import net.minecraftforge.registries.ObjectHolder;
 @ObjectHolder(TubesReloadedMod.MODID)
 public class TileEntityRegistrar
 {
-	@ObjectHolder(BlockNames.TUBE_NAME)
-	public static final TileEntityType<TubeTileEntity> TE_TYPE_TUBE = null;
-	@ObjectHolder(BlockNames.SHUNT_NAME)
-	public static final TileEntityType<ShuntTileEntity> TE_TYPE_SHUNT = null;
-	@ObjectHolder(BlockNames.REDSTONE_TUBE_NAME)
-	public static final TileEntityType<RedstoneTubeTileEntity> TE_TYPE_REDSTONE_TUBE = null;
-	@ObjectHolder(BlockNames.FILTER_NAME)
-	public static final TileEntityType<FilterTileEntity> TE_TYPE_FILTER = null;
-	@ObjectHolder(BlockNames.OSMOSIS_FILTER_NAME)
-	public static final TileEntityType<OsmosisFilterTileEntity> TE_TYPE_OSMOSIS_FILTER = null;
-	@ObjectHolder(BlockNames.DISTRIBUTOR_NAME)
-	public static final TileEntityType<OsmosisFilterTileEntity> TE_TYPE_DISTRIBUTOR = null;
+	@ObjectHolder(BlockNames.TUBE)
+	public static final TileEntityType<TubeTileEntity> TUBE = null;
+	@ObjectHolder(BlockNames.SHUNT)
+	public static final TileEntityType<ShuntTileEntity> SHUNT = null;
+	@ObjectHolder(BlockNames.REDSTONE_TUBE)
+	public static final TileEntityType<RedstoneTubeTileEntity> REDSTONE_TUBE = null;
+	@ObjectHolder(BlockNames.FILTER)
+	public static final TileEntityType<FilterTileEntity> FILTER = null;
+	@ObjectHolder(BlockNames.OSMOSIS_FILTER)
+	public static final TileEntityType<OsmosisFilterTileEntity> OSMOSIS_FILTER = null;
+	@ObjectHolder(BlockNames.DISTRIBUTOR)
+	public static final TileEntityType<OsmosisFilterTileEntity> DISTRIBUTOR = null;
 	
 	
 	public static void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event)
@@ -42,27 +42,27 @@ public class TileEntityRegistrar
 		tubes[16] = BlockRegistrar.TUBE;	// need an array with all the color tubes + the original tube since they use the same TE
 		event.getRegistry().register(TileEntityType.Builder.create(TubeTileEntity::new, tubes)
 				.build(null)
-				.setRegistryName(BlockNames.TUBE_NAME)
+				.setRegistryName(BlockNames.TUBE)
 				);
 		event.getRegistry().register(TileEntityType.Builder.create(ShuntTileEntity::new,BlockRegistrar.SHUNT)
 				.build(null)
-				.setRegistryName(BlockNames.SHUNT_NAME)
+				.setRegistryName(BlockNames.SHUNT)
 				);
 		event.getRegistry().register(TileEntityType.Builder.create(RedstoneTubeTileEntity::new,BlockRegistrar.REDSTONE_TUBE)
 				.build(null)
-				.setRegistryName(BlockNames.REDSTONE_TUBE_NAME)
+				.setRegistryName(BlockNames.REDSTONE_TUBE)
 				);
 		event.getRegistry().register(TileEntityType.Builder.create(FilterTileEntity::new,BlockRegistrar.FILTER)
 				.build(null)
-				.setRegistryName(BlockNames.FILTER_NAME)
+				.setRegistryName(BlockNames.FILTER)
 				);
 		event.getRegistry().register(TileEntityType.Builder.create(OsmosisFilterTileEntity::new,BlockRegistrar.OSMOSIS_FILTER)
 			.build(null)
-			.setRegistryName(BlockNames.OSMOSIS_FILTER_NAME)
+			.setRegistryName(BlockNames.OSMOSIS_FILTER)
 			);
 		event.getRegistry().register(TileEntityType.Builder.create(DistributorTileEntity::new,BlockRegistrar.DISTRIBUTOR)
 			.build(null)
-			.setRegistryName(BlockNames.OSMOSIS_FILTER_NAME)
+			.setRegistryName(BlockNames.OSMOSIS_FILTER)
 			);
 		
 		

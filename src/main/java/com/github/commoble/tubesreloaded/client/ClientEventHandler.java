@@ -47,9 +47,9 @@ public class ClientEventHandler
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.TUBE, RenderType.cutout());	// cutout
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.OSMOSIS_SLIME, RenderType.translucent());
 		// register TE renderers
-		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.TE_TYPE_TUBE, TubeTileEntityRenderer::new);
-		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.TE_TYPE_REDSTONE_TUBE, TubeTileEntityRenderer::new);
-		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.TE_TYPE_FILTER, FilterTileEntityRenderer::new);
-		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.TE_TYPE_OSMOSIS_FILTER, OsmosisFilterTileEntityRenderer::new);
+		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.TUBE, TubeTileEntityRenderer::new);
+		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.REDSTONE_TUBE, TubeTileEntityRenderer::new);
+		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.FILTER, FilterTileEntityRenderer::new);
+		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.OSMOSIS_FILTER, OsmosisFilterTileEntityRenderer::new);
 	}
 }

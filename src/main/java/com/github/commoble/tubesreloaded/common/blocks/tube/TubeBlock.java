@@ -81,7 +81,7 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	@Override
 	public TileEntity createTileEntity(BlockState state, IBlockReader world)
 	{
-		return TileEntityRegistrar.TE_TYPE_TUBE.create();
+		return TileEntityRegistrar.TUBE.create();
 	}
 
 	// block behaviour
