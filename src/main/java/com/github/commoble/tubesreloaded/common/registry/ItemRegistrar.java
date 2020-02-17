@@ -34,6 +34,7 @@ public class ItemRegistrar
 		registerItem(registry, new BlockItem(BlockRegistrar.FILTER, new Item.Properties().group(CreativeTabs.tab)), BlockNames.FILTER_NAME);
 		registerItem(registry, new BlockItem(BlockRegistrar.OSMOSIS_FILTER, new Item.Properties().group(CreativeTabs.tab)), BlockNames.OSMOSIS_FILTER_NAME);
 		registerItem(registry, new BlockItem(BlockRegistrar.OSMOSIS_SLIME, new Item.Properties()), BlockNames.OSMOSIS_SLIME_NAME);
+		registerItem(registry, new BlockItem(BlockRegistrar.DISTRIBUTOR, new Item.Properties().group(CreativeTabs.tab)), BlockNames.DISTRIBUTOR_NAME);
 		
 		IntStream.range(0, 16).forEach(
 				i -> registerItem(

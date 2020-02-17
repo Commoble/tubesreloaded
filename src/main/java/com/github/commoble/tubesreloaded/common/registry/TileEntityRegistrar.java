@@ -3,6 +3,7 @@ package com.github.commoble.tubesreloaded.common.registry;
 import java.util.stream.IntStream;
 
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.common.blocks.distributor.DistributorTileEntity;
 import com.github.commoble.tubesreloaded.common.blocks.filter.FilterTileEntity;
 import com.github.commoble.tubesreloaded.common.blocks.filter.OsmosisFilterTileEntity;
 import com.github.commoble.tubesreloaded.common.blocks.shunt.ShuntTileEntity;
@@ -29,6 +30,8 @@ public class TileEntityRegistrar
 	public static final TileEntityType<FilterTileEntity> TE_TYPE_FILTER = null;
 	@ObjectHolder(BlockNames.OSMOSIS_FILTER_NAME)
 	public static final TileEntityType<OsmosisFilterTileEntity> TE_TYPE_OSMOSIS_FILTER = null;
+	@ObjectHolder(BlockNames.DISTRIBUTOR_NAME)
+	public static final TileEntityType<OsmosisFilterTileEntity> TE_TYPE_DISTRIBUTOR = null;
 	
 	
 	public static void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event)
@@ -54,6 +57,10 @@ public class TileEntityRegistrar
 				.setRegistryName(BlockNames.FILTER_NAME)
 				);
 		event.getRegistry().register(TileEntityType.Builder.create(OsmosisFilterTileEntity::new,BlockRegistrar.OSMOSIS_FILTER)
+			.build(null)
+			.setRegistryName(BlockNames.OSMOSIS_FILTER_NAME)
+			);
+		event.getRegistry().register(TileEntityType.Builder.create(DistributorTileEntity::new,BlockRegistrar.DISTRIBUTOR)
 			.build(null)
 			.setRegistryName(BlockNames.OSMOSIS_FILTER_NAME)
 			);

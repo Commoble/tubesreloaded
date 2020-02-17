@@ -15,6 +15,7 @@ public class BlockNames
 	public static final String FILTER_NAME = "filter";
 	public static final String OSMOSIS_FILTER_NAME = "osmosis_filter";
 	public static final String OSMOSIS_SLIME_NAME = "osmosis_slime";
+	public static final String DISTRIBUTOR_NAME = "distributor";
 	
 	public static final String[] COLORED_TUBE_NAMES = Arrays.stream(DyeColor.values()).map(color -> color.toString() + "_tube").toArray(String[]::new);
 }
