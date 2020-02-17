@@ -3,6 +3,7 @@
   "values": [
     "tubesreloaded:shunt",
     "tubesreloaded:filter",
-    "tubesreloaded:osmosis_filter"
+    "tubesreloaded:osmosis_filter",
+    "tubesreloaded:distributor"
   ]
 }

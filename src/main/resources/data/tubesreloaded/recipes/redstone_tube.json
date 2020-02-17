@@ -10,7 +10,7 @@
       "item": "minecraft:redstone"
     },
     "t": {
-      "item": "tubesreloaded:tube"
+      "tag": "tubesreloaded:tubes"
     }
   },
   "result": {

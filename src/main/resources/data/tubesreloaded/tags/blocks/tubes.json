@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "tubesreloaded:tube",
+    "tubesreloaded:redstone_tube",
+    "#tubesreloaded:colored_tubes"
+  ]
+}

@@ -1,9 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " t ",
-    "tst",
-    " t "
+    "sts",
+    "tGt",
+    "sts"
   ],
   "key": {
     "s": {
@@ -11,10 +11,13 @@
     },
     "t": {
       "tag": "tubesreloaded:tubes"
+    },
+    "P": {
+      "tag": "forge:fence_gates"
     }
   },
   "result": {
-    "item": "tubesreloaded:shunt",
+    "item": "tubesreloaded:loader",
     "count": 1
   }
 }
