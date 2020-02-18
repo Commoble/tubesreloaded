@@ -129,12 +129,17 @@ public class WorldHelper
 	// return the portion that was not inserted
 	public static ItemStack disperseItemToHandler(ItemStack stack, IItemHandler handler)
 	{
+		return disperseItemToHandler(stack, handler, false);
+	}
+	
+	public static ItemStack disperseItemToHandler(ItemStack stack, IItemHandler handler, boolean simulate)
+	{
 		int slotCount = handler.getSlots();
 		for (int i=0; i<slotCount; i++)
 		{
 			if (handler.isItemValid(i, stack))
 			{
-				stack = handler.insertItem(i, stack, false);
+				stack = handler.insertItem(i, stack, simulate);
 			}
 			if (stack.getCount() == 0)
 			{
