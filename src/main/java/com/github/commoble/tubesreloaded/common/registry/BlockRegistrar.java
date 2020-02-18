@@ -44,7 +44,7 @@ public class BlockRegistrar
 	@ObjectHolder(BlockNames.OSMOSIS_SLIME)
 	public static final OsmosisSlimeBlock OSMOSIS_SLIME = null;
 	@ObjectHolder(BlockNames.DISTRIBUTOR)
-	public static final OsmosisSlimeBlock DISTRIBUTOR = null;
+	public static final DistributorBlock DISTRIBUTOR = null;
 	
 	// no object holder for color tubes since there's too many of them
 

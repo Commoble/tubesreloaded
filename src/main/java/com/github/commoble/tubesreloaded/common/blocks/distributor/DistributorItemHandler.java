@@ -33,6 +33,7 @@ public class DistributorItemHandler implements IItemHandler
 	public void setNextDirectionIndex(int index)
 	{
 		this.nextDirection = Direction.byIndex(index);
+		this.distributor.markDirty();
 	}
 	
 	@Override
@@ -61,26 +62,42 @@ public class DistributorItemHandler implements IItemHandler
 		int checkIndex = 0;
 		Direction checkDirection;
 		ItemStack remainingStack = stack;
-		for (int i=0; i<6; i++)
+		
+		if (!simulate && !stack.isEmpty())
 		{
-			checkIndex = (i + startCheckIndex) % 6;
-			checkDirection = Direction.byIndex(checkIndex);
-			if (checkDirection == this.inputFace)
-				continue;
-			BlockPos outputPos = this.distributor.getPos().offset(checkDirection);
-			final ItemStack stackForNextInsertion = remainingStack.copy();
-			remainingStack = this.getOutputOptional(outputPos, checkDirection)
-				.map(handler -> WorldHelper.disperseItemToHandler(stackForNextInsertion, handler, simulate))
-				.orElse(remainingStack);
+			// avoid checking neighboring TEs during simulation to avoid infinite loops in tubes
+			// this unfortunately means that we have to wholly accept any item sent into it
+			// so we'll have to eject the item if there's nowhere to send it onward to
 			
-			if (remainingStack.getCount() <= 0)
+			for (int i=0; i<6; i++)
 			{
-				break;
+				checkIndex = (i + startCheckIndex) % 6;
+				checkDirection = Direction.byIndex(checkIndex);
+				if (checkDirection == this.inputFace)
+					continue;
+				
+				BlockPos outputPos = this.distributor.getPos().offset(checkDirection);
+				final ItemStack stackForNextInsertion = remainingStack.copy();
+				remainingStack = this.getOutputOptional(outputPos, checkDirection)
+					.map(handler -> WorldHelper.disperseItemToHandler(stackForNextInsertion, handler, simulate))
+					.orElse(remainingStack);
+				
+				if (remainingStack.isEmpty())
+				{
+					break;
+				}
+				
 			}
+			
+			if (!remainingStack.isEmpty())
+			{
+				WorldHelper.ejectItemstack(this.distributor.getWorld(), this.distributor.getPos(), this.inputFace.getOpposite(), remainingStack);
+			}
+			
+			this.setNextDirectionIndex((checkIndex + 1) % 6);
 		}
 		
-		this.setNextDirectionIndex((checkIndex + 1) % 6);
-		return remainingStack;
+		return ItemStack.EMPTY;
 	}
 	
 	private LazyOptional<IItemHandler> getOutputOptional(BlockPos output_pos, Direction output_dir)

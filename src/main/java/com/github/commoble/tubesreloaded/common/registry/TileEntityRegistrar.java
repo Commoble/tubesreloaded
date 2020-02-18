@@ -31,7 +31,7 @@ public class TileEntityRegistrar
 	@ObjectHolder(BlockNames.OSMOSIS_FILTER)
 	public static final TileEntityType<OsmosisFilterTileEntity> OSMOSIS_FILTER = null;
 	@ObjectHolder(BlockNames.DISTRIBUTOR)
-	public static final TileEntityType<OsmosisFilterTileEntity> DISTRIBUTOR = null;
+	public static final TileEntityType<DistributorTileEntity> DISTRIBUTOR = null;
 	
 	
 	public static void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event)
@@ -62,7 +62,7 @@ public class TileEntityRegistrar
 			);
 		event.getRegistry().register(TileEntityType.Builder.create(DistributorTileEntity::new,BlockRegistrar.DISTRIBUTOR)
 			.build(null)
-			.setRegistryName(BlockNames.OSMOSIS_FILTER)
+			.setRegistryName(BlockNames.DISTRIBUTOR)
 			);
 		
 		
