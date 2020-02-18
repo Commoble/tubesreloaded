@@ -1,16 +1,16 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "sts",
-    "tGt",
-    "sts"
+    "csc",
+    "sGs",
+    "csc"
   ],
   "key": {
-    "s": {
+    "c": {
       "tag": "forge:cobblestone"
     },
-    "t": {
-      "tag": "tubesreloaded:tubes"
+    "s": {
+      "item": "tubesreloaded:shunt"
     },
     "G": {
       "tag": "forge:fence_gates"
