@@ -2,8 +2,10 @@ package com.github.commoble.tubesreloaded.client;
 
 import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
 import com.github.commoble.tubesreloaded.common.registry.BlockRegistrar;
+import com.github.commoble.tubesreloaded.common.registry.ContainerRegistrar;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 
+import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraftforge.api.distmarker.Dist;
@@ -51,5 +53,7 @@ public class ClientEventHandler
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.REDSTONE_TUBE, TubeTileEntityRenderer::new);
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.FILTER, FilterTileEntityRenderer::new);
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.OSMOSIS_FILTER, OsmosisFilterTileEntityRenderer::new);
+		// register screens
+		ScreenManager.registerFactory(ContainerRegistrar.LOADER, LoaderScreen::new);
 	}
 }

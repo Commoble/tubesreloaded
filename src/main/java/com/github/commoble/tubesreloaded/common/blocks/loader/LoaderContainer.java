@@ -16,6 +16,11 @@ public class LoaderContainer extends Container
 	public final PlayerEntity player;
 	public final BlockPos pos;
 	public final Slot loaderSlot;
+	
+	public LoaderContainer(int id, PlayerInventory playerInventory)
+	{
+		this(id, playerInventory, BlockPos.ZERO);
+	}
 
 	public LoaderContainer(int id, PlayerInventory playerInventory, BlockPos pos)
 	{
@@ -31,7 +36,7 @@ public class LoaderContainer extends Container
 		{
 			for (int backpackColumn = 0; backpackColumn < 9; ++backpackColumn)
 			{
-				this.addSlot(new Slot(playerInventory, backpackColumn + backpackRow * 9 + 1, 8 + backpackColumn * 18, 84 + backpackRow * 18));
+				this.addSlot(new Slot(playerInventory, backpackColumn + backpackRow * 9 + 9, 8 + backpackColumn * 18, 84 + backpackRow * 18));
 			}
 		}
 
