@@ -1,5 +1,6 @@
 package com.github.commoble.tubesreloaded.common.blocks.loader;
 
+import com.github.commoble.tubesreloaded.common.util.ClassHelper;
 import com.github.commoble.tubesreloaded.common.util.DirectionHelper;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
@@ -7,6 +8,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DirectionalBlock;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.DirectionProperty;
@@ -21,6 +24,7 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 public class LoaderBlock extends Block
 {
@@ -32,29 +36,34 @@ public class LoaderBlock extends Block
 		this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
 	}
 
-	// onBlockActivated
 	@Override
 	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace)
 	{
-		ItemStack heldStack = player.getHeldItem(hand);
-		if (heldStack.getCount() > 0)
-		{
-			ItemStack remaining = this.insertItem(heldStack.copy(), world, pos, state);
-			if (remaining.getCount() < heldStack.getCount())
-			{
-		        if (!world.isRemote)
-		        {
-					player.setHeldItem(hand, remaining);
-		        }
-				return ActionResultType.SUCCESS;
-			}
-		}
+//		ItemStack heldStack = player.getHeldItem(hand);
+//		if (heldStack.getCount() > 0)
+//		{
+//			ItemStack remaining = this.insertItem(heldStack.copy(), world, pos, state);
+//			if (remaining.getCount() < heldStack.getCount())
+//			{
+//		        if (!world.isRemote)
+//		        {
+//					player.setHeldItem(hand, remaining);
+//		        }
+//				return ActionResultType.SUCCESS;
+//			}
+//		}
+		
+		ClassHelper.as(player, ServerPlayerEntity.class).ifPresent(serverPlayer ->
+			NetworkHooks.openGui(serverPlayer, new SimpleNamedContainerProvider((id, inventory, theServerPlayer) ->
+				new LoaderContainer(id, inventory, pos), this.getNameTextComponent())
+			)
+		);
 
-		return super.onBlockActivated(state, world, pos, player, hand, rayTrace);
+		return ActionResultType.SUCCESS;
 	}
 
 	// returns the portion of the itemstack that wasn't inserted
-	private ItemStack insertItem(ItemStack stack, World world, BlockPos pos, BlockState state)
+	public ItemStack insertItem(ItemStack stack, World world, BlockPos pos, BlockState state)
 	{
 		// check if it can insert the item
 		Direction output_dir = state.get(FACING);
