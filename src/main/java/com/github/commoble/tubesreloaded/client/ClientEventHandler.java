@@ -8,6 +8,7 @@ import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -54,6 +55,9 @@ public class ClientEventHandler
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.FILTER, FilterTileEntityRenderer::new);
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.OSMOSIS_FILTER, OsmosisFilterTileEntityRenderer::new);
 		// register screens
-		ScreenManager.registerFactory(ContainerRegistrar.LOADER, LoaderScreen::new);
+		ScreenManager.registerFactory(ContainerRegistrar.LOADER, StandardSizeContainerScreenFactory.of(
+			new ResourceLocation(TubesReloadedMod.MODID, "textures/gui/loader.png"), BlockRegistrar.LOADER.getTranslationKey()));
+		ScreenManager.registerFactory(ContainerRegistrar.FILTER, StandardSizeContainerScreenFactory.of(
+			new ResourceLocation(TubesReloadedMod.MODID, "textures/gui/filter.png"), BlockRegistrar.FILTER.getTranslationKey()));
 	}
 }

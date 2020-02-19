@@ -1,8 +1,7 @@
 package com.github.commoble.tubesreloaded.common.blocks.filter;
 
-import java.util.Optional;
-
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
+import com.github.commoble.tubesreloaded.common.util.ClassHelper;
 import com.github.commoble.tubesreloaded.common.util.DirectionHelper;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
@@ -10,6 +9,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DirectionalBlock;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
@@ -26,6 +27,7 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 public class FilterBlock extends Block
 {
@@ -52,13 +54,19 @@ public class FilterBlock extends Block
 		return TileEntityRegistrar.FILTER.create();
 	}
 	
-	// onBlockActivated
 	@Override
 	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit)
 	{
-		Optional<FilterTileEntity> te = WorldHelper.getTileEntityAt(FilterTileEntity.class, world, pos);
-		boolean success = te.map(filter -> filter.onActivated(player, hit.getFace(), player.getHeldItem(hand))).orElse(false);
-		return success ? ActionResultType.SUCCESS : super.onBlockActivated(state, world, pos, player, hand, hit);
+//		Optional<FilterTileEntity> te = WorldHelper.getTileEntityAt(FilterTileEntity.class, world, pos);
+//		boolean success = te.map(filter -> filter.onActivated(player, hit.getFace(), player.getHeldItem(hand))).orElse(false);
+//		return success ? ActionResultType.SUCCESS : super.onBlockActivated(state, world, pos, player, hand, hit);
+		ClassHelper.as(player, ServerPlayerEntity.class).ifPresent(serverPlayer ->
+			NetworkHooks.openGui(serverPlayer, new SimpleNamedContainerProvider((id, inventory, theServerPlayer) ->
+				new FilterContainer(id, inventory, WorldHelper.getTileEntityAt(FilterTileEntity.class, world, pos)), this.getNameTextComponent())
+			)
+		);
+		
+		return ActionResultType.SUCCESS;
 	}
 	
 	@Override

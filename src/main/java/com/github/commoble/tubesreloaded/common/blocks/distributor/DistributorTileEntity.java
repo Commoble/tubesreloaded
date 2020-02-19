@@ -80,7 +80,7 @@ public class DistributorTileEntity extends TileEntity
 	public void read(CompoundNBT nbt)
 	{
 		int[] directionIndices = nbt.getIntArray(NEXT_DIRECTIONS);
-		int maxSize = Math.max(this.handlers.length, directionIndices.length);
+		int maxSize = Math.min(this.handlers.length, directionIndices.length);
 		for (int i=0; i<maxSize; i++)
 		{
 			this.handlers[i].setNextDirectionIndex(directionIndices[i]);
