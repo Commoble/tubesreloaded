@@ -25,6 +25,15 @@ public class FilterScreen extends ContainerScreen<FilterContainer>
 	}
 
 	@Override
+	public void render(int x, int y, float partialTicks)
+	{
+		this.renderBackground();
+		super.render(x, y, partialTicks);
+		this.renderHoveredToolTip(x, y);
+	}
+
+
+	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
 	{
 		String name = new TranslationTextComponent(BlockRegistrar.FILTER.getTranslationKey()).getFormattedText();

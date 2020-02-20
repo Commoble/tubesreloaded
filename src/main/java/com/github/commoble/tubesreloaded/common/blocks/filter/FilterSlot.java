@@ -1,22 +1,33 @@
 package com.github.commoble.tubesreloaded.common.blocks.filter;
 
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
 
 public class FilterSlot extends Slot
 {
-	private final FilterContainer container;
-	
-	public FilterSlot(FilterContainer container, int index, int xPosition, int yPosition)
+	private final IInventory inventory;
+
+	public FilterSlot(IInventory inventory, int index, int xPosition, int yPosition)
 	{
-		super(new Inventory(1), index, xPosition, yPosition);
-		this.container = container;
+		super(new FilterSlotInventory(), index,xPosition,yPosition);
+		this.inventory=inventory;
 	}
 
-	@Override
-	public void onSlotChange(ItemStack from, ItemStack to)
+	static class FilterSlotInventory extends Inventory
 	{
-		this.container.filterProxy.ifPresent(filter -> filter.setFilterStackAndSaveAndSync(to));
+		public FilterSlotInventory()
+		{
+			super(1);
+		}
+		/**
+		 * Returns the maximum stack size for a inventory slot. Seems to always be 64,
+		 * possibly will be extended.
+		 */
+		@Override
+		public int getInventoryStackLimit()
+		{
+			return 1;
+		}
 	}
 }

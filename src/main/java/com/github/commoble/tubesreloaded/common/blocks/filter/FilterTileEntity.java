@@ -7,7 +7,9 @@ import com.github.commoble.tubesreloaded.common.blocks.shunt.ShuntBlock;
 import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.common.util.WorldHelper;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -16,6 +18,8 @@ import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -26,6 +30,7 @@ public class FilterTileEntity extends TileEntity
 	public static final String INV_KEY = "inventory";
 	
 	public ItemStack filterStack = ItemStack.EMPTY;
+	public FilterInventory inventory = new FilterInventory(this);	// for the container
 	public FilterShuntingItemHandler shuntingHandler = new FilterShuntingItemHandler(this);
 	public FilterStorageItemHandler storageHandler = new FilterStorageItemHandler(this);
 	private LazyOptional<IItemHandler> shuntingOptional = LazyOptional.of(() -> this.shuntingHandler);
@@ -176,5 +181,77 @@ public class FilterTileEntity extends TileEntity
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet)
 	{
 		this.read(packet.getNbtCompound());
+	}
+	
+	static class FilterInventory implements IInventory
+	{
+		private final FilterTileEntity filter;
+		
+		public FilterInventory(FilterTileEntity filter)
+		{
+			this.filter = filter;
+		}
+		
+		@Override
+		public void clear()
+		{
+			this.filter.setFilterStackAndSaveAndSync(ItemStack.EMPTY);
+		}
+
+		@Override
+		public int getSizeInventory()
+		{
+			return 1;
+		}
+
+		@Override
+		public boolean isEmpty()
+		{
+			return this.filter.filterStack.isEmpty();
+		}
+
+		@Override
+		public ItemStack getStackInSlot(int index)
+		{
+			return this.filter.filterStack;
+		}
+
+		@Override
+		public ItemStack decrStackSize(int index, int count)
+		{
+			ItemStack newStack = this.filter.filterStack.split(count);
+			this.filter.setFilterStackAndSaveAndSync(this.filter.filterStack);
+			return newStack;
+		}
+
+		@Override
+		public ItemStack removeStackFromSlot(int index)
+		{
+			ItemStack stack = this.filter.filterStack.copy();
+			this.filter.setFilterStackAndSaveAndSync(ItemStack.EMPTY);
+			return stack;
+		}
+
+		@Override
+		public void setInventorySlotContents(int index, ItemStack stack)
+		{
+			this.filter.setFilterStackAndSaveAndSync(stack);
+		}
+
+		@Override
+		public void markDirty()
+		{
+			this.filter.markDirty();
+		}
+
+		@Override
+		public boolean isUsableByPlayer(PlayerEntity player)
+		{
+			World world = this.filter.getWorld();
+			BlockPos pos = this.filter.getPos();
+			Block block = this.filter.getBlockState().getBlock();
+			return world.getBlockState(pos).getBlock() != block ? false : player.getDistanceSq(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D) <= 64.0D;
+		}
+		
 	}
 }

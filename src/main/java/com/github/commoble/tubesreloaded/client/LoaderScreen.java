@@ -23,6 +23,15 @@ public class LoaderScreen extends ContainerScreen<LoaderContainer>
 		this.xSize = 176;
 		this.ySize = 166;
 	}
+	
+	@Override
+	public void render(int x, int y, float partialTicks)
+	{
+		this.renderBackground();
+		super.render(x, y, partialTicks);
+		this.renderHoveredToolTip(x, y);
+	}
+
 
 	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)

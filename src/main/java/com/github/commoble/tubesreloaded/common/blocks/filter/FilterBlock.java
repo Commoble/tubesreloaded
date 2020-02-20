@@ -61,8 +61,15 @@ public class FilterBlock extends Block
 //		boolean success = te.map(filter -> filter.onActivated(player, hit.getFace(), player.getHeldItem(hand))).orElse(false);
 //		return success ? ActionResultType.SUCCESS : super.onBlockActivated(state, world, pos, player, hand, hit);
 		ClassHelper.as(player, ServerPlayerEntity.class).ifPresent(serverPlayer ->
-			NetworkHooks.openGui(serverPlayer, new SimpleNamedContainerProvider((id, inventory, theServerPlayer) ->
-				new FilterContainer(id, inventory, WorldHelper.getTileEntityAt(FilterTileEntity.class, world, pos)), this.getNameTextComponent())
+			WorldHelper.getTileEntityAt(FilterTileEntity.class, world, pos).ifPresent(filter -> 
+				NetworkHooks.openGui(
+					serverPlayer,
+					new SimpleNamedContainerProvider(
+						(id, inventory, theServerPlayer) -> new FilterContainer(id, inventory, filter.inventory),
+						this.getNameTextComponent()
+					)
+				)
+				
 			)
 		);
 		

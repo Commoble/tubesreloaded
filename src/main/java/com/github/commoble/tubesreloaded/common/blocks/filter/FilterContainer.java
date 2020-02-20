@@ -1,33 +1,31 @@
 package com.github.commoble.tubesreloaded.common.blocks.filter;
 
-import java.util.Optional;
-
 import com.github.commoble.tubesreloaded.common.registry.ContainerRegistrar;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IWorldPosCallable;
 
 public class FilterContainer extends Container
 {
-	public final Optional<FilterTileEntity> filterProxy;
-	public final Slot filterSlot;
+	public final IInventory inventory;
 
 	public FilterContainer(int id, PlayerInventory playerInventory)
 	{
-		this(id, playerInventory, Optional.empty());
+		this(id, playerInventory, new Inventory(1));
 	}
 
-	public FilterContainer(int id, PlayerInventory playerInventory, Optional<FilterTileEntity> filterProxy)
+	public FilterContainer(int id, PlayerInventory playerInventory, IInventory filterInventory)
 	{
 		super(ContainerRegistrar.FILTER, id);
-		this.filterProxy = filterProxy;
+		this.inventory = filterInventory;
 
 		// add filter slot
-		this.filterSlot = this.addSlot(new FilterSlot(this, 0, 80, 35));
+		this.addSlot(new Slot(filterInventory, 0, 80, 35));
 
 		for (int backpackRow = 0; backpackRow < 3; ++backpackRow)
 		{
@@ -47,9 +45,7 @@ public class FilterContainer extends Container
 	@Override
 	public boolean canInteractWith(PlayerEntity playerIn)
 	{
-		return this.filterProxy
-			.map(filter -> Container.isWithinUsableDistance(IWorldPosCallable.of(filter.getWorld(), filter.getPos()), playerIn, filter.getBlockState().getBlock()))
-			.orElse(false);
+		return this.inventory.isUsableByPlayer(playerIn);
 
 	}
 
@@ -68,12 +64,12 @@ public class FilterContainer extends Container
 			copiedStack = stackFromSlot.copy();
 			if (index == 0)
 			{
-				if (!this.mergeItemStack(stackFromSlot, 9, 45, true))
+				if (!this.mergeItemStack(stackFromSlot, 9, 37, true))
 				{
 					return ItemStack.EMPTY;
 				}
 			}
-			else if (!this.mergeItemStack(stackFromSlot, 0, 9, false))
+			else if (!this.mergeItemStack(stackFromSlot, 0, 1, false))
 			{
 				return ItemStack.EMPTY;
 			}
