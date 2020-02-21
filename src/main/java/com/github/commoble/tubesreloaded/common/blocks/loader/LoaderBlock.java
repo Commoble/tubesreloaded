@@ -23,6 +23,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
@@ -55,7 +56,7 @@ public class LoaderBlock extends Block
 		
 		ClassHelper.as(player, ServerPlayerEntity.class).ifPresent(serverPlayer ->
 			NetworkHooks.openGui(serverPlayer, new SimpleNamedContainerProvider((id, inventory, theServerPlayer) ->
-				new LoaderContainer(id, inventory, pos), this.getNameTextComponent())
+				new LoaderContainer(id, inventory, pos), new TranslationTextComponent(this.getTranslationKey()))
 			)
 		);
 
