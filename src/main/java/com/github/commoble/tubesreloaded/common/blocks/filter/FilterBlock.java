@@ -25,6 +25,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
@@ -64,7 +65,7 @@ public class FilterBlock extends Block
 			WorldHelper.getTileEntityAt(FilterTileEntity.class, world, pos).ifPresent(filter -> 
 				NetworkHooks.openGui(
 					serverPlayer,
-					new SimpleNamedContainerProvider(FilterContainer.getServerContainerProvider(filter), this.getNameTextComponent())
+					new SimpleNamedContainerProvider(FilterContainer.getServerContainerProvider(filter), new TranslationTextComponent(this.getTranslationKey()))
 				)
 			)
 		);
