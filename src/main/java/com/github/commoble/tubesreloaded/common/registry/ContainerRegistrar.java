@@ -19,6 +19,6 @@ public class ContainerRegistrar
 	public static void registerContainers(IForgeRegistry<ContainerType<?>> registry)
 	{
 		RegistryHelper.register(registry, BlockNames.LOADER, new ContainerType<>(LoaderContainer::new));
-		RegistryHelper.register(registry, BlockNames.FILTER, new ContainerType<>(FilterContainer::new));
+		RegistryHelper.register(registry, BlockNames.FILTER, new ContainerType<>(FilterContainer::getClientContainer));
 	}
 }

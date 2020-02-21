@@ -64,12 +64,8 @@ public class FilterBlock extends Block
 			WorldHelper.getTileEntityAt(FilterTileEntity.class, world, pos).ifPresent(filter -> 
 				NetworkHooks.openGui(
 					serverPlayer,
-					new SimpleNamedContainerProvider(
-						(id, inventory, theServerPlayer) -> new FilterContainer(id, inventory, filter.inventory),
-						this.getNameTextComponent()
-					)
+					new SimpleNamedContainerProvider(FilterContainer.getServerContainerProvider(filter), this.getNameTextComponent())
 				)
-				
 			)
 		);
 		
