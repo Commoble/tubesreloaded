@@ -74,7 +74,7 @@ public class FilterContainer extends Container
 			copiedStack = stackFromSlot.copy();
 			if (index == 0)
 			{
-				if (!this.mergeItemStack(stackFromSlot, 9, 37, true))
+				if (!this.mergeItemStack(stackFromSlot, 1, 37, true))
 				{
 					return ItemStack.EMPTY;
 				}
