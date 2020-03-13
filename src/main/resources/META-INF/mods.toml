@@ -24,7 +24,7 @@ displayURL="https://www.curseforge.com/minecraft/mc-mods/tubes-reloaded" #option
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile="logo.png" #optional
 # A text field displayed in the mod UI
-credits="Thanks to kotelkonrad for the Polish translation! Thanks to sigy4444 for the German translation!" #optional
+credits="Thanks to kotelkonrad for the Polish translation! Thanks to sigy4444 for the German translation! Thanks to entcher for the Russian translation!" #optional
 # A text field displayed in the mod UI
 authors="Commoble" #optional
 # The description text for the mod (multi line!) (#mandatory)
