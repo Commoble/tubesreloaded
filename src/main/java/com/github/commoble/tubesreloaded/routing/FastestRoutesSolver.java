@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.common.routing;
+package com.github.commoble.tubesreloaded.routing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import com.github.commoble.tubesreloaded.common.blocks.tube.TubeBlock;
-import com.github.commoble.tubesreloaded.common.util.PosHelper;
+import com.github.commoble.tubesreloaded.blocks.tube.TubeBlock;
+import com.github.commoble.tubesreloaded.util.PosHelper;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;

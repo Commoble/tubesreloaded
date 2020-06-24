@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.common.blocks.loader;
+package com.github.commoble.tubesreloaded.blocks.loader;
 
 import java.util.Set;
 

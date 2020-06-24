@@ -1,8 +1,8 @@
-package com.github.commoble.tubesreloaded.common.blocks.loader;
+package com.github.commoble.tubesreloaded.blocks.loader;
 
-import com.github.commoble.tubesreloaded.common.util.ClassHelper;
-import com.github.commoble.tubesreloaded.common.util.DirectionHelper;
-import com.github.commoble.tubesreloaded.common.util.WorldHelper;
+import com.github.commoble.tubesreloaded.util.ClassHelper;
+import com.github.commoble.tubesreloaded.util.DirectionHelper;
+import com.github.commoble.tubesreloaded.util.WorldHelper;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

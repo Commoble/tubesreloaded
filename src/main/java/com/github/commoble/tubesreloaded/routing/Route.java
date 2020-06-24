@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.common.routing;
+package com.github.commoble.tubesreloaded.routing;
 
 import java.util.LinkedList;
 import java.util.Queue;

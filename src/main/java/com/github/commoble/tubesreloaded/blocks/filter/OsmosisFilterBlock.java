@@ -1,10 +1,10 @@
-package com.github.commoble.tubesreloaded.common.blocks.filter;
+package com.github.commoble.tubesreloaded.blocks.filter;
 
 import java.util.Optional;
 
-import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
-import com.github.commoble.tubesreloaded.common.util.ClassHelper;
-import com.github.commoble.tubesreloaded.common.util.WorldHelper;
+import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
+import com.github.commoble.tubesreloaded.util.ClassHelper;
+import com.github.commoble.tubesreloaded.util.WorldHelper;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

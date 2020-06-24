@@ -1,6 +1,6 @@
-package com.github.commoble.tubesreloaded.common.blocks.distributor;
+package com.github.commoble.tubesreloaded.blocks.distributor;
 
-import com.github.commoble.tubesreloaded.common.util.WorldHelper;
+import com.github.commoble.tubesreloaded.util.WorldHelper;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;

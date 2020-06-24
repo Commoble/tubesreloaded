@@ -1,9 +1,9 @@
-package com.github.commoble.tubesreloaded.common.blocks.shunt;
+package com.github.commoble.tubesreloaded.blocks.shunt;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
+import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;

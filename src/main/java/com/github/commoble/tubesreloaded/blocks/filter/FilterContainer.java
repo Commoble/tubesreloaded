@@ -1,6 +1,6 @@
-package com.github.commoble.tubesreloaded.common.blocks.filter;
+package com.github.commoble.tubesreloaded.blocks.filter;
 
-import com.github.commoble.tubesreloaded.common.registry.ContainerRegistrar;
+import com.github.commoble.tubesreloaded.registry.ContainerRegistrar;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;

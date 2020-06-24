@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.common.blocks.tube;
+package com.github.commoble.tubesreloaded.blocks.tube;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -9,11 +9,11 @@ import java.util.Queue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
-import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
-import com.github.commoble.tubesreloaded.common.routing.Route;
-import com.github.commoble.tubesreloaded.common.routing.RoutingNetwork;
-import com.github.commoble.tubesreloaded.common.util.WorldHelper;
+import com.github.commoble.tubesreloaded.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
+import com.github.commoble.tubesreloaded.routing.Route;
+import com.github.commoble.tubesreloaded.routing.RoutingNetwork;
+import com.github.commoble.tubesreloaded.util.WorldHelper;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

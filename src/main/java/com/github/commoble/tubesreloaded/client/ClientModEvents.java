@@ -1,9 +1,9 @@
 package com.github.commoble.tubesreloaded.client;
 
-import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
-import com.github.commoble.tubesreloaded.common.registry.BlockRegistrar;
-import com.github.commoble.tubesreloaded.common.registry.ContainerRegistrar;
-import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
+import com.github.commoble.tubesreloaded.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.registry.BlockRegistrar;
+import com.github.commoble.tubesreloaded.registry.ContainerRegistrar;
+import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
 
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.RenderType;
@@ -17,7 +17,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @Mod.EventBusSubscriber(value= {Dist.CLIENT}, modid = TubesReloadedMod.MODID, bus=Bus.MOD)
-public class ClientEventHandler
+public class ClientModEvents
 {
 //	public static final ResourceLocation SLIME_MODEL = new ResourceLocation(TubesReloadedMod.MODID, "block/osmosis_slime");
 //	public static IBakedModel BAKED_SLIME_MODEL = null;

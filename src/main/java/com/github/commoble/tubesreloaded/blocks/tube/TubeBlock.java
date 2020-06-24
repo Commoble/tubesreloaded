@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.common.blocks.tube;
+package com.github.commoble.tubesreloaded.blocks.tube;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,10 +6,10 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.common.blocks.extractor.ExtractorBlock;
-import com.github.commoble.tubesreloaded.common.blocks.filter.FilterBlock;
-import com.github.commoble.tubesreloaded.common.blocks.loader.LoaderBlock;
-import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
+import com.github.commoble.tubesreloaded.blocks.extractor.ExtractorBlock;
+import com.github.commoble.tubesreloaded.blocks.filter.FilterBlock;
+import com.github.commoble.tubesreloaded.blocks.loader.LoaderBlock;
+import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

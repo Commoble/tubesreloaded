@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.common.blocks.filter;
+package com.github.commoble.tubesreloaded.blocks.filter;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;

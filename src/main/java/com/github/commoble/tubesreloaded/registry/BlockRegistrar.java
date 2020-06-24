@@ -1,18 +1,18 @@
-package com.github.commoble.tubesreloaded.common.registry;
+package com.github.commoble.tubesreloaded.registry;
 
 import java.util.stream.IntStream;
 
-import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
-import com.github.commoble.tubesreloaded.common.blocks.distributor.DistributorBlock;
-import com.github.commoble.tubesreloaded.common.blocks.extractor.ExtractorBlock;
-import com.github.commoble.tubesreloaded.common.blocks.filter.FilterBlock;
-import com.github.commoble.tubesreloaded.common.blocks.filter.OsmosisFilterBlock;
-import com.github.commoble.tubesreloaded.common.blocks.filter.OsmosisSlimeBlock;
-import com.github.commoble.tubesreloaded.common.blocks.loader.LoaderBlock;
-import com.github.commoble.tubesreloaded.common.blocks.shunt.ShuntBlock;
-import com.github.commoble.tubesreloaded.common.blocks.tube.TubeBlock;
-import com.github.commoble.tubesreloaded.common.blocks.tube.colored_tubes.ColoredTubeBlock;
-import com.github.commoble.tubesreloaded.common.blocks.tube.redstone_tube.RedstoneTubeBlock;
+import com.github.commoble.tubesreloaded.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.blocks.distributor.DistributorBlock;
+import com.github.commoble.tubesreloaded.blocks.extractor.ExtractorBlock;
+import com.github.commoble.tubesreloaded.blocks.filter.FilterBlock;
+import com.github.commoble.tubesreloaded.blocks.filter.OsmosisFilterBlock;
+import com.github.commoble.tubesreloaded.blocks.filter.OsmosisSlimeBlock;
+import com.github.commoble.tubesreloaded.blocks.loader.LoaderBlock;
+import com.github.commoble.tubesreloaded.blocks.shunt.ShuntBlock;
+import com.github.commoble.tubesreloaded.blocks.tube.TubeBlock;
+import com.github.commoble.tubesreloaded.blocks.tube.colored_tubes.ColoredTubeBlock;
+import com.github.commoble.tubesreloaded.blocks.tube.redstone_tube.RedstoneTubeBlock;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;

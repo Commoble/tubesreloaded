@@ -1,8 +1,8 @@
-package com.github.commoble.tubesreloaded.common.blocks.tube.redstone_tube;
+package com.github.commoble.tubesreloaded.blocks.tube.redstone_tube;
 
-import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
-import com.github.commoble.tubesreloaded.common.registry.BlockRegistrar;
-import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
+import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
+import com.github.commoble.tubesreloaded.registry.BlockRegistrar;
+import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.util.SoundCategory;

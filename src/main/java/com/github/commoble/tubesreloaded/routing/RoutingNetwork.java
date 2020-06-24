@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.common.routing;
+package com.github.commoble.tubesreloaded.routing;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,9 +8,9 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
-import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
-import com.github.commoble.tubesreloaded.common.util.WorldHelper;
+import com.github.commoble.tubesreloaded.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
+import com.github.commoble.tubesreloaded.util.WorldHelper;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;

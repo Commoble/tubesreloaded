@@ -1,6 +1,6 @@
-package com.github.commoble.tubesreloaded.common.blocks.tube.colored_tubes;
+package com.github.commoble.tubesreloaded.blocks.tube.colored_tubes;
 
-import com.github.commoble.tubesreloaded.common.blocks.tube.TubeBlock;
+import com.github.commoble.tubesreloaded.blocks.tube.TubeBlock;
 
 import net.minecraft.item.DyeColor;
 

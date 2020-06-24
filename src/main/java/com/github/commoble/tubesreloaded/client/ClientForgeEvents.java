@@ -1,7 +1,7 @@
 package com.github.commoble.tubesreloaded.client;
 
-import com.github.commoble.tubesreloaded.common.ClientProxy;
-import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.ClientProxy;
+import com.github.commoble.tubesreloaded.TubesReloadedMod;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
@@ -11,7 +11,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
 @Mod.EventBusSubscriber(value= Dist.CLIENT, modid = TubesReloadedMod.MODID, bus=Bus.FORGE)
-public class InputEventHandler
+public class ClientForgeEvents
 {
 	@SubscribeEvent
 	public static void onKeyboardEvent(KeyInputEvent event)

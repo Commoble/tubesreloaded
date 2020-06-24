@@ -1,6 +1,6 @@
-package com.github.commoble.tubesreloaded.common.blocks.shunt;
+package com.github.commoble.tubesreloaded.blocks.shunt;
 
-import com.github.commoble.tubesreloaded.common.util.WorldHelper;
+import com.github.commoble.tubesreloaded.util.WorldHelper;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;

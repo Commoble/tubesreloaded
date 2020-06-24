@@ -1,8 +1,8 @@
-package com.github.commoble.tubesreloaded.common.registry;
+package com.github.commoble.tubesreloaded.registry;
 
 import java.util.stream.IntStream;
 
-import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.TubesReloadedMod;
 
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;

@@ -1,7 +1,7 @@
-package com.github.commoble.tubesreloaded.common.blocks.shunt;
+package com.github.commoble.tubesreloaded.blocks.shunt;
 
-import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
-import com.github.commoble.tubesreloaded.common.util.DirectionHelper;
+import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
+import com.github.commoble.tubesreloaded.util.DirectionHelper;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

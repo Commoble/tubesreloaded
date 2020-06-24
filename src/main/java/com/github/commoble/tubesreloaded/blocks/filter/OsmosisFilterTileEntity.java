@@ -1,12 +1,12 @@
-package com.github.commoble.tubesreloaded.common.blocks.filter;
+package com.github.commoble.tubesreloaded.blocks.filter;
 
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
-import com.github.commoble.tubesreloaded.common.registry.TileEntityRegistrar;
-import com.github.commoble.tubesreloaded.common.util.WorldHelper;
+import com.github.commoble.tubesreloaded.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
+import com.github.commoble.tubesreloaded.util.WorldHelper;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;

@@ -1,7 +1,7 @@
-package com.github.commoble.tubesreloaded.common.blocks.extractor;
+package com.github.commoble.tubesreloaded.blocks.extractor;
 
-import com.github.commoble.tubesreloaded.common.util.DirectionHelper;
-import com.github.commoble.tubesreloaded.common.util.WorldHelper;
+import com.github.commoble.tubesreloaded.util.DirectionHelper;
+import com.github.commoble.tubesreloaded.util.WorldHelper;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
