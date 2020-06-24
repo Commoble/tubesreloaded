@@ -2,8 +2,8 @@ package com.github.commoble.tubesreloaded.client;
 
 import java.util.Random;
 
-import com.github.commoble.tubesreloaded.common.blocks.tube.ItemInTubeWrapper;
-import com.github.commoble.tubesreloaded.common.blocks.tube.TubeTileEntity;
+import com.github.commoble.tubesreloaded.blocks.tube.ItemInTubeWrapper;
+import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;

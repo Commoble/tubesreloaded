@@ -2,7 +2,7 @@ package com.github.commoble.tubesreloaded.network;
 
 import java.util.function.Supplier;
 
-import com.github.commoble.tubesreloaded.common.PlayerData;
+import com.github.commoble.tubesreloaded.PlayerData;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;

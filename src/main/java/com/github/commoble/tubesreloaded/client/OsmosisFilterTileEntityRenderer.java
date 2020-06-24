@@ -2,12 +2,12 @@ package com.github.commoble.tubesreloaded.client;
 
 import java.util.Random;
 
-import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
-import com.github.commoble.tubesreloaded.common.blocks.filter.FilterTileEntity;
-import com.github.commoble.tubesreloaded.common.blocks.filter.OsmosisFilterBlock;
-import com.github.commoble.tubesreloaded.common.blocks.filter.OsmosisSlimeBlock;
-import com.github.commoble.tubesreloaded.common.registry.BlockRegistrar;
-import com.github.commoble.tubesreloaded.common.registry.ItemRegistrar;
+import com.github.commoble.tubesreloaded.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.blocks.filter.FilterTileEntity;
+import com.github.commoble.tubesreloaded.blocks.filter.OsmosisFilterBlock;
+import com.github.commoble.tubesreloaded.blocks.filter.OsmosisSlimeBlock;
+import com.github.commoble.tubesreloaded.registry.BlockRegistrar;
+import com.github.commoble.tubesreloaded.registry.ItemRegistrar;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.block.BlockState;

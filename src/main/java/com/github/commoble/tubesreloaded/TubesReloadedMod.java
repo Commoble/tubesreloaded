@@ -1,6 +1,6 @@
-package com.github.commoble.tubesreloaded.common;
+package com.github.commoble.tubesreloaded;
 
-import com.github.commoble.tubesreloaded.common.util.ConfigHelper;
+import com.github.commoble.tubesreloaded.util.ConfigHelper;
 
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;

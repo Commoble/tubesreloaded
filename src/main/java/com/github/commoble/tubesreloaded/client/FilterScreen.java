@@ -1,8 +1,8 @@
 package com.github.commoble.tubesreloaded.client;
 
-import com.github.commoble.tubesreloaded.common.TubesReloadedMod;
-import com.github.commoble.tubesreloaded.common.blocks.filter.FilterContainer;
-import com.github.commoble.tubesreloaded.common.registry.BlockRegistrar;
+import com.github.commoble.tubesreloaded.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.blocks.filter.FilterContainer;
+import com.github.commoble.tubesreloaded.registry.BlockRegistrar;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;

@@ -1,7 +1,7 @@
 package com.github.commoble.tubesreloaded.client;
 
-import com.github.commoble.tubesreloaded.common.blocks.filter.FilterBlock;
-import com.github.commoble.tubesreloaded.common.blocks.filter.FilterTileEntity;
+import com.github.commoble.tubesreloaded.blocks.filter.FilterBlock;
+import com.github.commoble.tubesreloaded.blocks.filter.FilterTileEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
