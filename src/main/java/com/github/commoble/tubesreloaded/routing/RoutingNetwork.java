@@ -8,7 +8,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.TubesReloaded;
 import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
 import com.github.commoble.tubesreloaded.util.WorldHelper;
 
@@ -57,10 +57,10 @@ public class RoutingNetwork
 	
 	private void setTicksPerTube()
 	{
-		int baseDuration = TubesReloadedMod.config.ticks_in_tube.get();
+		int baseDuration = TubesReloaded.serverConfig.ticks_in_tube.get();
 		int size = this.tubes.size();
-		int softCap = TubesReloadedMod.config.soft_tube_cap.get();
-		int hardCap = TubesReloadedMod.config.hard_tube_cap.get()+1;	// add 1 to avoid divide-by-zero errors
+		int softCap = TubesReloaded.serverConfig.soft_tube_cap.get();
+		int hardCap = TubesReloaded.serverConfig.hard_tube_cap.get()+1;	// add 1 to avoid divide-by-zero errors
 			// ^ this variable will always be greater than the actual network size now
 		// time dilation is 1:1 if network size <= softcap
 		// if size > softcap, time to traverse network becomes very large as network size approaches hardcap
@@ -208,7 +208,7 @@ public class RoutingNetwork
 		blocksToVisit.add(startPos);
 		while (!blocksToVisit.isEmpty())
 		{
-			if (network.tubes.size() > TubesReloadedMod.config.hard_tube_cap.get())
+			if (network.tubes.size() > TubesReloaded.serverConfig.hard_tube_cap.get())
 			{
 				break;
 			}

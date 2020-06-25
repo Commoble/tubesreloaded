@@ -1,8 +1,12 @@
 package com.github.commoble.tubesreloaded.event;
 
-import com.github.commoble.tubesreloaded.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.TubesReloaded;
+import com.github.commoble.tubesreloaded.blocks.tube.ITubesInChunk;
+import com.github.commoble.tubesreloaded.blocks.tube.TubesInChunk;
+import com.github.commoble.tubesreloaded.blocks.tube.TubesInChunkCapability;
 import com.github.commoble.tubesreloaded.network.IsWasSprintPacket;
 import com.github.commoble.tubesreloaded.network.PacketHandler;
+import com.github.commoble.tubesreloaded.network.TubeBreakPacket;
 import com.github.commoble.tubesreloaded.registry.BlockRegistrar;
 import com.github.commoble.tubesreloaded.registry.ContainerRegistrar;
 import com.github.commoble.tubesreloaded.registry.ItemRegistrar;
@@ -12,6 +16,7 @@ import net.minecraft.block.Block;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -20,10 +25,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 /**
  * Event handler for registering Blocks, Enchantments, Items, Potions, SoundEvents, and Biomes
- * @author Joseph
- *
  */
-@Mod.EventBusSubscriber(modid = TubesReloadedMod.MODID, bus=Bus.MOD)
+@Mod.EventBusSubscriber(modid = TubesReloaded.MODID, bus=Bus.MOD)
 public class CommonModEvents
 {
 	@SubscribeEvent
@@ -56,10 +59,19 @@ public class CommonModEvents
 		// register packets
 		int packetID=0;
 		PacketHandler.INSTANCE.registerMessage(packetID++,
-				IsWasSprintPacket.class,
-				IsWasSprintPacket::encode,
-				IsWasSprintPacket::decode,
-				IsWasSprintPacket::whenThisPacketIsReceived
-				);
+			IsWasSprintPacket.class,
+			IsWasSprintPacket::write,
+			IsWasSprintPacket::read,
+			IsWasSprintPacket::handle
+			);
+		PacketHandler.INSTANCE.registerMessage(packetID++,
+			TubeBreakPacket.class,
+			TubeBreakPacket::write,
+			TubeBreakPacket::read,
+			TubeBreakPacket::handle
+			);
+		
+		// register capabilities
+		CapabilityManager.INSTANCE.register(ITubesInChunk.class, new TubesInChunkCapability.Storage(), TubesInChunk::new);
 	}
 }

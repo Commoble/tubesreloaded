@@ -1,6 +1,6 @@
 package com.github.commoble.tubesreloaded.registry;
 
-import com.github.commoble.tubesreloaded.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.TubesReloaded;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -10,7 +10,7 @@ public class RegistryHelper
 {
 	public static <T extends IForgeRegistryEntry<T>> T register(IForgeRegistry<T> registry, String registryKey, T entry)
 	{
-		return register(registry, TubesReloadedMod.MODID, registryKey, entry);
+		return register(registry, TubesReloaded.MODID, registryKey, entry);
 	}
 
 	public static <T extends IForgeRegistryEntry<T>> T register(IForgeRegistry<T> registry, String modID, String registryKey, T entry)

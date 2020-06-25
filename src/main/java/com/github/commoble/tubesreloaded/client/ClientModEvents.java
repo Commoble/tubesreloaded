@@ -1,6 +1,6 @@
 package com.github.commoble.tubesreloaded.client;
 
-import com.github.commoble.tubesreloaded.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.TubesReloaded;
 import com.github.commoble.tubesreloaded.registry.BlockRegistrar;
 import com.github.commoble.tubesreloaded.registry.ContainerRegistrar;
 import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
@@ -16,32 +16,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
-@Mod.EventBusSubscriber(value= {Dist.CLIENT}, modid = TubesReloadedMod.MODID, bus=Bus.MOD)
+@Mod.EventBusSubscriber(value= {Dist.CLIENT}, modid = TubesReloaded.MODID, bus=Bus.MOD)
 public class ClientModEvents
 {
-//	public static final ResourceLocation SLIME_MODEL = new ResourceLocation(TubesReloadedMod.MODID, "block/osmosis_slime");
-//	public static IBakedModel BAKED_SLIME_MODEL = null;
-//	
-//	@SubscribeEvent
-//	public static void onModelRegistryEvent(ModelRegistryEvent event)
-//	{
-//		ModelLoader.addSpecialModel(SLIME_MODEL);
-//	}
-//	
-//	@SubscribeEvent
-//	public static void onModelBakeEvent(ModelBakeEvent event)
-//	{
-//		boolean contains = event.getModelRegistry().containsKey(SLIME_MODEL);
-//		BAKED_SLIME_MODEL = event.getModelRegistry().get(SLIME_MODEL);
-//		boolean rob = event.getModelRegistry().containsKey(SLIME_MODEL);
-//		ModelManager reg = Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes().getModelManager();
-//		IBakedModel missing = reg.getMissingModel();
-//		boolean quorn = BAKED_SLIME_MODEL == missing;
-//		int x = 1;
-//		IBakedModel slime = BAKED_SLIME_MODEL;
-//		int y = 2;
-//		
-//	}
 	
 	@SubscribeEvent
 	public static void onClientSetup(FMLClientSetupEvent event)
@@ -56,8 +33,8 @@ public class ClientModEvents
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.OSMOSIS_FILTER, OsmosisFilterTileEntityRenderer::new);
 		// register screens
 		ScreenManager.registerFactory(ContainerRegistrar.LOADER, StandardSizeContainerScreenFactory.of(
-			new ResourceLocation(TubesReloadedMod.MODID, "textures/gui/loader.png"), BlockRegistrar.LOADER.getTranslationKey()));
+			new ResourceLocation(TubesReloaded.MODID, "textures/gui/loader.png"), BlockRegistrar.LOADER.getTranslationKey()));
 		ScreenManager.registerFactory(ContainerRegistrar.FILTER, StandardSizeContainerScreenFactory.of(
-			new ResourceLocation(TubesReloadedMod.MODID, "textures/gui/filter.png"), BlockRegistrar.FILTER.getTranslationKey()));
+			new ResourceLocation(TubesReloaded.MODID, "textures/gui/filter.png"), BlockRegistrar.FILTER.getTranslationKey()));
 	}
 }

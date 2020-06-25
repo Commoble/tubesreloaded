@@ -17,17 +17,17 @@ public class IsWasSprintPacket
 		this.isSprintHeld = isSprintHeld;
 	}
 	
-	public void encode(PacketBuffer buf)
+	public void write(PacketBuffer buf)
 	{
-		buf.writeByte(isSprintHeld ? 1 : 0);
+		buf.writeByte(this.isSprintHeld ? 1 : 0);
 	}
 	
-	public static IsWasSprintPacket decode(PacketBuffer buf)
+	public static IsWasSprintPacket read(PacketBuffer buf)
 	{
 		return new IsWasSprintPacket(buf.readByte() > 0);
 	}
 	
-	public void whenThisPacketIsReceived(Supplier<NetworkEvent.Context> context)
+	public void handle(Supplier<NetworkEvent.Context> context)
 	{
 		ServerPlayerEntity player = context.get().getSender();
 		if (player != null)

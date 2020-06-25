@@ -1,7 +1,7 @@
 package com.github.commoble.tubesreloaded.client;
 
 import com.github.commoble.tubesreloaded.ClientProxy;
-import com.github.commoble.tubesreloaded.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.TubesReloaded;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
@@ -10,7 +10,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
-@Mod.EventBusSubscriber(value= Dist.CLIENT, modid = TubesReloadedMod.MODID, bus=Bus.FORGE)
+@Mod.EventBusSubscriber(value= Dist.CLIENT, modid = TubesReloaded.MODID, bus=Bus.FORGE)
 public class ClientForgeEvents
 {
 	@SubscribeEvent

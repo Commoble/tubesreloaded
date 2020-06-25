@@ -1,19 +1,28 @@
 package com.github.commoble.tubesreloaded.blocks.tube;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.TubesReloaded;
+import com.github.commoble.tubesreloaded.network.PacketHandler;
+import com.github.commoble.tubesreloaded.network.TubeBreakPacket;
 import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.routing.Route;
 import com.github.commoble.tubesreloaded.routing.RoutingNetwork;
+import com.github.commoble.tubesreloaded.util.NBTMapHelper;
+import com.github.commoble.tubesreloaded.util.NestedBoundingBox;
 import com.github.commoble.tubesreloaded.util.WorldHelper;
+import com.google.common.collect.Maps;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -27,18 +36,42 @@ import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 {
-	// public static final String DIST_NBT_KEY = "distance";
 	public static final String INV_NBT_KEY_ADD = "inventory_new_items";
 	public static final String INV_NBT_KEY_RESET = "inventory_reset";
+	public static final String CONNECTIONS = "connections";
+	
+	public static final AxisAlignedBB EMPTY_AABB = new AxisAlignedBB(0,0,0,0,0,0);
+	
+	public static final String SIDE = "side";
+	public static final NBTMapHelper<Direction, RemoteConnection.Storage> REMOTE_CONNECTIONS_CODEC = new NBTMapHelper<>(
+		CONNECTIONS,
+		(nbt, side) -> nbt.putInt(SIDE, side.ordinal()),
+		nbt -> Direction.byIndex(nbt.getInt(SIDE)),
+		(nbt, rcs) -> rcs.toNBT(),
+		nbt -> RemoteConnection.Storage.fromNBT(nbt));
+
+	private Map<Direction, RemoteConnection> remoteConnections = new HashMap<>();
+	
+	private AxisAlignedBB renderAABB = EMPTY_AABB; // used by client, updated whenever NBT is read
+	
+	
 
 	@Nonnull
 	public Queue<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
@@ -66,6 +99,62 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	public TubeTileEntity()
 	{
 		this(TileEntityRegistrar.TUBE);
+	}
+
+	public static Optional<TubeTileEntity> getTubeTEAt(IWorld world, BlockPos pos)
+	{
+		TileEntity te = world.getTileEntity(pos);
+		return Optional.ofNullable(te instanceof TubeTileEntity ? (TubeTileEntity)te : null);
+	}
+
+	// connects two tube TEs
+	// returns whether the attempt to add a connection was successful
+	public static boolean addConnection(IWorld world, BlockPos posA, BlockPos posB)
+	{
+		// if two tube TEs exist at the given locations, connect them and return true
+		// otherwise return false
+		return getTubeTEAt(world, posA)
+			.flatMap(tubeA -> getTubeTEAt(world, posB).map(tubeB -> addConnection(world, tubeA, tubeB)))
+			.orElse(false);
+	}
+
+	// returns true if attempt to add a connection was successful
+	public static boolean addConnection(IWorld world, @Nonnull TubeTileEntity tubeA, @Nonnull TubeTileEntity tubeB)
+	{
+		tubeA.addConnection(tubeB.pos);
+		tubeB.addConnection(tubeA.pos);
+		return true;
+	}
+
+	// returns true if tube TEs exist at the given locations and both have a
+	// connection to the other
+	public static boolean areTubesConnected(IWorld world, BlockPos posA, BlockPos posB)
+	{
+		return getTubeTEAt(world, posA).flatMap(tubeA -> getTubeTEAt(world, posB).map(tubeB -> tubeA.hasRemoteConnection(posB) && tubeB.hasRemoteConnection(posA)))
+			.orElse(false);
+	}
+
+	// removes any connection between two tubes to each other
+	// if only one tubes exists for some reason, or only one tube has a
+	// connection to the other,
+	// it will still attempt to remove its connection
+	public static void removeConnection(IWorld world, BlockPos posA, BlockPos posB)
+	{
+		getTubeTEAt(world, posA).ifPresent(tube -> tube.removeConnection(posB));
+		getTubeTEAt(world, posB).ifPresent(tube -> tube.removeConnection(posA));
+	}
+	
+	public static Vec3d getConnectionVector(BlockPos pos)
+	{
+		return new Vec3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
+	}
+	
+	public static AxisAlignedBB getAABBContainingAllBlockPos(BlockPos startPos, Set<BlockPos> theRest)
+	{
+		return theRest.stream()
+			.map(AxisAlignedBB::new)
+			.reduce(EMPTY_AABB, AxisAlignedBB::union, AxisAlignedBB::union)
+			.union(new AxisAlignedBB(startPos));
 	}
 	
 	/**** Getters and Setters	****/
@@ -100,16 +189,114 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		return TubeBlock.getConnectedDirections(state);
 	}
 	
-	public static Optional<TubeTileEntity> getTubeTEAt(World world, BlockPos pos)
-	{
-		TileEntity te = world.getTileEntity(pos);
-		return Optional.ofNullable(te instanceof TubeTileEntity ? (TubeTileEntity)te : null);
-	}
-	
 	// insertionSide is the side of this block the item was inserted from
 	public Route getBestRoute(Direction insertionSide, ItemStack stack)
 	{
 		return this.getNetwork().getBestRoute(this.world, this.pos, insertionSide, stack);
+	}
+	
+	/** Returns a view of this tube's side-to-remote-connection map **/
+	public Map<Direction, BlockPos> getRemoteConnections()
+	{
+		return Maps.transformValues(this.remoteConnections, connection -> connection.toPos);
+	}
+
+	public boolean hasRemoteConnection(BlockPos otherPos)
+	{
+		return this.getRemoteConnections().values().contains(otherPos);
+	}
+
+	public void clearRemoteConnections()
+	{
+		this.remoteConnections.entrySet().forEach(entry -> getTubeTEAt(this.world, entry.getValue().toPos).ifPresent(otherTube -> otherTube.removeConnection(this.pos)));
+		this.remoteConnections = new HashMap<>();
+		this.onDataUpdated();
+	}
+
+	private void addConnection(BlockPos otherPos)
+	{
+		this.remoteConnections.put(Direction.UP, new RemoteConnection(Direction.UP, Direction.UP, this.pos, otherPos));
+		this.world.neighborChanged(this.pos, this.getBlockState().getBlock(), otherPos);
+		this.onDataUpdated();
+	}
+
+	private void removeConnection(BlockPos otherPos)
+	{
+		for (Direction dir : Direction.values())
+		{
+			if (this.remoteConnections.get(dir).toPos.equals(otherPos))
+			{
+				this.remoteConnections.remove(dir);
+			}
+		}
+		this.world.neighborChanged(this.pos, this.getBlockState().getBlock(), otherPos);
+		if (!this.world.isRemote)
+		{
+			PacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.world.getChunkAt(this.pos)),
+				new TubeBreakPacket(getConnectionVector(this.pos), getConnectionVector(otherPos)));
+		}
+		this.onDataUpdated();
+	}
+
+	
+	// TODO check whether actually needed
+//	public void notifyConnections()
+//	{
+//		this.getRemoteConnections()
+//			.forEach(connectionPos -> this.world.neighborChanged(connectionPos, this.getBlockState().getBlock(), this.pos));
+//			
+//	}
+
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	public AxisAlignedBB getRenderBoundingBox()
+	{
+		return this.renderAABB;
+	}
+	
+	/**
+	 * Checks if a placed block would intersect any of this block's connections.
+	 * @param placePos The position the block is being placed at
+	 * @param placeState The blockstate being placed
+	 * @param checkedTubePositions The positions of tubes that have already been checked.
+	 * Any tubes in this list that this tube is connected to is also connected to this tube, and this connection has been
+	 * verified to not intersect the placed block, so we don't need to check again.
+	 * @return A vec3d of the intersecting hit, or null if there was no intersecting hit
+	 */
+	@Nullable
+	public Vec3d doesBlockStateIntersectConnection(BlockPos placePos, BlockState placeState, Set<BlockPos> checkedTubePositions)
+	{
+		for (RemoteConnection connection : this.remoteConnections.values())
+		{
+			BlockPos pos = connection.toPos;
+			if (!checkedTubePositions.contains(pos))
+			{
+				Vec3d hit = doesBlockStateIntersectConnection(this.pos, pos, placePos, placeState, connection.box, this.getWorld());
+				if (hit != null)
+				{
+					return hit;
+				}
+			}
+		}
+		return null;
+	}
+	
+	@Nullable
+	public static Vec3d doesBlockStateIntersectConnection(BlockPos startPos, BlockPos endPos, BlockPos placePos, BlockState placeState, NestedBoundingBox box, World world)
+	{
+		VoxelShape shape = placeState.getCollisionShape(world, placePos);
+		for (AxisAlignedBB aabb : shape.toBoundingBoxList())
+		{
+			if (box.intersects(aabb.offset(placePos)))
+			{
+				// if we confirm the AABB intersects, do a raytrace as well
+				boolean lastPosIsHigher = startPos.getY() < endPos.getY();
+				BlockPos upperPos = lastPosIsHigher ? endPos : startPos;
+				BlockPos lowerPos = lastPosIsHigher ? startPos : endPos; 
+				return RaytraceHelper.getTubeRaytraceHit(lowerPos, upperPos, world);
+			}
+		}
+		return null;
 	}
 
 	/**** Event Handling ****/
@@ -120,6 +307,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		this.dropItems();
 		this.network.invalid = true;
 		Arrays.stream(this.handlerOptionals).forEach(optional -> optional.invalidate());
+		this.clearRemoteConnections();
 		super.remove();
 	}
 	
@@ -180,7 +368,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			}
 			this.inventory = remainingWrappers;
 		}
-		if (!this.world.isRemote && this.inventory.size() > TubesReloadedMod.config.max_items_in_tube.get())
+		if (!this.world.isRemote && this.inventory.size() > TubesReloaded.serverConfig.max_items_in_tube.get())
 		{
 			this.world.removeBlock(this.pos, false);
 		}
@@ -219,6 +407,13 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			WorldHelper.ejectItemstack(this.world, this.pos, null, wrapper.stack);
 		}
 	}
+
+	public void onDataUpdated()
+	{
+		this.markDirty();
+		this.world.notifyBlockUpdate(this.pos, this.getBlockState(), this.getBlockState(), Constants.BlockFlags.DEFAULT);
+	}
+	
 	/**** Inventory handling ****/
 
 	@Override
@@ -339,6 +534,19 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 				this.inventory.add(ItemInTubeWrapper.readFromNBT(itemTag));
 			}
 		}
+		
+
+		if (compound.contains(CONNECTIONS))
+		{
+			Map<Direction, RemoteConnection.Storage> rawMap = REMOTE_CONNECTIONS_CODEC.read(compound);
+			Map<Direction, RemoteConnection> newMap = new HashMap<>();
+			rawMap.entrySet().forEach(entry -> newMap.put(entry.getKey(), RemoteConnection.fromStorage(entry.getValue(), entry.getKey(), this.pos)));
+			this.remoteConnections = newMap;
+		}
+		this.renderAABB = getAABBContainingAllBlockPos(this.pos,
+			this.remoteConnections.values().stream()
+			.map(connection -> connection.toPos)
+			.collect(Collectors.toSet()));
 	}
 
 	@Override	// write entire inventory by default (for server -> hard disk purposes this is what is called)
@@ -358,6 +566,8 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		{
 			compound.put(INV_NBT_KEY_RESET, invList);
 		}
+		
+		REMOTE_CONNECTIONS_CODEC.write(Maps.transformValues(this.remoteConnections, connection -> connection.toStorage()), compound);
 
 		return super.write(compound);
 	}

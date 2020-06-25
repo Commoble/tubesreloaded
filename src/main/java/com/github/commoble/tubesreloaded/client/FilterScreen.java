@@ -1,6 +1,6 @@
 package com.github.commoble.tubesreloaded.client;
 
-import com.github.commoble.tubesreloaded.TubesReloadedMod;
+import com.github.commoble.tubesreloaded.TubesReloaded;
 import com.github.commoble.tubesreloaded.blocks.filter.FilterContainer;
 import com.github.commoble.tubesreloaded.registry.BlockRegistrar;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -14,7 +14,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 public class FilterScreen extends ContainerScreen<FilterContainer>
 {
 	// location of GUI texture
-	private static final ResourceLocation TEXTURE = new ResourceLocation(TubesReloadedMod.MODID, "textures/gui/filter.png");
+	private static final ResourceLocation TEXTURE = new ResourceLocation(TubesReloaded.MODID, "textures/gui/filter.png");
 
 	public FilterScreen(FilterContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
 	{
