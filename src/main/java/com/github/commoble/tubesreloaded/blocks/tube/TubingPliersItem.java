@@ -9,6 +9,7 @@ import com.github.commoble.tubesreloaded.network.PacketHandler;
 import com.github.commoble.tubesreloaded.network.TubeBreakPacket;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SixWayBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -63,7 +64,7 @@ public class TubingPliersItem extends Item
 			
 			if (nbt == null)
 			{
-				if (state.getBlock() instanceof TubeBlock && state.get(TubeBlock.PROPERTIES_BY_DIRECTION.get(activatedSide)) == FaceConnection.OPEN)
+				if (state.getBlock() instanceof TubeBlock && !state.get(SixWayBlock.FACING_TO_PROPERTY_MAP.get(activatedSide)))
 				{
 					CompoundNBT newNBT = new CompoundNBT();
 					newNBT.put(LAST_TUBE_POS, NBTUtil.writeBlockPos(pos));
@@ -107,11 +108,11 @@ public class TubingPliersItem extends Item
 							((ServerPlayerEntity)player).playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
 						}
 					}
-					else if (state.getBlock() instanceof TubeBlock && state.get(TubeBlock.PROPERTIES_BY_DIRECTION.get(activatedSide)) == FaceConnection.OPEN)
+					else if (state.getBlock() instanceof TubeBlock && !state.get(SixWayBlock.FACING_TO_PROPERTY_MAP.get(activatedSide)))
 					{
-						// if tube wasn't connected, connect them if they're close enough
+						// if tube wasn't connected to the first tube or another tube, connect them if they're close enough
 						if (pos.withinDistance(lastPos, TubesReloaded.serverConfig.max_remote_tube_connection_range.get())
-							&& lastState.getBlock() instanceof TubeBlock && lastState.get(TubeBlock.PROPERTIES_BY_DIRECTION.get(lastSide)) == FaceConnection.OPEN)
+							&& lastState.getBlock() instanceof TubeBlock && !lastState.get(SixWayBlock.FACING_TO_PROPERTY_MAP.get(lastSide)))
 						{
 							stack.removeChildTag(LAST_TUBE_DATA);
 							TubeTileEntity.getTubeTEAt(world, lastPos)

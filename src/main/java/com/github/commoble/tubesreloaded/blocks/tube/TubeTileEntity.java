@@ -200,7 +200,22 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	{
 		return this.remoteConnections;
 	}
+	
+	/**
+	 * 
+	 * @param face The face of the tube block
+	 * @return TRUE if the tile entity has a remote connection from the given side
+	 */
+	public boolean hasRemoteConnection(Direction face)
+	{
+		return this.getRemoteConnections().containsKey(face);
+	}
 
+	/**
+	 * 
+	 * @param otherPos
+	 * @return TRUE if the tile entity has any remote connections to the other position
+	 */
 	public boolean hasRemoteConnection(BlockPos otherPos)
 	{
 		return this.getRemoteConnections().values().stream()
@@ -218,7 +233,6 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	{
 		this.remoteConnections.put(thisSide, new RemoteConnection(thisSide, otherSide, this.pos, otherPos));
 		this.network.invalid = true;
-		this.world.setBlockState(this.pos, this.getBlockState().with(TubeBlock.PROPERTIES_BY_DIRECTION.get(thisSide), FaceConnection.REMOTE));
 		this.onDataUpdated();
 	}
 
@@ -231,7 +245,6 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			if (connection != null && connection.toPos.equals(otherPos))
 			{
 				this.remoteConnections.remove(dir);
-				newState = newState.with(TubeBlock.PROPERTIES_BY_DIRECTION.get(dir), FaceConnection.OPEN);
 			}
 		}
 		if (!this.world.isRemote)

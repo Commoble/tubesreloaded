@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -15,8 +14,6 @@ import com.github.commoble.tubesreloaded.blocks.filter.FilterBlock;
 import com.github.commoble.tubesreloaded.blocks.loader.LoaderBlock;
 import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -210,6 +207,36 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	public boolean isTubeCompatible(TubeBlock tube)
 	{
 		return true;
+	}
+	
+	/**
+	 * 
+	 * @param state
+	 * @param face
+	 * @return TRUE if the block is a tube block and is connected on the given side, false otherwise
+	 */
+	public static boolean hasAdjacentConnection(BlockState state, Direction face)
+	{
+		return state.getBlock() instanceof TubeBlock && state.get(SixWayBlock.FACING_TO_PROPERTY_MAP.get(face));
+	}
+	
+	/**
+	 * 
+	 * @param state
+	 * @return TRUE if the state is a tube block with a valid TileEntity and has neither an adjacent connection or remote connection on the given side, FALSE otherwise
+	 */
+	public static boolean hasOpenConnection(World world, BlockPos pos, BlockState state, Direction face)
+	{
+		if (state.getBlock() instanceof TubeBlock)
+		{
+			return !hasAdjacentConnection(state, face) &&
+				TubeTileEntity.getTubeTEAt(world, pos).map(te -> !te.hasRemoteConnection(face))
+					.orElse(false);
+		}
+		else
+		{
+			return false;
+		}
 	}
 	
 	public static List<Direction> getConnectedDirections(BlockState state)
