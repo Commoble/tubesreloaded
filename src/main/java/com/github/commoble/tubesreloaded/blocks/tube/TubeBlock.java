@@ -1,9 +1,8 @@
 package com.github.commoble.tubesreloaded.blocks.tube;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -239,10 +238,10 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		}
 	}
 	
-	public static List<Direction> getConnectedDirections(BlockState state)
+	public static Set<Direction> getConnectedDirections(BlockState state)
 	{
 		Block block = state.getBlock();
-		ArrayList<Direction> dirs = new ArrayList<Direction>();
+		Set<Direction> dirs = new HashSet<Direction>();
 		if (block instanceof TubeBlock)
 		{
 			for (Direction dir : Direction.values())

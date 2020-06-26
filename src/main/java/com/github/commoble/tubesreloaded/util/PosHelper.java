@@ -2,8 +2,11 @@ package com.github.commoble.tubesreloaded.util;
 
 import javax.annotation.Nullable;
 
+import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
+
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class PosHelper
 {
@@ -15,7 +18,15 @@ public class PosHelper
 	 * @return
 	 */
 	@Nullable
-	public static Direction getTravelDirectionFromTo(BlockPos startPos, BlockPos nextPos)
+	public static Direction getTravelDirectionFromTo(World world, BlockPos startPos, BlockPos nextPos)
+	{
+		return TubeTileEntity.getTubeTEAt(world, startPos)
+			.flatMap(tube -> tube.getDirectionOfRemoteConnection(nextPos))
+			.orElse(getTravelDirectionBetweenAdjacentPositions(startPos, nextPos));
+	}
+	
+	@Nullable
+	public static Direction getTravelDirectionBetweenAdjacentPositions(BlockPos startPos, BlockPos nextPos)
 	{
 		for (Direction face : Direction.values())
 		{

@@ -219,11 +219,12 @@ public class RoutingNetwork
 			TileEntity te = world.getTileEntity(visitedPos);
 			if (te instanceof TubeTileEntity)
 			{
+				TubeTileEntity tube = (TubeTileEntity)te;
 				network.tubes.add(visitedPos);
-				List<Direction> dirs = ((TubeTileEntity)te).getAdjacentConnectedDirections();
+				Set<Direction> dirs = tube.getAllConnectedDirections();
 				for (Direction face : dirs)
 				{
-					BlockPos checkPos = visitedPos.offset(face);
+					BlockPos checkPos = tube.getConnectedPos(face);
 					if (!visited.contains(checkPos))
 					{
 						blocksToVisit.add(checkPos);

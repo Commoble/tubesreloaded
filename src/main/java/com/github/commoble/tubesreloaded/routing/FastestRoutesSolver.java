@@ -5,9 +5,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 import com.github.commoble.tubesreloaded.blocks.tube.TubeBlock;
+import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
 import com.github.commoble.tubesreloaded.util.PosHelper;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -68,11 +71,13 @@ public class FastestRoutesSolver
 			// remove it from the queue
 			// TODO handle support for noneuclidean tubes
 			BlockState state = world.getBlockState(node.pos);
+			Optional<TubeTileEntity> tube = TubeTileEntity.getTubeTEAt(world, node.pos);
+			Set<Direction> dirs = tube.map(te -> te.getAllConnectedDirections())
+				.orElse(TubeBlock.getConnectedDirections(state));
 
-			List<Direction> dirs = TubeBlock.getConnectedDirections(state);
 			for (Direction face : dirs)
 			{
-				BlockPos checkPos = node.pos.offset(face);
+				BlockPos checkPos = tube.map(te -> te.getConnectedPos(face)).orElse(node.pos.offset(face));
 				Endpoint maybeEndpoint = new Endpoint(checkPos, face.getOpposite());
 				
 				
@@ -131,7 +136,7 @@ public class FastestRoutesSolver
 		// for each endpoint, determine the route to it and add it to the list
 		for (Endpoint endpoint : network.endpoints)
 		{
-			LinkedList<Direction> sequenceOfMoves = getSequenceOfMoves(endpoint, startPos, new LinkedList<Direction>(), tubePrevs, endpointPrevs);
+			LinkedList<Direction> sequenceOfMoves = getSequenceOfMoves(world, endpoint, startPos, new LinkedList<Direction>(), tubePrevs, endpointPrevs);
 			if (sequenceOfMoves != null)
 			{
 				routes.add(new Route(endpoint, sequenceOfMoves.size(), sequenceOfMoves));
@@ -143,7 +148,7 @@ public class FastestRoutesSolver
 		return routes;
 	}
 	
-	private static LinkedList<Direction> getSequenceOfMoves(Endpoint endpoint, BlockPos startPos, LinkedList<Direction> returnList, HashMap<BlockPos, BlockPos> tubePrevs, HashMap<Endpoint, BlockPos> endpointPrevs)
+	private static LinkedList<Direction> getSequenceOfMoves(World world, Endpoint endpoint, BlockPos startPos, LinkedList<Direction> returnList, HashMap<BlockPos, BlockPos> tubePrevs, HashMap<Endpoint, BlockPos> endpointPrevs)
 	{
 		if (!endpointPrevs.containsKey(endpoint))
 		{
@@ -158,20 +163,21 @@ public class FastestRoutesSolver
 		}
 		else
 		{
-			return getSequenceOfMoves(prevPos, startPos, returnList, tubePrevs);
+			return getSequenceOfMoves(world, prevPos, startPos, returnList, tubePrevs);
 		}
 	}
 	
 	// recursively assemble the sequence of moves required to get to a given position from the startPos
-	private static LinkedList<Direction> getSequenceOfMoves(BlockPos pos, BlockPos startPos, LinkedList<Direction> returnList, HashMap<BlockPos, BlockPos> prevs)
+	private static LinkedList<Direction> getSequenceOfMoves(World world, BlockPos pos, BlockPos startPos, LinkedList<Direction> returnList, HashMap<BlockPos, BlockPos> prevs)
 	{
+		
 		if (!prevs.containsKey(pos))
 		{
 			return null;	// if the endpoint can't be reached from the start point, then we don't create a route to it 
 		}
 		
 		BlockPos prevPos = prevs.get(pos);
-		returnList.addFirst(PosHelper.getTravelDirectionFromTo(prevPos, pos));
+		returnList.addFirst(PosHelper.getTravelDirectionFromTo(world, prevPos, pos));
 		
 		// TODO at the moment we're going to blindly trust that the route solver didn't create any loops, may need to add safeguard later
 		// to be honest if we do run into a loop, that's a problem to be fixed in the route solver, not here
@@ -181,7 +187,7 @@ public class FastestRoutesSolver
 		}
 		else
 		{
-			return getSequenceOfMoves(prevPos, startPos, returnList, prevs);
+			return getSequenceOfMoves(world, prevPos, startPos, returnList, prevs);
 		}
 	}
 }

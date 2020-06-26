@@ -2,8 +2,8 @@ package com.github.commoble.tubesreloaded.blocks.tube;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -184,10 +184,18 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		return false;
 	}
 	
-	public List<Direction> getAdjacentConnectedDirections()
+	public Set<Direction> getAdjacentConnectedDirections()
 	{
 		BlockState state = this.getBlockState();
 		return TubeBlock.getConnectedDirections(state);
+	}
+	
+	public Set<Direction> getAllConnectedDirections()
+	{
+		Set<Direction> result = new HashSet<>();
+		result.addAll(this.getAdjacentConnectedDirections());
+		result.addAll(this.getRemoteConnections().keySet());
+		return result;
 	}
 	
 	// insertionSide is the side of this block the item was inserted from
@@ -199,6 +207,11 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	public Map<Direction, RemoteConnection> getRemoteConnections()
 	{
 		return this.remoteConnections;
+	}
+	
+	public boolean hasRemoteConnection(BlockPos otherPos)
+	{
+		return this.getDirectionOfRemoteConnection(otherPos).isPresent();
 	}
 	
 	/**
@@ -214,12 +227,14 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	/**
 	 * 
 	 * @param otherPos
-	 * @return TRUE if the tile entity has any remote connections to the other position
+	 * @return The side of this tube that has a connection to the given position, if any
 	 */
-	public boolean hasRemoteConnection(BlockPos otherPos)
+	public Optional<Direction> getDirectionOfRemoteConnection(BlockPos otherPos)
 	{
-		return this.getRemoteConnections().values().stream()
-			.anyMatch(connection -> connection.toPos.equals(otherPos));
+		return this.getRemoteConnections().entrySet().stream()
+			.filter(entry -> entry.getValue().toPos.equals(otherPos))
+			.findAny()
+			.map(entry -> entry.getKey());
 	}
 
 	public void clearRemoteConnections()
