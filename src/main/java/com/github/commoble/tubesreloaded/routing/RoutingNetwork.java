@@ -220,7 +220,7 @@ public class RoutingNetwork
 			if (te instanceof TubeTileEntity)
 			{
 				network.tubes.add(visitedPos);
-				List<Direction> dirs = ((TubeTileEntity)te).getConnectedDirections();
+				List<Direction> dirs = ((TubeTileEntity)te).getAdjacentConnectedDirections();
 				for (Direction face : dirs)
 				{
 					BlockPos checkPos = visitedPos.offset(face);

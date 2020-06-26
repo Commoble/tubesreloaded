@@ -2,11 +2,12 @@ package com.github.commoble.tubesreloaded.util;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 
 /**
@@ -70,33 +71,41 @@ SOFTWARE.
  * 
  * @author Joseph aka Commoble
  */
-public class NBTMapHelper<K, V>
+public class NBTMapHelper<K, KNBT extends INBT, V, VNBT extends INBT>
 {
+	private static final String KEY = "k";
+	private static final String VALUE = "v";
+	
 	private final String name;
-	private final BiConsumer<CompoundNBT, K> keyWriter;
-	private final Function<CompoundNBT, K> keyReader;
-	private final BiConsumer<CompoundNBT, V> valueWriter;
-	private final Function<CompoundNBT, V> valueReader;
+	private final Function<K, KNBT> keyWriter;
+	private final Function<KNBT, K> keyReader;
+	private final Function<V, VNBT> valueWriter;
+	private final Function<VNBT, V> valueReader;
 	
 	/**
 	 * @param name A unique identifier for the hashmap, allowing the map to be written into a CompoundNBT alongside other data
-	 * @param keyWriter A function that, given a compoundNBT and a Key, writes that Key into the NBT
-	 * @param keyReader A function that, given a compoundNBT, returns the Key written in that NBT
-	 * @param valueWriter A function that, given a compoundNBT and a Value, writes that Value into the NBT
-	 * @param valueReader A Function that ,given a compoundNBT, returns the Value written in that NBT
+	 * @param keyWriter A function that, given a Key, returns an nbt object representing that key
+	 * @param keyReader A function that, given an nbt object, returns the Key represented by that nbt
+	 * @param valueWriter A function that, given a Value, returns an nbt object representing that value
+	 * @param valueReader A Function that, given an nbt object, returns the Value represented by that nbt
 	 */
 	public NBTMapHelper(
 			String name,
-			BiConsumer<CompoundNBT, K> keyWriter,
-			Function<CompoundNBT, K> keyReader,
-			BiConsumer<CompoundNBT, V> valueWriter,
-			Function<CompoundNBT, V> valueReader)
+			Function<K, KNBT> keyWriter,
+			Function<KNBT, K> keyReader,
+			Function<V, VNBT> valueWriter,
+			Function<VNBT, V> valueReader)
 	{
 		this.name = name;
 		this.keyReader = keyReader;
 		this.keyWriter = keyWriter;
 		this.valueReader = valueReader;
 		this.valueWriter = valueWriter;
+	}
+	
+	public boolean hasData(final CompoundNBT nbt)
+	{
+		return nbt.contains(this.name);
 	}
 	
 	/**
@@ -109,24 +118,29 @@ public class NBTMapHelper<K, V>
 	{
 		final Map<K, V> newMap = new HashMap<>();
 
-		final ListNBT keyList = nbt.getList(this.name, 10);
-		if (keyList == null)
+		final ListNBT entryList = nbt.getList(this.name, 10);
+		if (entryList == null)
 			return newMap;
 		
-		final int keyListSize = keyList.size();
+		final int entryCount = entryList.size();
 		
-		if (keyListSize <= 0)
+		if (entryCount <= 0)
 			return newMap;
 
-		IntStream.range(0, keyListSize).mapToObj(keyIterator -> keyList.getCompound(keyIterator))
-				.forEach(keyNBT -> {
-					final K key = this.keyReader.apply(keyNBT);
-					final V value = this.valueReader.apply(keyNBT);
-					
-					newMap.put(key, value);
-				});
+		IntStream.range(0, entryCount).mapToObj(i -> entryList.getCompound(i))
+			.forEach(entryNBT -> this.writeEntry(newMap, entryNBT));
 
 		return newMap;
+	}
+	
+	private void writeEntry(Map<K,V> map, CompoundNBT entryNBT)
+	{
+		@SuppressWarnings("unchecked")
+		final K key = this.keyReader.apply((KNBT) entryNBT.get(KEY));
+		@SuppressWarnings("unchecked")
+		final V value = this.valueReader.apply((VNBT) entryNBT.get(VALUE));
+		
+		map.put(key, value);
 	}
 	
 	/**
@@ -138,21 +152,20 @@ public class NBTMapHelper<K, V>
 	 */
 	public CompoundNBT write(final Map<K,V> map, final CompoundNBT compound)
 	{
-		final ListNBT listOfKeys = new ListNBT();
-		map.entrySet().forEach(entry ->
-		{
-			final K key = entry.getKey();
-			final V value = entry.getValue();
-			
-			final CompoundNBT entryNBT = new CompoundNBT();
-			this.keyWriter.accept(entryNBT, key);
-			this.valueWriter.accept(entryNBT, value);
-			
-			listOfKeys.add(entryNBT);
-		});
+		final ListNBT entryListNBT = new ListNBT();
+		map.entrySet().forEach(entry -> this.writeEntry(entryListNBT, entry));
 		
-		compound.put(this.name, listOfKeys);
+		compound.put(this.name, entryListNBT);
 		
 		return compound;
+	}
+	
+	private void writeEntry(ListNBT entryListNBT, Entry<K,V> entry)
+	{
+		final CompoundNBT entryNBT = new CompoundNBT();
+		entryNBT.put(KEY, this.keyWriter.apply(entry.getKey()));
+		entryNBT.put(VALUE, this.valueWriter.apply(entry.getValue()));
+		
+		entryListNBT.add(entryNBT);
 	}
 }

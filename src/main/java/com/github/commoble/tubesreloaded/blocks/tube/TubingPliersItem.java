@@ -8,6 +8,7 @@ import com.github.commoble.tubesreloaded.TubesReloaded;
 import com.github.commoble.tubesreloaded.network.PacketHandler;
 import com.github.commoble.tubesreloaded.network.TubeBreakPacket;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -20,6 +21,7 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
@@ -30,7 +32,9 @@ import net.minecraftforge.fml.network.PacketDistributor;
 
 public class TubingPliersItem extends Item
 {
+	public static final String LAST_TUBE_DATA = "last_tube_data";
 	public static final String LAST_TUBE_POS = "last_tube_pos";
+	public static final String LAST_TUBE_SIDE = "last_tube_side";
 	
 	public TubingPliersItem(Properties properties)
 	{
@@ -46,67 +50,80 @@ public class TubingPliersItem extends Item
 		World world = context.getWorld();
 		BlockPos pos = context.getPos();
 		return TubeTileEntity.getTubeTEAt(world, pos)
-			.map(tube -> this.onUseOnTube(world, pos, tube, context.getItem(), context.getPlayer()))
+			.map(tube -> this.onUseOnTube(world, pos, tube, context.getItem(), context.getPlayer(), context.getFace()))
 			.orElseGet(() -> super.onItemUse(context));
 	}
 	
-	private ActionResultType onUseOnTube(World world, BlockPos pos, @Nonnull TubeTileEntity tube, ItemStack stack, PlayerEntity player)
+	private ActionResultType onUseOnTube(World world, BlockPos pos, @Nonnull TubeTileEntity tube, ItemStack stack, PlayerEntity player, Direction activatedSide)
 	{
 		if (!world.isRemote)
 		{
-			CompoundNBT nbt = stack.getChildTag(LAST_TUBE_POS);
+			CompoundNBT nbt = stack.getChildTag(LAST_TUBE_DATA);
+			BlockState state = world.getBlockState(pos);
 			
 			if (nbt == null)
 			{
-				stack.setTagInfo(LAST_TUBE_POS, NBTUtil.writeBlockPos(pos));
+				if (state.getBlock() instanceof TubeBlock && state.get(TubeBlock.PROPERTIES_BY_DIRECTION.get(activatedSide)) == FaceConnection.OPEN)
+				{
+					CompoundNBT newNBT = new CompoundNBT();
+					newNBT.put(LAST_TUBE_POS, NBTUtil.writeBlockPos(pos));
+					newNBT.putInt(LAST_TUBE_SIDE, activatedSide.ordinal());
+					stack.setTagInfo(LAST_TUBE_DATA, newNBT);
+				}
+				
 			}
 			else // existing position stored in stack
 			{
-				BlockPos lastPos = NBTUtil.readBlockPos(nbt);
+				BlockPos lastPos = NBTUtil.readBlockPos(nbt.getCompound(LAST_TUBE_POS));
+				Direction lastSide = Direction.byIndex(nbt.getInt(LAST_TUBE_SIDE));
 				// if player clicked the same tube twice, clear the last-used-position
 				if (lastPos.equals(pos))
 				{
-					stack.removeChildTag(LAST_TUBE_POS);
+					stack.removeChildTag(LAST_TUBE_DATA);
 				}
 				// if tube was already connected to the other position, remove connections
 				else if (tube.hasRemoteConnection(lastPos))
 				{
 					TubeTileEntity.removeConnection(world, pos, lastPos);
-					stack.removeChildTag(LAST_TUBE_POS);
+					stack.removeChildTag(LAST_TUBE_DATA);
 				}
-				else // we clicked a different post that doesn't have an existing connection to the original post
+				else // we clicked a different tube that doesn't have an existing connection to the original tube
 				{
-					// do a curved raytrace to check for interruptions
-					boolean lastPosIsHigher = pos.getY() < lastPos.getY();
-					BlockPos upperPos = lastPosIsHigher ? lastPos : pos;
-					BlockPos lowerPos = lastPosIsHigher ? pos : lastPos; 
-					Vec3d hit = RaytraceHelper.getTubeRaytraceHit(lowerPos, upperPos, world);
+					// do a raytrace to check for interruptions
+					Vec3d startVec = RaytraceHelper.getTubeSideCenter(lastPos, lastSide);
+					Vec3d endVec = RaytraceHelper.getTubeSideCenter(pos, activatedSide);
+					Vec3d hit = RaytraceHelper.getTubeRaytraceHit(startVec, endVec, world);
+					BlockState lastState = world.getBlockState(lastPos);
 					
-					// if post wasn't connected but they can't be connected due to a block in the way, interrupt the connection
+					// if tube wasn't connected but they can't be connected due to a block in the way, interrupt the connection
 					if (hit != null)
 					{
-						stack.removeChildTag(LAST_TUBE_POS);
+						stack.removeChildTag(LAST_TUBE_DATA);
 						if (player instanceof ServerPlayerEntity && world instanceof ServerWorld)
 						{
-							PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)player), new TubeBreakPacket(TubeTileEntity.getConnectionVector(lowerPos), TubeTileEntity.getConnectionVector(upperPos)));
+							PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)player), new TubeBreakPacket(startVec, endVec));
 							((ServerWorld)world).spawnParticle((ServerPlayerEntity)player, RedstoneParticleData.REDSTONE_DUST, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
 							
 							((ServerPlayerEntity)player).playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
 						}
 					}
-					// if post wasn't connected, connect them if they're close enough
-					else if (pos.withinDistance(lastPos, TubesReloaded.serverConfig.max_remote_tube_connection_range.get()))
+					else if (state.getBlock() instanceof TubeBlock && state.get(TubeBlock.PROPERTIES_BY_DIRECTION.get(activatedSide)) == FaceConnection.OPEN)
 					{
-						stack.removeChildTag(LAST_TUBE_POS);
-						TubeTileEntity.getTubeTEAt(world, lastPos)
-							.ifPresent(lastPost -> TubeTileEntity.addConnection(world, tube, lastPost));
-						stack.damageItem(1, player, thePlayer -> thePlayer.sendBreakAnimation(EquipmentSlotType.MAINHAND));
-							
-					}
-					else	// too far away, initiate a new connection from here
-					{
-						stack.setTagInfo(LAST_TUBE_POS, NBTUtil.writeBlockPos(pos));
-						// TODO give feedback to player
+						// if tube wasn't connected, connect them if they're close enough
+						if (pos.withinDistance(lastPos, TubesReloaded.serverConfig.max_remote_tube_connection_range.get())
+							&& lastState.getBlock() instanceof TubeBlock && lastState.get(TubeBlock.PROPERTIES_BY_DIRECTION.get(lastSide)) == FaceConnection.OPEN)
+						{
+							stack.removeChildTag(LAST_TUBE_DATA);
+							TubeTileEntity.getTubeTEAt(world, lastPos)
+								.ifPresent(lastPost -> TubeTileEntity.addConnection(world, tube, activatedSide, lastPost, lastSide));
+							stack.damageItem(1, player, thePlayer -> thePlayer.sendBreakAnimation(EquipmentSlotType.MAINHAND));
+								
+						}
+						else // too far away, initiate a new connection from here
+						{
+							stack.setTagInfo(LAST_TUBE_DATA, NBTUtil.writeBlockPos(pos));
+							// TODO give feedback to player
+						}
 					}
 				}
 			}
@@ -124,8 +141,8 @@ public class TubingPliersItem extends Item
 		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
 		if (!worldIn.isRemote)
 		{
-			Optional.ofNullable(stack.getChildTag(LAST_TUBE_POS))
-				.map(nbt -> NBTUtil.readBlockPos(nbt))
+			Optional.ofNullable(stack.getChildTag(LAST_TUBE_DATA))
+				.map(nbt -> NBTUtil.readBlockPos(nbt.getCompound(LAST_TUBE_POS)))
 				.filter(pos -> shouldRemoveConnection(pos, worldIn, entityIn))
 				.ifPresent(pos -> breakPendingConnection(stack, pos, entityIn, worldIn));
 		}
@@ -144,12 +161,12 @@ public class TubingPliersItem extends Item
 	
 	public static void breakPendingConnection(ItemStack stack, BlockPos connectingPos, Entity holder, World world)
 	{
-		stack.removeChildTag(LAST_TUBE_POS);
+		stack.removeChildTag(LAST_TUBE_DATA);
 		if (holder instanceof ServerPlayerEntity)
 		{
 			PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)holder),
 				new TubeBreakPacket(
-					TubeTileEntity.getConnectionVector(connectingPos),
+					TubeTileEntity.getCenter(connectingPos),
 					new Vec3d(holder.getPosX(), holder.getPosYEye(), holder.getPosZ())));
 		}
 	}

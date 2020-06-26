@@ -1,8 +1,10 @@
 package com.github.commoble.tubesreloaded.blocks.tube;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -12,6 +14,9 @@ import com.github.commoble.tubesreloaded.blocks.extractor.ExtractorBlock;
 import com.github.commoble.tubesreloaded.blocks.filter.FilterBlock;
 import com.github.commoble.tubesreloaded.blocks.loader.LoaderBlock;
 import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -222,6 +227,13 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 			}
 		}
 		return dirs;
+	}
+	
+	public static Collection<RemoteConnection> getRemoteConnections(World world, BlockPos pos)
+	{
+		return TubeTileEntity.getTubeTEAt(world, pos)
+			.map(te -> te.getRemoteConnections().values())
+			.orElse(ImmutableList.of());
 	}
 
 	@Override

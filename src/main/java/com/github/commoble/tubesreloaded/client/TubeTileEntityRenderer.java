@@ -1,10 +1,13 @@
 package com.github.commoble.tubesreloaded.client;
 
+import java.util.Map;
 import java.util.Random;
 
 import com.github.commoble.tubesreloaded.blocks.tube.ItemInTubeWrapper;
 import com.github.commoble.tubesreloaded.blocks.tube.RaytraceHelper;
+import com.github.commoble.tubesreloaded.blocks.tube.RemoteConnection;
 import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
+import com.github.commoble.tubesreloaded.blocks.tube.TubingPliersItem;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -20,10 +23,14 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -63,14 +70,48 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 				this.renderWrapper(tube, wrapper, partialTicks, matrix, buffer, combinedLight);
 			}
 		}
-		Vec3d startVec = TubeTileEntity.getConnectionVector(tube.getPos());
-		for (BlockPos connectionPos : tube.getRemoteConnections().values())
+		BlockPos startPos = tube.getPos();
+		for (Map.Entry<Direction, RemoteConnection> entry : tube.getRemoteConnections().entrySet())
 		{
-			Vec3d endVec = TubeTileEntity.getConnectionVector(connectionPos);
-			Vec3d[] points = RaytraceHelper.getInterpolatedPoints(startVec, endVec);
-			for (Vec3d point : points)
+			RemoteConnection connection = entry.getValue();
+			BlockPos endPos = connection.toPos;
+			if (startPos.hashCode() <= endPos.hashCode())
 			{
-				tube.getWorld().addParticle(ParticleTypes.END_ROD, point.x, point.y, point.z, 0D, 0D, 0D);
+				Direction startSide = entry.getKey();
+				Direction endSide = connection.toSide;
+				Vec3d startVec = RaytraceHelper.getTubeSideCenter(startPos, startSide);
+				Vec3d endVec = RaytraceHelper.getTubeSideCenter(endPos, endSide);
+				Vec3d[] points = RaytraceHelper.getInterpolatedPoints(startVec, endVec);
+				for (Vec3d point : points)
+				{
+					tube.getWorld().addParticle(ParticleTypes.BUBBLE_POP, point.x, point.y, point.z, 0D, 0D, 0D);
+				}
+			}
+		}
+		
+		@SuppressWarnings("resource")
+		PlayerEntity player = Minecraft.getInstance().player;
+		for (Hand hand : Hand.values())
+		{
+			ItemStack stack = player.getHeldItem(hand);
+			if (stack.getItem() instanceof TubingPliersItem)
+			{
+				CompoundNBT nbt = stack.getChildTag(TubingPliersItem.LAST_TUBE_DATA);
+				if (nbt != null)
+				{
+					BlockPos posOfLastTubeOfPlayer = NBTUtil.readBlockPos(nbt.getCompound(TubingPliersItem.LAST_TUBE_POS));
+					Direction sideOfLastTubeOfPlayer = Direction.byHorizontalIndex(nbt.getInt(TubingPliersItem.LAST_TUBE_SIDE));
+					if (posOfLastTubeOfPlayer.equals(tube.getPos()))
+					{
+						Vec3d startVec = RaytraceHelper.getTubeSideCenter(posOfLastTubeOfPlayer, sideOfLastTubeOfPlayer);
+						Vec3d endVec = player.getPositionVec();
+						Vec3d[] points = RaytraceHelper.getInterpolatedPoints(startVec, endVec);
+						for (Vec3d point : points)
+						{
+							tube.getWorld().addParticle(ParticleTypes.BUBBLE_POP, point.x, point.y, point.z, 0D, 0D, 0D);
+						}
+					}
+				}
 			}
 		}
 //		this.renderLongTube(tube, partialTicks, matrix, buffer, combinedLight, combinedOverlay);

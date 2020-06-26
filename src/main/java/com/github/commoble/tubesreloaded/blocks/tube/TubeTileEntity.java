@@ -29,6 +29,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
@@ -60,11 +61,11 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	public static final AxisAlignedBB EMPTY_AABB = new AxisAlignedBB(0,0,0,0,0,0);
 	
 	public static final String SIDE = "side";
-	public static final NBTMapHelper<Direction, RemoteConnection.Storage> REMOTE_CONNECTIONS_CODEC = new NBTMapHelper<>(
+	public static final NBTMapHelper<Direction, IntNBT, RemoteConnection.Storage, CompoundNBT> REMOTE_CONNECTIONS_CODEC = new NBTMapHelper<>(
 		CONNECTIONS,
-		(nbt, side) -> nbt.putInt(SIDE, side.ordinal()),
-		nbt -> Direction.byIndex(nbt.getInt(SIDE)),
-		(nbt, rcs) -> rcs.toNBT(),
+		side -> IntNBT.valueOf(side.ordinal()),
+		nbt -> Direction.byIndex(nbt.getInt()),
+		rcs -> rcs.toNBT(),
 		nbt -> RemoteConnection.Storage.fromNBT(nbt));
 
 	private Map<Direction, RemoteConnection> remoteConnections = new HashMap<>();
@@ -109,20 +110,20 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 
 	// connects two tube TEs
 	// returns whether the attempt to add a connection was successful
-	public static boolean addConnection(IWorld world, BlockPos posA, BlockPos posB)
+	public static boolean addConnection(IWorld world, Direction sideA, BlockPos posA, Direction sideB, BlockPos posB)
 	{
 		// if two tube TEs exist at the given locations, connect them and return true
 		// otherwise return false
 		return getTubeTEAt(world, posA)
-			.flatMap(tubeA -> getTubeTEAt(world, posB).map(tubeB -> addConnection(world, tubeA, tubeB)))
+			.flatMap(tubeA -> getTubeTEAt(world, posB).map(tubeB -> addConnection(world, tubeA, sideA, tubeB, sideB)))
 			.orElse(false);
 	}
 
 	// returns true if attempt to add a connection was successful
-	public static boolean addConnection(IWorld world, @Nonnull TubeTileEntity tubeA, @Nonnull TubeTileEntity tubeB)
+	public static boolean addConnection(IWorld world, @Nonnull TubeTileEntity tubeA, @Nonnull Direction sideA, @Nonnull TubeTileEntity tubeB, @Nonnull Direction sideB)
 	{
-		tubeA.addConnection(tubeB.pos);
-		tubeB.addConnection(tubeA.pos);
+		tubeA.addConnection(sideA, sideB, tubeB.pos);
+		tubeB.addConnection(sideB, sideA, tubeA.pos);
 		return true;
 	}
 
@@ -144,7 +145,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		getTubeTEAt(world, posB).ifPresent(tube -> tube.removeConnection(posA));
 	}
 	
-	public static Vec3d getConnectionVector(BlockPos pos)
+	public static Vec3d getCenter(BlockPos pos)
 	{
 		return new Vec3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
 	}
@@ -183,7 +184,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		return false;
 	}
 	
-	public List<Direction> getConnectedDirections()
+	public List<Direction> getAdjacentConnectedDirections()
 	{
 		BlockState state = this.getBlockState();
 		return TubeBlock.getConnectedDirections(state);
@@ -195,15 +196,15 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		return this.getNetwork().getBestRoute(this.world, this.pos, insertionSide, stack);
 	}
 	
-	/** Returns a view of this tube's side-to-remote-connection map **/
-	public Map<Direction, BlockPos> getRemoteConnections()
+	public Map<Direction, RemoteConnection> getRemoteConnections()
 	{
-		return Maps.transformValues(this.remoteConnections, connection -> connection.toPos);
+		return this.remoteConnections;
 	}
 
 	public boolean hasRemoteConnection(BlockPos otherPos)
 	{
-		return this.getRemoteConnections().values().contains(otherPos);
+		return this.getRemoteConnections().values().stream()
+			.anyMatch(connection -> connection.toPos.equals(otherPos));
 	}
 
 	public void clearRemoteConnections()
@@ -213,39 +214,36 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		this.onDataUpdated();
 	}
 
-	private void addConnection(BlockPos otherPos)
+	private void addConnection(Direction thisSide, Direction otherSide, BlockPos otherPos)
 	{
-		this.remoteConnections.put(Direction.UP, new RemoteConnection(Direction.UP, Direction.UP, this.pos, otherPos));
-		this.world.neighborChanged(this.pos, this.getBlockState().getBlock(), otherPos);
+		this.remoteConnections.put(thisSide, new RemoteConnection(thisSide, otherSide, this.pos, otherPos));
+		this.network.invalid = true;
+		this.world.setBlockState(this.pos, this.getBlockState().with(TubeBlock.PROPERTIES_BY_DIRECTION.get(thisSide), FaceConnection.REMOTE));
 		this.onDataUpdated();
 	}
 
 	private void removeConnection(BlockPos otherPos)
 	{
+		BlockState newState = this.getBlockState();
 		for (Direction dir : Direction.values())
 		{
-			if (this.remoteConnections.get(dir).toPos.equals(otherPos))
+			RemoteConnection connection = this.remoteConnections.get(dir);
+			if (connection != null && connection.toPos.equals(otherPos))
 			{
 				this.remoteConnections.remove(dir);
+				newState = newState.with(TubeBlock.PROPERTIES_BY_DIRECTION.get(dir), FaceConnection.OPEN);
 			}
 		}
-		this.world.neighborChanged(this.pos, this.getBlockState().getBlock(), otherPos);
 		if (!this.world.isRemote)
 		{
+			this.onPossibleNetworkUpdateRequired();
+			this.network.invalid = true;
+			this.world.setBlockState(this.pos, newState);
 			PacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.world.getChunkAt(this.pos)),
-				new TubeBreakPacket(getConnectionVector(this.pos), getConnectionVector(otherPos)));
+				new TubeBreakPacket(getCenter(this.pos), getCenter(otherPos)));
 		}
 		this.onDataUpdated();
 	}
-
-	
-	// TODO check whether actually needed
-//	public void notifyConnections()
-//	{
-//		this.getRemoteConnections()
-//			.forEach(connectionPos -> this.world.neighborChanged(connectionPos, this.getBlockState().getBlock(), this.pos));
-//			
-//	}
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
@@ -266,12 +264,15 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	@Nullable
 	public Vec3d doesBlockStateIntersectConnection(BlockPos placePos, BlockState placeState, Set<BlockPos> checkedTubePositions)
 	{
-		for (RemoteConnection connection : this.remoteConnections.values())
+		for (Map.Entry<Direction, RemoteConnection> entry : this.remoteConnections.entrySet())
 		{
+			RemoteConnection connection = entry.getValue();
 			BlockPos pos = connection.toPos;
 			if (!checkedTubePositions.contains(pos))
 			{
-				Vec3d hit = doesBlockStateIntersectConnection(this.pos, pos, placePos, placeState, connection.box, this.getWorld());
+				Direction fromSide = entry.getKey();
+				Direction toSide = connection.toSide;
+				Vec3d hit = doesBlockStateIntersectConnection(this.pos, fromSide, pos, toSide, placePos, placeState, connection.box, this.getWorld());
 				if (hit != null)
 				{
 					return hit;
@@ -282,7 +283,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	}
 	
 	@Nullable
-	public static Vec3d doesBlockStateIntersectConnection(BlockPos startPos, BlockPos endPos, BlockPos placePos, BlockState placeState, NestedBoundingBox box, World world)
+	public static Vec3d doesBlockStateIntersectConnection(BlockPos startPos, Direction startSide, BlockPos endPos, Direction endSide, BlockPos placePos, BlockState placeState, NestedBoundingBox box, World world)
 	{
 		VoxelShape shape = placeState.getCollisionShape(world, placePos);
 		for (AxisAlignedBB aabb : shape.toBoundingBoxList())
@@ -290,10 +291,9 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			if (box.intersects(aabb.offset(placePos)))
 			{
 				// if we confirm the AABB intersects, do a raytrace as well
-				boolean lastPosIsHigher = startPos.getY() < endPos.getY();
-				BlockPos upperPos = lastPosIsHigher ? endPos : startPos;
-				BlockPos lowerPos = lastPosIsHigher ? startPos : endPos; 
-				return RaytraceHelper.getTubeRaytraceHit(lowerPos, upperPos, world);
+				Vec3d startVec = RaytraceHelper.getTubeSideCenter(startPos, startSide);
+				Vec3d endVec = RaytraceHelper.getTubeSideCenter(endPos, endSide);
+				return RaytraceHelper.getTubeRaytraceHit(startVec, endVec, world);
 			}
 		}
 		return null;
@@ -374,12 +374,25 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		}
 	}
 	
+	public BlockPos getConnectedPos(Direction dir)
+	{
+		if (this.remoteConnections.containsKey(dir))
+		{
+			return this.remoteConnections.get(dir).toPos;
+		}
+		else
+		{
+			return this.pos.offset(dir);
+		}
+	}
+	
 	public void sendWrapperOnward(ItemInTubeWrapper wrapper)
 	{
 		if (!wrapper.remainingMoves.isEmpty())	// wrapper has remaining moves
 		{
 			Direction dir = wrapper.remainingMoves.poll();
-			TileEntity te = this.world.getTileEntity(this.pos.offset(dir));
+			BlockPos nextPos = this.getConnectedPos(dir);
+			TileEntity te = this.world.getTileEntity(nextPos);
 			if (te instanceof TubeTileEntity && this.isTubeCompatible((TubeTileEntity)te)) // te exists and is a valid tube
 			{
 				((TubeTileEntity)te).enqueueItemStack(wrapper.stack, wrapper.remainingMoves, wrapper.maximumDurationInTube);
@@ -609,6 +622,8 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		{
 			nbt.put(INV_NBT_KEY_ADD, invList);
 		}
+		
+		REMOTE_CONNECTIONS_CODEC.write(Maps.transformValues(this.remoteConnections, connection -> connection.toStorage()), nbt);
 		
 		return new SUpdateTileEntityPacket(this.getPos(), 1, nbt);
 	}

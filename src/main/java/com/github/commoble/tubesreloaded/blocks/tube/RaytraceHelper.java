@@ -53,14 +53,23 @@ public class RaytraceHelper
 	{
 		return (double) current / (double) max;
 	}
+	
+	/** Returns the vector representing the center of the side of a tube block **/
+	public static Vec3d getTubeSideCenter(BlockPos pos, Direction side)
+	{
+		Vec3d center = TubeTileEntity.getCenter(pos);
+		double offsetFromCenter = 4D/16D;
+		double xOff = side.getXOffset() * offsetFromCenter;
+		double yOff = side.getYOffset() * offsetFromCenter;
+		double zOff = side.getZOffset() * offsetFromCenter;
+		return center.add(xOff, yOff, zOff);
+	}
 
 	@Nullable
-	public static Vec3d getTubeRaytraceHit(BlockPos lower, BlockPos upper, World world)
+	public static Vec3d getTubeRaytraceHit(Vec3d startVec, Vec3d endVec, World world)
 	{
-		Vec3d startVec = TubeTileEntity.getConnectionVector(lower);
-		Vec3d endVec = TubeTileEntity.getConnectionVector(upper);
 		Vec3d[] points = getInterpolatedPoints(startVec, endVec);
-		TubeRayTraceSelectionContext selector = new TubeRayTraceSelectionContext(lower, upper);
+		TubeRayTraceSelectionContext selector = new TubeRayTraceSelectionContext();
 		int pointCount = points.length;
 		int rayTraceCount = pointCount-1;
 		for (int i=0; i<rayTraceCount; i++)

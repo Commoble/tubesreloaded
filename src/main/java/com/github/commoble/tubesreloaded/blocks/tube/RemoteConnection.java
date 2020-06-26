@@ -34,8 +34,8 @@ public class RemoteConnection
 	
 	private static NestedBoundingBox getNestedBoundingBoxForConnectedPos(BlockPos from, BlockPos to)
 	{
-		Vec3d thisVec = TubeTileEntity.getConnectionVector(from);
-		Vec3d otherVec = TubeTileEntity.getConnectionVector(to);
+		Vec3d thisVec = TubeTileEntity.getCenter(from);
+		Vec3d otherVec = TubeTileEntity.getCenter(to);
 		boolean otherHigher = otherVec.y > thisVec.y;
 		Vec3d higherVec = otherHigher ? otherVec : thisVec;
 		Vec3d lowerVec = otherHigher ? thisVec : otherVec;
