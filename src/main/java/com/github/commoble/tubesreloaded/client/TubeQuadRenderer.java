@@ -1,5 +1,6 @@
 package com.github.commoble.tubesreloaded.client;
 
+import com.github.commoble.tubesreloaded.blocks.tube.TubeBlock;
 import com.github.commoble.tubesreloaded.util.DirectionTransformer;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -11,7 +12,6 @@ import net.minecraft.client.renderer.model.Material;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.LightType;
@@ -19,9 +19,9 @@ import net.minecraft.world.World;
 
 public class TubeQuadRenderer
 {
-	public static void renderQuads(World world, float partialTicks, BlockPos startPos, BlockPos endPos, Direction startFace, Direction endFace, MatrixStack matrix, IRenderTypeBuffer buffer, ResourceLocation textureLocation)
+	public static void renderQuads(World world, float partialTicks, BlockPos startPos, BlockPos endPos, Direction startFace, Direction endFace, MatrixStack matrix, IRenderTypeBuffer buffer, TubeBlock block)
 	{
-		TextureAtlasSprite textureatlassprite = new Material(AtlasTexture.LOCATION_BLOCKS_TEXTURE, textureLocation).getSprite();
+		TextureAtlasSprite textureatlassprite = new Material(AtlasTexture.LOCATION_BLOCKS_TEXTURE, block.textureLocation).getSprite();
 		
 		Vec3d startVec = new Vec3d(startPos);
 		Vec3d endVec = new Vec3d(endPos);
@@ -81,7 +81,7 @@ public class TubeQuadRenderer
 			// for a given quad, all four vertices should have the same normal, so we only need to calculate one of them
 			// and reverse it for the reverse quad
 			
-			Vec3d normal = startVertexB.subtract(startVertexA).crossProduct((endVertexA.subtract(startVertexA)));
+			Vec3d normal = startVertexB.subtract(startVertexA).crossProduct((endVertexA.subtract(startVertexA))).normalize();
 			Vec3d reverseNormal = normal.mul(-1, -1, -1);
 
 			putVertex(matrixEntry, ivertexbuilder, xA, yA, zA, minU, maxV, startLight, normal);

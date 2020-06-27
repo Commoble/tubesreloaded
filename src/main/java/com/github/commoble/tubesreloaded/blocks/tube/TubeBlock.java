@@ -31,6 +31,7 @@ import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
@@ -55,8 +56,11 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
 	protected final VoxelShape[] shapes;
+	
+	/** Texture location for rendering long tubes **/
+	public final ResourceLocation textureLocation;
 
-	public TubeBlock(Properties properties)
+	public TubeBlock(ResourceLocation textureLocation, Properties properties)
 	{
 		super(properties);this.setDefaultState(this.stateContainer.getBaseState()
 				.with(NORTH, Boolean.valueOf(false))
@@ -67,6 +71,7 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 				.with(UP, Boolean.valueOf(false))
 				.with(WATERLOGGED, Boolean.valueOf(false)));
 		this.shapes = this.makeShapes();
+		this.textureLocation = textureLocation;
 	}
 
 	/// basic block properties

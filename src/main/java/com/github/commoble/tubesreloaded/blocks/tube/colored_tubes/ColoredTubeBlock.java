@@ -3,17 +3,19 @@ package com.github.commoble.tubesreloaded.blocks.tube.colored_tubes;
 import com.github.commoble.tubesreloaded.blocks.tube.TubeBlock;
 
 import net.minecraft.item.DyeColor;
+import net.minecraft.util.ResourceLocation;
 
 public class ColoredTubeBlock extends TubeBlock
 {
 	private DyeColor color;
 
-	public ColoredTubeBlock(DyeColor color, Properties properties)
+	public ColoredTubeBlock(ResourceLocation textureLocation, DyeColor color, Properties properties)
 	{
-		super(properties);
+		super(textureLocation, properties);
 		this.color = color;
 	}
 	
+	@Override
 	public boolean isTubeCompatible(TubeBlock tube)
 	{
 		if (tube instanceof ColoredTubeBlock)

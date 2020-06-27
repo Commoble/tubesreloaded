@@ -120,10 +120,10 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	}
 
 	// returns true if attempt to add a connection was successful
-	public static boolean addConnection(IWorld world, @Nonnull TubeTileEntity tubeA, @Nonnull Direction sideA, @Nonnull TubeTileEntity tubeB, @Nonnull Direction sideB)
+	public static boolean addConnection(IWorld world, @Nonnull TubeTileEntity fromTube, @Nonnull Direction fromSide, @Nonnull TubeTileEntity toTube, @Nonnull Direction toSide)
 	{
-		tubeA.addConnection(sideA, sideB, tubeB.pos);
-		tubeB.addConnection(sideB, sideA, tubeA.pos);
+		fromTube.addConnection(fromSide, toSide, toTube.pos, true);
+		toTube.addConnection(toSide, fromSide, fromTube.pos, false);
 		return true;
 	}
 
@@ -249,9 +249,9 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		this.onDataUpdated();
 	}
 
-	private void addConnection(Direction thisSide, Direction otherSide, BlockPos otherPos)
+	private void addConnection(Direction thisSide, Direction otherSide, BlockPos otherPos, boolean isPrimary)
 	{
-		this.remoteConnections.put(thisSide, new RemoteConnection(thisSide, otherSide, this.pos, otherPos));
+		this.remoteConnections.put(thisSide, new RemoteConnection(thisSide, otherSide, this.pos, otherPos, isPrimary));
 		this.network.invalid = true;
 		this.onDataUpdated();
 	}
@@ -426,9 +426,12 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			Direction dir = wrapper.remainingMoves.poll();
 			BlockPos nextPos = this.getConnectedPos(dir);
 			TileEntity te = this.world.getTileEntity(nextPos);
-			if (te instanceof TubeTileEntity && this.isTubeCompatible((TubeTileEntity)te)) // te exists and is a valid tube
+			if (te instanceof TubeTileEntity) // te exists and is a valid tube
 			{
-				((TubeTileEntity)te).enqueueItemStack(wrapper.stack, wrapper.remainingMoves, wrapper.maximumDurationInTube);
+				if (this.isTubeCompatible((TubeTileEntity)te) || this.hasRemoteConnection(nextPos))
+				{
+					((TubeTileEntity)te).enqueueItemStack(wrapper.stack, wrapper.remainingMoves, wrapper.maximumDurationInTube);
+				}
 			}
 			else if (!this.world.isRemote)
 			{

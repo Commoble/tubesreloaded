@@ -19,6 +19,7 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.item.DyeColor;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -52,10 +53,10 @@ public class BlockRegistrar
 	{
 		IForgeRegistry<Block> registry = event.getRegistry();
 		
-		registerBlock(registry, new TubeBlock(Block.Properties.create(Material.GLASS, MaterialColor.YELLOW_TERRACOTTA).hardnessAndResistance(0.4F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.TUBE);
+		registerBlock(registry, new TubeBlock(new ResourceLocation("tubesreloaded:block/tube"), Block.Properties.create(Material.GLASS, MaterialColor.YELLOW_TERRACOTTA).hardnessAndResistance(0.4F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.TUBE);
 		registerBlock(registry, new ShuntBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.SHUNT);
 		registerBlock(registry, new LoaderBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.LOADER);
-		registerBlock(registry, new RedstoneTubeBlock(Block.Properties.create(Material.GLASS, MaterialColor.GOLD).hardnessAndResistance(0.4F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.REDSTONE_TUBE);
+		registerBlock(registry, new RedstoneTubeBlock(new ResourceLocation("tubesreloaded:block/tube"), Block.Properties.create(Material.GLASS, MaterialColor.GOLD).hardnessAndResistance(0.4F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.REDSTONE_TUBE);
 		registerBlock(registry, new ExtractorBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.EXTRACTOR);
 		registerBlock(registry, new FilterBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.FILTER);
 		registerBlock(registry, new OsmosisFilterBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.OSMOSIS_FILTER);
@@ -65,6 +66,7 @@ public class BlockRegistrar
 		IntStream.range(0, 16).forEach(i -> registerBlock(
 			registry,
 			new ColoredTubeBlock(
+					new ResourceLocation(TubesReloaded.MODID, "block/" + Names.COLORED_TUBE_NAMES[i]),
 					DyeColor.values()[i],
 					Block.Properties.create(Material.GLASS)
 						.hardnessAndResistance(0.4F)

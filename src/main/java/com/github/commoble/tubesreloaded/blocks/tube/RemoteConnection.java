@@ -13,23 +13,26 @@ public class RemoteConnection
 {
 	public final Direction toSide;
 	public final BlockPos toPos;
+	/** Every connection is stored inside both tubes, but only the primary connection will be rendered **/
+	public final boolean isPrimary;
 	public NestedBoundingBox box;
 	
-	public RemoteConnection(Direction fromSide, Direction toSide, BlockPos fromPos, BlockPos toPos)
+	public RemoteConnection(Direction fromSide, Direction toSide, BlockPos fromPos, BlockPos toPos, boolean isPrimary)
 	{
 		this.toSide = toSide;
 		this.toPos = toPos;
+		this.isPrimary = isPrimary;
 		this.box = getNestedBoundingBoxForConnectedPos(fromPos, toPos);
 	}
 	
 	public Storage toStorage()
 	{
-		return new Storage(this.toSide, this.toPos);
+		return new Storage(this.toSide, this.toPos, this.isPrimary);
 	}
 	
 	public static RemoteConnection fromStorage(Storage storage, Direction fromSide, BlockPos fromPos)
 	{
-		return new RemoteConnection(fromSide, storage.toSide, fromPos, storage.toPos);
+		return new RemoteConnection(fromSide, storage.toSide, fromPos, storage.toPos, storage.isPrimary);
 	}
 	
 	private static NestedBoundingBox getNestedBoundingBoxForConnectedPos(BlockPos from, BlockPos to)
@@ -53,18 +56,21 @@ public class RemoteConnection
 	{
 		public final Direction toSide;
 		public final BlockPos toPos;
+		public final boolean isPrimary;
 		
-		public Storage(Direction toSide, BlockPos toPos)
+		public Storage(Direction toSide, BlockPos toPos, boolean isPrimary)
 		{
 			this.toSide = toSide;
 			this.toPos = toPos;
+			this.isPrimary = isPrimary;
 		}
 		
 		public static Storage fromNBT(CompoundNBT nbt)
 		{
 			Direction toSide = Direction.byIndex(nbt.getInt("toSide"));
 			BlockPos toPos = NBTUtil.readBlockPos(nbt.getCompound("toPos"));
-			return new Storage(toSide, toPos);
+			boolean isPrimary = nbt.getBoolean("isPrimary");
+			return new Storage(toSide, toPos, isPrimary);
 		}
 		
 		public CompoundNBT toNBT()
@@ -72,6 +78,7 @@ public class RemoteConnection
 			CompoundNBT nbt = new CompoundNBT();
 			nbt.putInt("toSide", this.toSide.ordinal());
 			nbt.put("toPos", NBTUtil.writeBlockPos(this.toPos));
+			nbt.putBoolean("isPrimary", this.isPrimary);
 			return nbt;
 		}
 	}

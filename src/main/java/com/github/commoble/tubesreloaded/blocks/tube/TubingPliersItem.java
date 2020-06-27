@@ -120,6 +120,17 @@ public class TubingPliersItem extends Item
 							((ServerPlayerEntity)player).playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
 						}
 					}
+					else if (activatedSide == lastSide)
+					{
+						stack.removeChildTag(LAST_TUBE_DATA);
+						if (player instanceof ServerPlayerEntity && world instanceof ServerWorld)
+						{
+							PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)player), new TubeBreakPacket(startVec, endVec));
+							((ServerWorld)world).spawnParticle((ServerPlayerEntity)player, RedstoneParticleData.REDSTONE_DUST, false, endVec.x, endVec.y, endVec.z, 5, .05, .05, .05, 0);
+							
+							((ServerPlayerEntity)player).playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
+						}
+					}
 					else if (state.getBlock() instanceof TubeBlock && !state.get(SixWayBlock.FACING_TO_PROPERTY_MAP.get(activatedSide)))
 					{
 						// if tube wasn't connected to the first tube or another tube, connect them if they're close enough
@@ -138,7 +149,7 @@ public class TubingPliersItem extends Item
 										TubeTileEntity.removeConnection(world, lastPos, originalConnection);
 									}
 									
-									TubeTileEntity.addConnection(world, tube, activatedSide, lastPost, lastSide);
+									TubeTileEntity.addConnection(world, lastPost, lastSide, tube, activatedSide);
 								});
 							stack.damageItem(1, player, thePlayer -> thePlayer.sendBreakAnimation(EquipmentSlotType.MAINHAND));
 							
@@ -151,8 +162,8 @@ public class TubingPliersItem extends Item
 					}
 				}
 			}
-			world.playSound(null, pos, SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, SoundCategory.BLOCKS,
-				0.2F + world.rand.nextFloat()*0.1F,
+			world.playSound(null, pos, SoundEvents.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS,
+				0.1F + world.rand.nextFloat()*0.1F,
 				0.7F + world.rand.nextFloat()*0.1F);
 		}
 		
