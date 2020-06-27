@@ -171,12 +171,14 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		IBlockReader world = context.getWorld();
 		BlockPos pos = context.getPos();
 		IFluidState fluidstate = context.getWorld().getFluidState(context.getPos());
-		return super.getStateForPlacement(context).with(DOWN, this.canConnectTo(world, pos, Direction.DOWN))
-				.with(UP, this.canConnectTo(world, pos, Direction.UP)).with(NORTH, this.canConnectTo(world, pos, Direction.NORTH))
-				.with(SOUTH, this.canConnectTo(world, pos, Direction.SOUTH))
-				.with(WEST, this.canConnectTo(world, pos, Direction.WEST))
-				.with(EAST, this.canConnectTo(world, pos, Direction.EAST))
-				.with(WATERLOGGED, Boolean.valueOf(fluidstate.getFluid() == Fluids.WATER));
+		return super.getStateForPlacement(context)
+			.with(DOWN, this.canConnectTo(world, pos, Direction.DOWN))
+			.with(UP, this.canConnectTo(world, pos, Direction.UP))
+			.with(NORTH, this.canConnectTo(world, pos, Direction.NORTH))
+			.with(SOUTH, this.canConnectTo(world, pos, Direction.SOUTH))
+			.with(WEST, this.canConnectTo(world, pos, Direction.WEST))
+			.with(EAST, this.canConnectTo(world, pos, Direction.EAST))
+			.with(WATERLOGGED, Boolean.valueOf(fluidstate.getFluid() == Fluids.WATER));
 	}
 
 	protected boolean canConnectTo(IBlockReader world, BlockPos pos, Direction face)
@@ -184,8 +186,13 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		BlockPos newPos = pos.offset(face);
 		BlockState state = world.getBlockState(newPos);
 		Block block = state.getBlock();
-		if (block instanceof TubeBlock)
-			return this.isTubeCompatible((TubeBlock) block);
+		if (block instanceof TubeBlock && world instanceof World)
+		{
+			return this.isTubeCompatible((TubeBlock) block) &&
+				TubeTileEntity.getTubeTEAt((World)world, pos)
+					.map(tube -> !tube.hasRemoteConnection(face.getOpposite()))
+					.orElse(false);
+		}
 		
 		if (block instanceof LoaderBlock && state.get(LoaderBlock.FACING).equals(face.getOpposite()))
 			return true;	// todo make this configurable for arbitrary blocks instead of hardcoded
