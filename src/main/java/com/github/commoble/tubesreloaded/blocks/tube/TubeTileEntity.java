@@ -154,8 +154,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	{
 		return theRest.stream()
 			.map(AxisAlignedBB::new)
-			.reduce(EMPTY_AABB, AxisAlignedBB::union, AxisAlignedBB::union)
-			.union(new AxisAlignedBB(startPos));
+			.reduce(new AxisAlignedBB(startPos), AxisAlignedBB::union, AxisAlignedBB::union);
 	}
 	
 	/**** Getters and Setters	****/

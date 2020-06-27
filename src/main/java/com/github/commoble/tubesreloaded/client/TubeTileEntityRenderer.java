@@ -391,5 +391,11 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 		}
 	}
 
+	@Override
+	public boolean isGlobalRenderer(TubeTileEntity te)
+	{
+		return true;
+	}
+
 
 }
