@@ -214,6 +214,11 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		return this.getDirectionOfRemoteConnection(otherPos).isPresent();
 	}
 	
+	public Optional<RemoteConnection> getRemoteConnection(Direction face)
+	{
+		return Optional.ofNullable(this.getRemoteConnections().get(face));
+	}
+	
 	/**
 	 * 
 	 * @param face The face of the tube block

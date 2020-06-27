@@ -90,6 +90,18 @@ public class TubingPliersItem extends Item
 				}
 				else // we clicked a different tube that doesn't have an existing connection to the original tube
 				{
+					// if the tube is already connected on this side, cancel the connection
+					if (tube.hasRemoteConnection(activatedSide))
+					{
+						stack.removeChildTag(LAST_TUBE_DATA);
+						if (player instanceof ServerPlayerEntity && world instanceof ServerWorld)
+						{
+							PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)player), new TubeBreakPacket(new Vec3d(lastPos), new Vec3d(pos)));
+							
+							((ServerPlayerEntity)player).playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
+						}
+						return ActionResultType.SUCCESS;
+					}
 					// do a raytrace to check for interruptions
 					Vec3d startVec = RaytraceHelper.getTubeSideCenter(lastPos, lastSide);
 					Vec3d endVec = RaytraceHelper.getTubeSideCenter(pos, activatedSide);
@@ -114,11 +126,22 @@ public class TubingPliersItem extends Item
 						if (pos.withinDistance(lastPos, TubesReloaded.serverConfig.max_remote_tube_connection_range.get())
 							&& lastState.getBlock() instanceof TubeBlock && !lastState.get(SixWayBlock.FACING_TO_PROPERTY_MAP.get(lastSide)))
 						{
+							
 							stack.removeChildTag(LAST_TUBE_DATA);
 							TubeTileEntity.getTubeTEAt(world, lastPos)
-								.ifPresent(lastPost -> TubeTileEntity.addConnection(world, tube, activatedSide, lastPost, lastSide));
+								.ifPresent(lastPost -> {
+									BlockPos originalConnection = lastPost.getConnectedPos(lastSide);
+									
+									// if the original tube was already connected on the given side, make sure to remove the original connection first
+									if (originalConnection != null)
+									{
+										TubeTileEntity.removeConnection(world, lastPos, originalConnection);
+									}
+									
+									TubeTileEntity.addConnection(world, tube, activatedSide, lastPost, lastSide);
+								});
 							stack.damageItem(1, player, thePlayer -> thePlayer.sendBreakAnimation(EquipmentSlotType.MAINHAND));
-								
+							
 						}
 						else // too far away, initiate a new connection from here
 						{
