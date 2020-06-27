@@ -3,7 +3,8 @@
 	"textures": {
 		"front": "tubesreloaded:block/shunt_output",
 		"filter": "tubesreloaded:block/filter",
-		"particle": "tubesreloaded:block/filter"
+		"particle": "tubesreloaded:block/filter",
+		"cobblestone": "block/cobblestone"
 	},
 	"elements": [
 		{
@@ -11,12 +12,21 @@
 			"from": [0, 0, 0],
 			"to": [16, 16, 2],
 			"faces": {
-				"north": {"uv": [0, 0, 16, 16], "texture": "#front"},
+				"north": {"uv": [0, 0, 16, 16], "texture": "#cobblestone"},
 				"east": {"uv": [14, 0, 16, 16], "texture": "#front"},
-				"south": {"uv": [0, 0, 16, 16], "texture": "#front"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#cobblestone"},
 				"west": {"uv": [0, 0, 2, 16], "texture": "#front"},
 				"up": {"uv": [0, 14, 16, 16], "texture": "#front"},
 				"down": {"uv": [0, 0, 16, 2], "texture": "#front"}
+			}
+		},
+		{
+			"name": "output_plate_overlay",
+			"from": [0, 0, 0],
+			"to": [16, 16, 2],
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "#front"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#front"}
 			}
 		},
 		{

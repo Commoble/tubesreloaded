@@ -3,19 +3,27 @@
 	"textures": {
 		"output": "tubesreloaded:block/loader_output",
 		"particle": "tubesreloaded:block/shunt_output",
-		"side": "block/dropper_front_vertical"
+		"side": "block/dropper_front_vertical",
+		"cobblestone": "block/cobblestone"
 	},
 	"elements": [
 		{
 			"from": [0, 0, 0],
 			"to": [16, 16, 16],
 			"faces": {
-				"north": {"uv": [0, 0, 16, 16], "texture": "#output"},
+				"north": {"uv": [0, 0, 16, 16], "texture": "#cobblestone"},
 				"east": {"uv": [0, 0, 16, 16], "texture": "#side"},
 				"south": {"uv": [0, 0, 16, 16], "texture": "#side"},
 				"west": {"uv": [0, 0, 16, 16], "texture": "#side"},
 				"up": {"uv": [0, 0, 16, 16], "texture": "#side"},
 				"down": {"uv": [0, 0, 16, 16], "texture": "#side"}
+			}
+		},
+		{
+			"from": [0, 0, 0],
+			"to": [16, 16, 16],
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "#output"}
 			}
 		}
 	],

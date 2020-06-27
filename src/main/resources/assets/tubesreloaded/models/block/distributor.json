@@ -2,7 +2,8 @@
     "parent": "block/block",
     "textures": {
         "overlay": "tubesreloaded:block/distributor",
-        "wood": "minecraft:block/oak_planks" 
+        "wood": "minecraft:block/oak_planks",
+        "particle": "tubesreloaded:block/distributor"
     },
     "elements": [
         {   "from": [ 0, 0, 0 ],

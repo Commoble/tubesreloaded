@@ -24,7 +24,12 @@ public class ClientModEvents
 	public static void onClientSetup(FMLClientSetupEvent event)
 	{
 		// set render types
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.TUBE, RenderType.cutout());	// cutout
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.TUBE, RenderType.cutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.SHUNT, RenderType.cutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.LOADER, RenderType.cutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.EXTRACTOR, RenderType.cutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.FILTER, RenderType.cutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.DISTRIBUTOR, RenderType.cutout());
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.OSMOSIS_SLIME, RenderType.translucent());
 		// register TE renderers
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.TUBE, TubeTileEntityRenderer::new);
