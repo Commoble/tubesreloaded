@@ -189,9 +189,13 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		if (block instanceof TubeBlock && world instanceof World)
 		{
 			return this.isTubeCompatible((TubeBlock) block) &&
-				TubeTileEntity.getTubeTEAt((World)world, pos)
+				TubeTileEntity.getTubeTEAt((World)world, newPos)
 					.map(tube -> !tube.hasRemoteConnection(face.getOpposite()))
-					.orElse(false);
+					.orElse(false)
+				&&
+				TubeTileEntity.getTubeTEAt((World)world, pos)
+					.map(tube -> !tube.hasRemoteConnection(face))
+					.orElse(true);
 		}
 		
 		if (block instanceof LoaderBlock && state.get(LoaderBlock.FACING).equals(face.getOpposite()))
