@@ -7,12 +7,14 @@ import com.github.commoble.tubesreloaded.blocks.tube.ItemInTubeWrapper;
 import com.github.commoble.tubesreloaded.blocks.tube.RaytraceHelper;
 import com.github.commoble.tubesreloaded.blocks.tube.RemoteConnection;
 import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
+import com.github.commoble.tubesreloaded.blocks.tube.TubingPliersItem;
 import com.github.commoble.tubesreloaded.util.DirectionTransformer;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.Material;
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -20,15 +22,22 @@ import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTUtil;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;
+import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -65,49 +74,6 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 			}
 		}
 		BlockPos startPos = tube.getPos();
-//		for (Map.Entry<Direction, RemoteConnection> entry : tube.getRemoteConnections().entrySet())
-//		{
-//			RemoteConnection connection = entry.getValue();
-//			BlockPos endPos = connection.toPos;
-//			if (startPos.hashCode() <= endPos.hashCode())
-//			{
-//				Direction startSide = entry.getKey();
-//				Direction endSide = connection.toSide;
-//				Vec3d startVec = RaytraceHelper.getTubeSideCenter(startPos, startSide);
-//				Vec3d endVec = RaytraceHelper.getTubeSideCenter(endPos, endSide);
-//				Vec3d[] points = RaytraceHelper.getInterpolatedPoints(startVec, endVec);
-//				for (Vec3d point : points)
-//				{
-//					tube.getWorld().addParticle(ParticleTypes.BUBBLE_POP, point.x, point.y, point.z, 0D, 0D, 0D);
-//				}
-//			}
-//		}
-		
-//		@SuppressWarnings("resource")
-//		PlayerEntity player = Minecraft.getInstance().player;
-//		for (Hand hand : Hand.values())
-//		{
-//			ItemStack stack = player.getHeldItem(hand);
-//			if (stack.getItem() instanceof TubingPliersItem)
-//			{
-//				CompoundNBT nbt = stack.getChildTag(TubingPliersItem.LAST_TUBE_DATA);
-//				if (nbt != null)
-//				{
-//					BlockPos posOfLastTubeOfPlayer = NBTUtil.readBlockPos(nbt.getCompound(TubingPliersItem.LAST_TUBE_POS));
-//					Direction sideOfLastTubeOfPlayer = Direction.byHorizontalIndex(nbt.getInt(TubingPliersItem.LAST_TUBE_SIDE));
-//					if (posOfLastTubeOfPlayer.equals(tube.getPos()))
-//					{
-//						Vec3d startVec = RaytraceHelper.getTubeSideCenter(posOfLastTubeOfPlayer, sideOfLastTubeOfPlayer);
-//						Vec3d endVec = player.getPositionVec();
-//						Vec3d[] points = RaytraceHelper.getInterpolatedPoints(startVec, endVec);
-//						for (Vec3d point : points)
-//						{
-//							tube.getWorld().addParticle(ParticleTypes.BUBBLE_POP, point.x, point.y, point.z, 0D, 0D, 0D);
-//						}
-//					}
-//				}
-//			}
-//		}
 		this.renderLongTube(tube, partialTicks, matrix, buffer, combinedLight, combinedOverlay);
 	}
 
@@ -337,6 +303,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 
 	public void renderLongTube(TubeTileEntity tube, float partialTicks, MatrixStack matrix, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay)
 	{
+		World world = tube.getWorld();
 		BlockPos startPos = tube.getPos();
 		for (Map.Entry<Direction, RemoteConnection> entry : tube.getRemoteConnections().entrySet())
 		{
@@ -349,7 +316,78 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 			Direction startFace = entry.getKey();
 			Direction endFace = connection.toSide;
 			
-			TubeQuadRenderer.renderQuads(startPos, endPos, startFace, endFace, matrix, buffer, new ResourceLocation("tubesreloaded:block/tube"));
+			TubeQuadRenderer.renderQuads(world, partialTicks, startPos, endPos, startFace, endFace, matrix, buffer, new ResourceLocation("tubesreloaded:block/tube"));
+		}
+		
+		@SuppressWarnings("resource")
+		PlayerEntity player = Minecraft.getInstance().player;
+		if (player != null)
+		{
+			for (Hand hand : Hand.values())
+			{
+				ItemStack stack = player.getHeldItem(hand);
+				if (stack.getItem() instanceof TubingPliersItem)
+				{
+					CompoundNBT nbt = stack.getChildTag(TubingPliersItem.LAST_TUBE_DATA);
+					if (nbt != null)
+					{
+						BlockPos posOfLastTubeOfPlayer = NBTUtil.readBlockPos(nbt.getCompound(TubingPliersItem.LAST_TUBE_POS));
+						Direction sideOfLastTubeOfPlayer = Direction.byIndex(nbt.getInt(TubingPliersItem.LAST_TUBE_SIDE));
+						if (posOfLastTubeOfPlayer.equals(tube.getPos()))
+						{
+
+							EntityRendererManager renderManager = Minecraft.getInstance().getRenderManager();
+							Vec3d vectorOfCurrentPostOfPlayer = new Vec3d(posOfLastTubeOfPlayer).add(0.5d, 0.5d, 0.5d);
+							int handSideID = -(hand == Hand.MAIN_HAND ? -1 : 1) * (player.getPrimaryHand() == HandSide.RIGHT ? 1 : -1);
+
+							float swingProgress = player.getSwingProgress(partialTicks);
+							float swingZ = MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
+							float playerAngle = MathHelper.lerp(partialTicks, player.prevRenderYawOffset, player.renderYawOffset) * ((float) Math.PI / 180F);
+							double playerAngleX = MathHelper.sin(playerAngle);
+							double playerAngleZ = MathHelper.cos(playerAngle);
+							double handOffset = handSideID * 0.35D;
+							double d3 = 0.8D;
+							double handX;
+							double handY;
+							double handZ;
+							float eyeHeight;
+							
+							// first person
+							if ((renderManager.options == null || renderManager.options.thirdPersonView <= 0))
+							{
+								double fov = renderManager.options.fov;
+								fov = fov / 100.0D;
+								Vec3d handVector = new Vec3d(-0.14 + handSideID * -0.36D * fov, -0.12 + -0.045D * fov, 0.4D);
+								handVector = handVector.rotatePitch(-MathHelper.lerp(partialTicks, player.prevRotationPitch, player.rotationPitch) * ((float) Math.PI / 180F));
+								handVector = handVector.rotateYaw(-MathHelper.lerp(partialTicks, player.prevRotationYaw, player.rotationYaw) * ((float) Math.PI / 180F));
+								handVector = handVector.rotateYaw(swingZ * 0.5F);
+								handVector = handVector.rotatePitch(-swingZ * 0.7F);
+								handX = MathHelper.lerp(partialTicks, player.prevPosX, player.getPosX()) + handVector.x;
+								handY = MathHelper.lerp(partialTicks, player.prevPosY, player.getPosY()) + handVector.y + 0.3F;
+								handZ = MathHelper.lerp(partialTicks, player.prevPosZ, player.getPosZ()) + handVector.z;
+								eyeHeight = player.getEyeHeight();
+							}
+							
+							// third person
+							else
+							{
+								handX = MathHelper.lerp(partialTicks, player.prevPosX, player.getPosX()) - playerAngleZ * handOffset - playerAngleX * 0.8D;
+								handY = -0.2 + player.prevPosY + player.getEyeHeight() + (player.getPosY() - player.prevPosY) * partialTicks - 0.45D;
+								handZ = MathHelper.lerp(partialTicks, player.prevPosZ, player.getPosZ()) - playerAngleX * handOffset + playerAngleZ * 0.8D;
+								eyeHeight = player.isCrouching() ? -0.1875F : 0.0F;
+							}
+							Vec3d renderPlayerVec = new Vec3d(handX, handY + eyeHeight, handZ);
+							Vec3d startVec = RaytraceHelper.getTubeSideCenter(posOfLastTubeOfPlayer, sideOfLastTubeOfPlayer);
+							Vec3d endVec = renderPlayerVec;
+							Vec3d[] points = RaytraceHelper.getInterpolatedPoints(startVec, endVec);
+							for (Vec3d point : points)
+							{
+								world.addParticle(ParticleTypes.UNDERWATER, point.x, point.y, point.z, 0D, 0D, 0D);
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 

@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.model.Material;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -13,15 +14,20 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.LightType;
+import net.minecraft.world.World;
 
 public class TubeQuadRenderer
 {
-	public static void renderQuads(BlockPos startPos, BlockPos endPos, Direction startFace, Direction endFace, MatrixStack matrix, IRenderTypeBuffer buffer, ResourceLocation textureLocation)
+	public static void renderQuads(World world, float partialTicks, BlockPos startPos, BlockPos endPos, Direction startFace, Direction endFace, MatrixStack matrix, IRenderTypeBuffer buffer, ResourceLocation textureLocation)
 	{
 		TextureAtlasSprite textureatlassprite = new Material(AtlasTexture.LOCATION_BLOCKS_TEXTURE, textureLocation).getSprite();
 		
+		Vec3d startVec = new Vec3d(startPos);
+		Vec3d endVec = new Vec3d(endPos);
+		
 		Vec3d[][] vertices = DirectionTransformer.getVertexPairs(startFace, endFace);
-		Vec3d offsetToEndPos = new Vec3d(endPos.subtract(startPos));
+		Vec3d offsetToEndPos = endVec.subtract(startVec);
 
 		for (int side=0; side<4; side++)
 		{
@@ -64,29 +70,46 @@ public class TubeQuadRenderer
 			float zC = (float) endVertexB.z + 0.5F;
 			float zD = (float) endVertexA.z + 0.5F;
 			
-			
+			int startLight = getPackedLight(world, startPos);
+			int endLight = getPackedLight(world, endPos);
 
 			MatrixStack.Entry matrixEntry = matrix.getLast();
+			
+			// need to calculate normals so vertex can have sided lighting
+			// to get the normal for a vertex v1 connected to v2 and v3,
+			// we take the cross product (v2 - v1) x (v3 - v1)
+			// for a given quad, all four vertices should have the same normal, so we only need to calculate one of them
+			// and reverse it for the reverse quad
+			
+			Vec3d normal = startVertexB.subtract(startVertexA).crossProduct((endVertexA.subtract(startVertexA)));
+			Vec3d reverseNormal = normal.mul(-1, -1, -1);
 
-			putVertex(matrixEntry, ivertexbuilder, xA, yA, zA, minU, maxV);
-			putVertex(matrixEntry, ivertexbuilder, xB, yB, zB, maxU, maxV);
-			putVertex(matrixEntry, ivertexbuilder, xC, yC, zC, maxU, minV);
-			putVertex(matrixEntry, ivertexbuilder, xD, yD, zD, minU, minV);
+			putVertex(matrixEntry, ivertexbuilder, xA, yA, zA, minU, maxV, startLight, normal);
+			putVertex(matrixEntry, ivertexbuilder, xB, yB, zB, maxU, maxV, startLight, normal);
+			putVertex(matrixEntry, ivertexbuilder, xC, yC, zC, maxU, minV, endLight, normal);
+			putVertex(matrixEntry, ivertexbuilder, xD, yD, zD, minU, minV, endLight, normal);
 			
 			// also add the vertices in reverse order so we render the insides of the tubes
-			putVertex(matrixEntry, ivertexbuilder, xD, yD, zD, minU, minV);
-			putVertex(matrixEntry, ivertexbuilder, xC, yC, zC, maxU, minV);
-			putVertex(matrixEntry, ivertexbuilder, xB, yB, zB, maxU, maxV);
-			putVertex(matrixEntry, ivertexbuilder, xA, yA, zA, minU, maxV);
+			putVertex(matrixEntry, ivertexbuilder, xD, yD, zD, minU, minV, endLight, reverseNormal);
+			putVertex(matrixEntry, ivertexbuilder, xC, yC, zC, maxU, minV, endLight, reverseNormal);
+			putVertex(matrixEntry, ivertexbuilder, xB, yB, zB, maxU, maxV, startLight, reverseNormal);
+			putVertex(matrixEntry, ivertexbuilder, xA, yA, zA, minU, maxV, startLight, reverseNormal);
 
 			matrix.pop();
 		}
 		
 	}
 
-	private static void putVertex(MatrixStack.Entry matrixEntryIn, IVertexBuilder bufferIn, float x, float y, float z, float texU, float texV)
+	private static void putVertex(MatrixStack.Entry matrixEntryIn, IVertexBuilder bufferIn, float x, float y, float z, float texU, float texV, int packedLight, Vec3d normal)
 	{
-		bufferIn.pos(matrixEntryIn.getPositionMatrix(), x, y, z).color(255, 255, 255, 255).tex(texU, texV).overlay(0, 10).lightmap(240)
-			.normal(matrixEntryIn.getNormalMatrix(), 0.0F, 1.0F, 0.0F).endVertex();
+		bufferIn.pos(matrixEntryIn.getPositionMatrix(), x, y, z).color(1F,1F,1F, 1F).tex(texU, texV).overlay(0, 10).lightmap(packedLight)
+			.normal(matrixEntryIn.getNormalMatrix(), (float)normal.x, (float)normal.y, (float)normal.z).endVertex();
+	}
+	
+	public static int getPackedLight(World world, BlockPos pos)
+	{
+		int blockLight = world.getLightFor(LightType.BLOCK, pos);
+		int skyLight = world.getLightFor(LightType.SKY, pos);
+		return LightTexture.packLight(blockLight, skyLight);
 	}
 }
