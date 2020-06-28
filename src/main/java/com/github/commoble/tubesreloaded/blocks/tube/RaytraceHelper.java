@@ -13,16 +13,16 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceContext.BlockMode;
 import net.minecraft.util.math.RayTraceContext.FluidMode;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class RaytraceHelper
 {
-	public static Vec3d[] getInterpolatedDifferences(Vec3d vector)
+	public static Vector3d[] getInterpolatedDifferences(Vector3d vector)
 	{
 		int points = 17; // 16 segments
-		Vec3d[] list = new Vec3d[points];
+		Vector3d[] list = new Vector3d[points];
 
 		double dx = vector.getX();
 		double dy = vector.getY();
@@ -31,17 +31,17 @@ public class RaytraceHelper
 		for (int point = 0; point < points; point++)
 		{
 			double startLerp = getFractionalLerp(point, points - 1);
-			list[point] = new Vec3d(startLerp * dx, startLerp * dy, startLerp * dz);
+			list[point] = new Vector3d(startLerp * dx, startLerp * dy, startLerp * dz);
 		}
 
 		return list;
 	}
 
-	public static Vec3d[] getInterpolatedPoints(Vec3d lower, Vec3d upper)
+	public static Vector3d[] getInterpolatedPoints(Vector3d lower, Vector3d upper)
 	{
-		Vec3d diff = upper.subtract(lower);
-		Vec3d[] diffs = getInterpolatedDifferences(diff);
-		Vec3d[] points = new Vec3d[diffs.length];
+		Vector3d diff = upper.subtract(lower);
+		Vector3d[] diffs = getInterpolatedDifferences(diff);
+		Vector3d[] points = new Vector3d[diffs.length];
 		for (int i = 0; i < points.length; i++)
 		{
 			points[i] = lower.add(diffs[i]);
@@ -55,9 +55,9 @@ public class RaytraceHelper
 	}
 	
 	/** Returns the vector representing the center of the side of a tube block **/
-	public static Vec3d getTubeSideCenter(BlockPos pos, Direction side)
+	public static Vector3d getTubeSideCenter(BlockPos pos, Direction side)
 	{
-		Vec3d center = TubeTileEntity.getCenter(pos);
+		Vector3d center = TubeTileEntity.getCenter(pos);
 		double offsetFromCenter = 4D/16D;
 		double xOff = side.getXOffset() * offsetFromCenter;
 		double yOff = side.getYOffset() * offsetFromCenter;
@@ -66,9 +66,9 @@ public class RaytraceHelper
 	}
 
 	@Nullable
-	public static Vec3d getTubeRaytraceHit(Vec3d startVec, Vec3d endVec, World world)
+	public static Vector3d getTubeRaytraceHit(Vector3d startVec, Vector3d endVec, World world)
 	{
-		Vec3d[] points = getInterpolatedPoints(startVec, endVec);
+		Vector3d[] points = getInterpolatedPoints(startVec, endVec);
 		TubeRayTraceSelectionContext selector = new TubeRayTraceSelectionContext();
 		int pointCount = points.length;
 		int rayTraceCount = pointCount-1;
@@ -93,21 +93,21 @@ public class RaytraceHelper
 		return doRayTrace(context, (rayTraceContext, pos) ->
 		{
 			BlockState state = world.getBlockState(pos);
-			Vec3d startVec = rayTraceContext.getStartVec();
-			Vec3d endVec = rayTraceContext.getEndVec();
+			Vector3d startVec = rayTraceContext.getStartVec();
+			Vector3d endVec = rayTraceContext.getEndVec();
 			VoxelShape shape = rayTraceContext.getBlockShape(state, world, pos);
 			BlockRayTraceResult result = world.rayTraceBlocks(startVec, endVec, pos, shape, state);
 			return result;
 		}, (rayTraceContext) -> {
-			Vec3d difference = rayTraceContext.getStartVec().subtract(rayTraceContext.getEndVec());
+			Vector3d difference = rayTraceContext.getStartVec().subtract(rayTraceContext.getEndVec());
 			return BlockRayTraceResult.createMiss(rayTraceContext.getEndVec(), Direction.getFacingFromVector(difference.x, difference.y, difference.z), new BlockPos(rayTraceContext.getEndVec()));
 		});
 	}
 
 	static <T> T doRayTrace(TubeRayTraceContext context, BiFunction<TubeRayTraceContext, BlockPos, T> rayTracer, Function<TubeRayTraceContext, T> missFactory)
 	{
-		Vec3d start = context.getStartVec();
-		Vec3d end = context.getEndVec();
+		Vector3d start = context.getStartVec();
+		Vector3d end = context.getEndVec();
 		if (start.equals(end))
 		{
 			return missFactory.apply(context);

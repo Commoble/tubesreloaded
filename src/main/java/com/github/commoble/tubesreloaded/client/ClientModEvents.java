@@ -24,13 +24,13 @@ public class ClientModEvents
 	public static void onClientSetup(FMLClientSetupEvent event)
 	{
 		// set render types
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.TUBE, RenderType.cutout());
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.SHUNT, RenderType.cutout());
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.LOADER, RenderType.cutout());
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.EXTRACTOR, RenderType.cutout());
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.FILTER, RenderType.cutout());
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.DISTRIBUTOR, RenderType.cutout());
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.OSMOSIS_SLIME, RenderType.translucent());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.TUBE, RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.SHUNT, RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.LOADER, RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.EXTRACTOR, RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.FILTER, RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.DISTRIBUTOR, RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.OSMOSIS_SLIME, RenderType.getTranslucent());
 		// register TE renderers
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.TUBE, TubeTileEntityRenderer::new);
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.REDSTONE_TUBE, TubeTileEntityRenderer::new);

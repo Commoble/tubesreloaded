@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 
 import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -77,7 +78,8 @@ public class DistributorTileEntity extends TileEntity
 	}
 	
 	@Override
-	public void read(CompoundNBT nbt)
+	/** read **/
+	public void func_230337_a_(BlockState state, CompoundNBT nbt)
 	{
 		int[] directionIndices = nbt.getIntArray(NEXT_DIRECTIONS);
 		int maxSize = Math.min(this.handlers.length, directionIndices.length);
@@ -85,6 +87,6 @@ public class DistributorTileEntity extends TileEntity
 		{
 			this.handlers[i].setNextDirectionIndex(directionIndices[i]);
 		}
-		super.read(nbt);
+		super.func_230337_a_(state, nbt);
 	}
 }

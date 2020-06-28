@@ -21,8 +21,8 @@ import net.minecraft.block.ILiquidContainer;
 import net.minecraft.block.SixWayBlock;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathType;
@@ -170,7 +170,7 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	{
 		IBlockReader world = context.getWorld();
 		BlockPos pos = context.getPos();
-		IFluidState fluidstate = context.getWorld().getFluidState(context.getPos());
+		FluidState fluidstate = context.getWorld().getFluidState(context.getPos());
 		return super.getStateForPlacement(context)
 			.with(DOWN, this.canConnectTo(world, pos, Direction.DOWN))
 			.with(UP, this.canConnectTo(world, pos, Direction.UP))
@@ -403,7 +403,7 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	}
 
 	@Override
-	public boolean receiveFluid(IWorld worldIn, BlockPos pos, BlockState state, IFluidState fluidStateIn)
+	public boolean receiveFluid(IWorld worldIn, BlockPos pos, BlockState state, FluidState fluidStateIn)
 	{
 		if (!state.get(WATERLOGGED) && fluidStateIn.getFluid() == Fluids.WATER)
 		{
@@ -437,7 +437,7 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	}
 
 	@Override
-	public IFluidState getFluidState(BlockState state)
+	public FluidState getFluidState(BlockState state)
 	{
 		HashMap<Direction, Direction> map = new HashMap<>();
 		return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(state);

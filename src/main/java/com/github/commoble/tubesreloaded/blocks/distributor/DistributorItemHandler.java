@@ -5,7 +5,7 @@ import com.github.commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -103,8 +103,9 @@ public class DistributorItemHandler implements IItemHandler
 	private LazyOptional<IItemHandler> getOutputOptional(BlockPos output_pos, Direction output_dir)
 	{
 		// if the block we are attempting to insert the item into is a shuntlike block, do not insert
-		Tag<Block> shuntTag = BlockTags.getCollection().get(new ResourceLocation("tubesreloaded", "shunts"));
-		return WorldHelper.getTEItemHandlerAtIf(this.distributor.getWorld(), output_pos, output_dir.getOpposite(), te -> !shuntTag.contains(te.getBlockState().getBlock()));
+		ITag<Block> shuntTag = BlockTags.getCollection().get(new ResourceLocation("tubesreloaded", "shunts"));
+			// contains
+		return WorldHelper.getTEItemHandlerAtIf(this.distributor.getWorld(), output_pos, output_dir.getOpposite(), te -> !shuntTag.func_230235_a_((te.getBlockState().getBlock())));
 	}
 
 	@Override

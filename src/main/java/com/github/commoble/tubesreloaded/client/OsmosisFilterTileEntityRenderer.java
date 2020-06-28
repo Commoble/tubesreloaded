@@ -1,7 +1,5 @@
 package com.github.commoble.tubesreloaded.client;
 
-import java.util.Random;
-
 import com.github.commoble.tubesreloaded.TubesReloaded;
 import com.github.commoble.tubesreloaded.blocks.filter.FilterTileEntity;
 import com.github.commoble.tubesreloaded.blocks.filter.OsmosisFilterBlock;
@@ -21,6 +19,7 @@ import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class OsmosisFilterTileEntityRenderer extends FilterTileEntityRenderer
 {
@@ -83,21 +82,22 @@ public class OsmosisFilterTileEntityRenderer extends FilterTileEntityRenderer
 		matrix.push();	// push
 		matrix.translate(translateX, translateY, translateZ);
 		matrix.scale(scaleX, scaleY, scaleZ);
-		RenderType renderType = RenderTypeLookup.getRenderType(renderState);
+		RenderType renderType = RenderTypeLookup.func_239221_b_(renderState); // RenderTypeLookup.getRenderType
 		net.minecraftforge.client.ForgeHooksClient.setRenderLayer(renderType);
 		
 		BlockRendererDispatcher blockDispatcher = Minecraft.getInstance().getBlockRendererDispatcher();
+		World world = te.getWorld();
 		blockDispatcher.getBlockModelRenderer().renderModel(
-      	  te.getWorld(),
+      	  world,
       	  blockDispatcher.getModelForState(renderState),
       	  renderState,
       	  blockpos,
       	  matrix,
       	  buffer.getBuffer(renderType),
       	  false,
-      	  new Random(),
+      	  world.rand,
       	  renderState.getPositionRandom(blockpos),
-      	  OverlayTexture.DEFAULT_LIGHT,
+      	  OverlayTexture.NO_OVERLAY,
       	  net.minecraftforge.client.model.data.EmptyModelData.INSTANCE
       	 );
 		matrix.pop();

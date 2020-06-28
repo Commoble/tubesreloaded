@@ -7,6 +7,7 @@ import com.github.commoble.tubesreloaded.blocks.shunt.ShuntBlock;
 import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
 import com.github.commoble.tubesreloaded.util.WorldHelper;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
@@ -141,11 +142,11 @@ public class FilterTileEntity extends TileEntity
 	////// NBT and syncing
 	
 	@Override
-	public void read(CompoundNBT compound)
+	/** read **/
+	public void func_230337_a_(BlockState state, CompoundNBT compound)
 	{
-		super.read(compound);
-		CompoundNBT inventory = compound.getCompound(INV_KEY);
-		this.filterStack = ItemStack.read(inventory);
+		super.func_230337_a_(state, compound);
+		this.readNBT(compound);
 	}
 
 	@Override	// write entire inventory by default (for server -> hard disk purposes this is what is called)
@@ -175,6 +176,13 @@ public class FilterTileEntity extends TileEntity
 	@Override
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet)
 	{
-		this.read(packet.getNbtCompound());
+		super.onDataPacket(net, packet);
+		this.readNBT(packet.getNbtCompound());
+	}
+	
+	public void readNBT(CompoundNBT nbt)
+	{
+		CompoundNBT inventory = nbt.getCompound(INV_KEY);
+		this.filterStack = ItemStack.read(inventory);
 	}
 }

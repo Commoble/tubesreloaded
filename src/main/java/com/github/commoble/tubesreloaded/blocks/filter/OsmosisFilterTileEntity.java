@@ -27,9 +27,9 @@ public class OsmosisFilterTileEntity extends FilterTileEntity implements ITickab
 	}
 
 	@Override
-	public void read(CompoundNBT compound)
+	public void readNBT(CompoundNBT compound)
 	{
-		super.read(compound);
+		super.readNBT(compound);
 		this.transferHash = this.pos.hashCode();
 	}
 	

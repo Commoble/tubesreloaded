@@ -8,12 +8,12 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.model.Material;
+import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
@@ -21,13 +21,14 @@ public class TubeQuadRenderer
 {
 	public static void renderQuads(World world, float partialTicks, BlockPos startPos, BlockPos endPos, Direction startFace, Direction endFace, MatrixStack matrix, IRenderTypeBuffer buffer, TubeBlock block)
 	{
-		TextureAtlasSprite textureatlassprite = new Material(AtlasTexture.LOCATION_BLOCKS_TEXTURE, block.textureLocation).getSprite();
+		TextureAtlasSprite textureatlassprite = new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, block.textureLocation).getSprite();
 		
-		Vec3d startVec = new Vec3d(startPos);
-		Vec3d endVec = new Vec3d(endPos);
+		// this Vector3d method converts (1,2,3) into (1D, 2D, 3D)
+		Vector3d startVec = Vector3d.func_237491_b_(startPos);
+		Vector3d endVec = Vector3d.func_237491_b_(endPos);
 		
-		Vec3d[][] vertices = DirectionTransformer.getVertexPairs(startFace, endFace);
-		Vec3d offsetToEndPos = endVec.subtract(startVec);
+		Vector3d[][] vertices = DirectionTransformer.getVertexPairs(startFace, endFace);
+		Vector3d offsetToEndPos = endVec.subtract(startVec);
 
 		for (int side=0; side<4; side++)
 		{
@@ -52,10 +53,10 @@ public class TubeQuadRenderer
 			
 			int vertIndexA = side;
 			int vertIndexB = (side+1)%4;
-			Vec3d startVertexA = vertices[vertIndexA][0];
-			Vec3d startVertexB = vertices[vertIndexB][0];
-			Vec3d endVertexB = vertices[vertIndexB][1].add(offsetToEndPos);
-			Vec3d endVertexA = vertices[vertIndexA][1].add(offsetToEndPos);
+			Vector3d startVertexA = vertices[vertIndexA][0];
+			Vector3d startVertexB = vertices[vertIndexB][0];
+			Vector3d endVertexB = vertices[vertIndexB][1].add(offsetToEndPos);
+			Vector3d endVertexA = vertices[vertIndexA][1].add(offsetToEndPos);
 
 			float xA = (float) startVertexA.x + 0.5F;
 			float xB = (float) startVertexB.x + 0.5F;
@@ -81,8 +82,8 @@ public class TubeQuadRenderer
 			// for a given quad, all four vertices should have the same normal, so we only need to calculate one of them
 			// and reverse it for the reverse quad
 			
-			Vec3d normal = startVertexB.subtract(startVertexA).crossProduct((endVertexA.subtract(startVertexA))).normalize();
-			Vec3d reverseNormal = normal.mul(-1, -1, -1);
+			Vector3d normal = startVertexB.subtract(startVertexA).crossProduct((endVertexA.subtract(startVertexA))).normalize();
+			Vector3d reverseNormal = normal.mul(-1, -1, -1);
 
 			putVertex(matrixEntry, ivertexbuilder, xA, yA, zA, minU, maxV, startLight, normal);
 			putVertex(matrixEntry, ivertexbuilder, xB, yB, zB, maxU, maxV, startLight, normal);
@@ -100,10 +101,10 @@ public class TubeQuadRenderer
 		
 	}
 
-	private static void putVertex(MatrixStack.Entry matrixEntryIn, IVertexBuilder bufferIn, float x, float y, float z, float texU, float texV, int packedLight, Vec3d normal)
+	private static void putVertex(MatrixStack.Entry matrixEntryIn, IVertexBuilder bufferIn, float x, float y, float z, float texU, float texV, int packedLight, Vector3d normal)
 	{
-		bufferIn.pos(matrixEntryIn.getPositionMatrix(), x, y, z).color(1F,1F,1F, 1F).tex(texU, texV).overlay(0, 10).lightmap(packedLight)
-			.normal(matrixEntryIn.getNormalMatrix(), (float)normal.x, (float)normal.y, (float)normal.z).endVertex();
+		bufferIn.pos(matrixEntryIn.getMatrix(), x, y, z).color(1F,1F,1F, 1F).tex(texU, texV).overlay(0, 10).lightmap(packedLight)
+			.normal(matrixEntryIn.getNormal(), (float)normal.x, (float)normal.y, (float)normal.z).endVertex();
 	}
 	
 	public static int getPackedLight(World world, BlockPos pos)

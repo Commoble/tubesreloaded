@@ -34,8 +34,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -120,7 +120,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 		int renderedItemCount = this.getModelCount(itemstack);
 		float xStart, yStart, zStart, xEnd, yEnd, zEnd;
 		float lerpFactor = (wrapper.ticksElapsed + partialTicks) / wrapper.maximumDurationInTube;	// factor in range [0,1)
-		Vec3d renderOffset;
+		Vector3d renderOffset;
 		float remoteScale = 1F; // extra scaling if rendering in a narrow remote tube
 		if (wrapper.freshlyInserted)	// first move
 		{
@@ -133,7 +133,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 			float xLerp = MathHelper.lerp(lerpFactor, xStart, xEnd);
 			float yLerp = MathHelper.lerp(lerpFactor, yStart, yEnd);
 			float zLerp = MathHelper.lerp(lerpFactor, zStart, zEnd);
-			renderOffset = new Vec3d(xLerp, yLerp, zLerp);
+			renderOffset = new Vector3d(xLerp, yLerp, zLerp);
 		}
 		else	// any other move
 		{
@@ -161,7 +161,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 			float scale = remoteScale * 0.5F;
 			matrix.scale(scale, scale, scale);
 			
-			itemRenderer.renderItem(itemstack, ItemCameraTransforms.TransformType.GROUND, intA, OverlayTexture.DEFAULT_LIGHT, matrix, buffer);
+			itemRenderer.renderItem(itemstack, ItemCameraTransforms.TransformType.GROUND, intA, OverlayTexture.NO_OVERLAY, matrix, buffer);
 			matrix.pop();
 		}
 		itemRenderer.zLevel += 50F;
@@ -176,7 +176,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 	 * @param lerpFactor
 	 * @return
 	 */
-	public static Vec3d getItemRenderOffset(TubeTileEntity tube, Direction travelDirection, float lerpFactor)
+	public static Vector3d getItemRenderOffset(TubeTileEntity tube, Direction travelDirection, float lerpFactor)
 	{
 		return tube.getRemoteConnection(travelDirection)
 			.map(connection -> getRemoteItemRenderOffset(connection, travelDirection, tube.getPos(), lerpFactor))
@@ -198,23 +198,23 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 	 * @param lerpFactor
 	 * @return
 	 */
-	public static Vec3d getRemoteItemRenderOffset(RemoteConnection connection, Direction travelDirection, BlockPos fromPos, float lerpFactor)
+	public static Vector3d getRemoteItemRenderOffset(RemoteConnection connection, Direction travelDirection, BlockPos fromPos, float lerpFactor)
 	{
-		Vec3d startVec = TubeTileEntity.getCenter(fromPos);
+		Vector3d startVec = TubeTileEntity.getCenter(fromPos);
 		BlockPos endPos = connection.toPos;
-		Vec3d endVec = TubeTileEntity.getCenter(endPos);
+		Vector3d endVec = TubeTileEntity.getCenter(endPos);
 		Direction endSide = connection.toSide;
-		Vec3d startSideVec = RaytraceHelper.getTubeSideCenter(fromPos, travelDirection);
-		Vec3d endSideVec = RaytraceHelper.getTubeSideCenter(endPos, endSide);
+		Vector3d startSideVec = RaytraceHelper.getTubeSideCenter(fromPos, travelDirection);
+		Vector3d endSideVec = RaytraceHelper.getTubeSideCenter(endPos, endSide);
 		// render item exiting origin tube
 		if (lerpFactor < 0.25F)
 		{
-			Vec3d sideOffset = startSideVec.subtract(startVec);
+			Vector3d sideOffset = startSideVec.subtract(startVec);
 			float subLerp = lerpFactor / 0.25F;
 			double x = MathHelper.lerp(subLerp, 0, sideOffset.x);
 			double y = MathHelper.lerp(subLerp, 0, sideOffset.y);
 			double z = MathHelper.lerp(subLerp, 0, sideOffset.z);
-			return new Vec3d(x,y,z);
+			return new Vector3d(x,y,z);
 		}
 		else if (lerpFactor < 0.75F) // render item between tubes
 		{
@@ -224,7 +224,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 			double z = MathHelper.lerp(subLerp, startSideVec.z, endSideVec.z);
 			// these values are in absolute coords
 			// want to make them local to the renderer
-			return new Vec3d(x - startVec.x, y - startVec.y, z - startVec.z);
+			return new Vector3d(x - startVec.x, y - startVec.y, z - startVec.z);
 			
 		}
 		else // render item entering destination tube
@@ -236,7 +236,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 			double z = MathHelper.lerp(subLerp, endSideVec.z, endVec.z);
 			// these values are in absolute coords
 			// want to make them local to the renderer
-			return new Vec3d(x - startVec.x, y - startVec.y, z - startVec.z);
+			return new Vector3d(x - startVec.x, y - startVec.y, z - startVec.z);
 		}
 	}
 	
@@ -263,7 +263,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 	
 	public static double getRemoteItemRenderScale(Direction startSide, BlockPos startPos, BlockPos toPos)
 	{
-		Vec3i dist = toPos.subtract(startPos);
+		Vector3i dist = toPos.subtract(startPos);
 		Axis travelAxis = startSide.getAxis();
 		Axis[] orthagonalAxes = DirectionTransformer.ORTHAGONAL_AXES[travelAxis.ordinal()];
 		double parallelDistance = startSide.getAxis().getCoordinate(dist.getX(), dist.getY(), dist.getZ());
@@ -285,7 +285,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 	 * @param lerpFactor
 	 * @return
 	 */
-	public static Vec3d getAdjacentRenderOffset(Direction travelDirection, float lerpFactor)
+	public static Vector3d getAdjacentRenderOffset(Direction travelDirection, float lerpFactor)
 	{
 		double xEnd = travelDirection.getXOffset();
 		double yEnd = travelDirection.getYOffset();
@@ -293,7 +293,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 		double xLerp = MathHelper.lerp(lerpFactor, 0, xEnd);
 		double yLerp = MathHelper.lerp(lerpFactor, 0, yEnd);
 		double zLerp = MathHelper.lerp(lerpFactor, 0, zEnd);
-		return new Vec3d(xLerp, yLerp, zLerp);
+		return new Vector3d(xLerp, yLerp, zLerp);
 	}
 	
 
@@ -356,7 +356,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 								{
 									double fov = renderManager.options.fov;
 									fov = fov / 100.0D;
-									Vec3d handVector = new Vec3d(-0.14 + handSideID * -0.36D * fov, -0.12 + -0.045D * fov, 0.4D);
+									Vector3d handVector = new Vector3d(-0.14 + handSideID * -0.36D * fov, -0.12 + -0.045D * fov, 0.4D);
 									handVector = handVector.rotatePitch(-MathHelper.lerp(partialTicks, player.prevRotationPitch, player.rotationPitch) * ((float) Math.PI / 180F));
 									handVector = handVector.rotateYaw(-MathHelper.lerp(partialTicks, player.prevRotationYaw, player.rotationYaw) * ((float) Math.PI / 180F));
 									handVector = handVector.rotateYaw(swingZ * 0.5F);
@@ -375,11 +375,11 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 									handZ = MathHelper.lerp(partialTicks, player.prevPosZ, player.getPosZ()) - playerAngleX * handOffset + playerAngleZ * 0.8D;
 									eyeHeight = player.isCrouching() ? -0.1875F : 0.0F;
 								}
-								Vec3d renderPlayerVec = new Vec3d(handX, handY + eyeHeight, handZ);
-								Vec3d startVec = RaytraceHelper.getTubeSideCenter(posOfLastTubeOfPlayer, sideOfLastTubeOfPlayer);
-								Vec3d endVec = renderPlayerVec;
-								Vec3d[] points = RaytraceHelper.getInterpolatedPoints(startVec, endVec);
-								for (Vec3d point : points)
+								Vector3d renderPlayerVec = new Vector3d(handX, handY + eyeHeight, handZ);
+								Vector3d startVec = RaytraceHelper.getTubeSideCenter(posOfLastTubeOfPlayer, sideOfLastTubeOfPlayer);
+								Vector3d endVec = renderPlayerVec;
+								Vector3d[] points = RaytraceHelper.getInterpolatedPoints(startVec, endVec);
+								for (Vector3d point : points)
 								{
 									world.addParticle(ParticleTypes.UNDERWATER, point.x, point.y, point.z, 0D, 0D, 0D);
 								}

@@ -26,7 +26,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.PacketDistributor;
@@ -96,16 +96,17 @@ public class TubingPliersItem extends Item
 						stack.removeChildTag(LAST_TUBE_DATA);
 						if (player instanceof ServerPlayerEntity && world instanceof ServerWorld)
 						{
-							PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)player), new TubeBreakPacket(new Vec3d(lastPos), new Vec3d(pos)));
+							// TODO Vector3d.getCenterOfBlockPos
+							PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)player), new TubeBreakPacket(Vector3d.func_237489_a_(lastPos), Vector3d.func_237489_a_(pos)));
 							
 							((ServerPlayerEntity)player).playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
 						}
 						return ActionResultType.SUCCESS;
 					}
 					// do a raytrace to check for interruptions
-					Vec3d startVec = RaytraceHelper.getTubeSideCenter(lastPos, lastSide);
-					Vec3d endVec = RaytraceHelper.getTubeSideCenter(pos, activatedSide);
-					Vec3d hit = RaytraceHelper.getTubeRaytraceHit(startVec, endVec, world);
+					Vector3d startVec = RaytraceHelper.getTubeSideCenter(lastPos, lastSide);
+					Vector3d endVec = RaytraceHelper.getTubeSideCenter(pos, activatedSide);
+					Vector3d hit = RaytraceHelper.getTubeRaytraceHit(startVec, endVec, world);
 					BlockState lastState = world.getBlockState(lastPos);
 					
 					// if tube wasn't connected but they can't be connected due to a block in the way, interrupt the connection
@@ -186,7 +187,8 @@ public class TubingPliersItem extends Item
 	public static boolean shouldRemoveConnection(BlockPos connectionPos, World world, Entity holder)
 	{
 		double maxDistance = TubesReloaded.serverConfig.max_remote_tube_connection_range.get();
-		if (holder.getPositionVec().squareDistanceTo((new Vec3d(connectionPos).add(0.5,0.5,0.5))) > maxDistance*maxDistance)
+		// Vector3d.getCenterOfBlockPos
+		if (holder.getPositionVec().squareDistanceTo(Vector3d.func_237489_a_(connectionPos)) > maxDistance*maxDistance)
 		{
 			return true;
 		}
@@ -202,7 +204,7 @@ public class TubingPliersItem extends Item
 			PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)holder),
 				new TubeBreakPacket(
 					TubeTileEntity.getCenter(connectingPos),
-					new Vec3d(holder.getPosX(), holder.getPosYEye(), holder.getPosZ())));
+					new Vector3d(holder.getPosX(), holder.getPosYEye(), holder.getPosZ())));
 		}
 	}
 }

@@ -8,6 +8,8 @@ import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
 import com.github.commoble.tubesreloaded.blocks.tube.TubesInChunk;
 import com.github.commoble.tubesreloaded.blocks.tube.TubesInChunkCapability;
 import com.github.commoble.tubesreloaded.registry.Names;
+import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -22,7 +24,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -70,7 +72,7 @@ public class CommonForgeEvents
 							TileEntity te = world.getTileEntity(tubePos);
 							if (te instanceof TubeTileEntity)
 							{
-								Vec3d hit = ((TubeTileEntity)te).doesBlockStateIntersectConnection(pos, state, checkedTubePositions);
+								Vector3d hit = ((TubeTileEntity)te).doesBlockStateIntersectConnection(pos, state, checkedTubePositions);
 								if (hit != null)
 								{
 									event.setCanceled(true);
@@ -78,7 +80,7 @@ public class CommonForgeEvents
 									if (entity instanceof ServerPlayerEntity)
 									{
 										ServerPlayerEntity serverPlayer = (ServerPlayerEntity)entity;
-										serverPlayer.connection.sendPacket(new SEntityEquipmentPacket(serverPlayer.getEntityId(), EquipmentSlotType.MAINHAND, serverPlayer.getHeldItem(Hand.MAIN_HAND)));
+										serverPlayer.connection.sendPacket(new SEntityEquipmentPacket(serverPlayer.getEntityId(), ImmutableList.of(Pair.of(EquipmentSlotType.MAINHAND, serverPlayer.getHeldItem(Hand.MAIN_HAND)))));
 										((ServerWorld)world).spawnParticle(serverPlayer, RedstoneParticleData.REDSTONE_DUST, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
 										serverPlayer.playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
 									}

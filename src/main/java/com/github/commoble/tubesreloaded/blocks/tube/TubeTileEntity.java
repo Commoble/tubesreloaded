@@ -39,8 +39,8 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -145,9 +145,9 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		getTubeTEAt(world, posB).ifPresent(tube -> tube.removeConnection(posA));
 	}
 	
-	public static Vec3d getCenter(BlockPos pos)
+	public static Vector3d getCenter(BlockPos pos)
 	{
-		return new Vec3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
+		return new Vector3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
 	}
 	
 	public static AxisAlignedBB getAABBContainingAllBlockPos(BlockPos startPos, Set<BlockPos> theRest)
@@ -291,10 +291,10 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	 * @param checkedTubePositions The positions of tubes that have already been checked.
 	 * Any tubes in this list that this tube is connected to is also connected to this tube, and this connection has been
 	 * verified to not intersect the placed block, so we don't need to check again.
-	 * @return A vec3d of the intersecting hit, or null if there was no intersecting hit
+	 * @return A Vector3d of the intersecting hit, or null if there was no intersecting hit
 	 */
 	@Nullable
-	public Vec3d doesBlockStateIntersectConnection(BlockPos placePos, BlockState placeState, Set<BlockPos> checkedTubePositions)
+	public Vector3d doesBlockStateIntersectConnection(BlockPos placePos, BlockState placeState, Set<BlockPos> checkedTubePositions)
 	{
 		for (Map.Entry<Direction, RemoteConnection> entry : this.remoteConnections.entrySet())
 		{
@@ -304,7 +304,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			{
 				Direction fromSide = entry.getKey();
 				Direction toSide = connection.toSide;
-				Vec3d hit = doesBlockStateIntersectConnection(this.pos, fromSide, pos, toSide, placePos, placeState, connection.box, this.getWorld());
+				Vector3d hit = doesBlockStateIntersectConnection(this.pos, fromSide, pos, toSide, placePos, placeState, connection.box, this.getWorld());
 				if (hit != null)
 				{
 					return hit;
@@ -315,7 +315,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	}
 	
 	@Nullable
-	public static Vec3d doesBlockStateIntersectConnection(BlockPos startPos, Direction startSide, BlockPos endPos, Direction endSide, BlockPos placePos, BlockState placeState, NestedBoundingBox box, World world)
+	public static Vector3d doesBlockStateIntersectConnection(BlockPos startPos, Direction startSide, BlockPos endPos, Direction endSide, BlockPos placePos, BlockState placeState, NestedBoundingBox box, World world)
 	{
 		VoxelShape shape = placeState.getCollisionShape(world, placePos);
 		for (AxisAlignedBB aabb : shape.toBoundingBoxList())
@@ -323,8 +323,8 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			if (box.intersects(aabb.offset(placePos)))
 			{
 				// if we confirm the AABB intersects, do a raytrace as well
-				Vec3d startVec = RaytraceHelper.getTubeSideCenter(startPos, startSide);
-				Vec3d endVec = RaytraceHelper.getTubeSideCenter(endPos, endSide);
+				Vector3d startVec = RaytraceHelper.getTubeSideCenter(startPos, startSide);
+				Vector3d endVec = RaytraceHelper.getTubeSideCenter(endPos, endSide);
 				return RaytraceHelper.getTubeRaytraceHit(startVec, endVec, world);
 			}
 		}
@@ -558,43 +558,11 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	}
 
 	@Override
-	public void read(CompoundNBT compound)
+	/** read **/
+	public void func_230337_a_(BlockState state, CompoundNBT compound)
 	{
-		super.read(compound);
-
-		if (compound.contains(INV_NBT_KEY_RESET))	// only update inventory if the compound has an inv. key
-		{									// this lets the client receive packets without the inventory being cleared
-			ListNBT invList = compound.getList(INV_NBT_KEY_RESET, 10);
-			Queue<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
-			for (int i = 0; i < invList.size(); i++)
-			{
-				CompoundNBT itemTag = invList.getCompound(i);
-				inventory.add(ItemInTubeWrapper.readFromNBT(itemTag));
-			}
-			this.inventory = inventory;
-		}
-		else if (compound.contains(INV_NBT_KEY_ADD))	// add newly inserted items to this tube
-		{
-			ListNBT invList = compound.getList(INV_NBT_KEY_ADD, 10);
-			for (int i=0; i<invList.size(); i++)
-			{
-				CompoundNBT itemTag = invList.getCompound(i);
-				this.inventory.add(ItemInTubeWrapper.readFromNBT(itemTag));
-			}
-		}
-		
-
-		if (compound.contains(CONNECTIONS))
-		{
-			Map<Direction, RemoteConnection.Storage> rawMap = REMOTE_CONNECTIONS_CODEC.read(compound);
-			Map<Direction, RemoteConnection> newMap = new HashMap<>();
-			rawMap.entrySet().forEach(entry -> newMap.put(entry.getKey(), RemoteConnection.fromStorage(entry.getValue(), entry.getKey(), this.pos)));
-			this.remoteConnections = newMap;
-		}
-		this.renderAABB = getAABBContainingAllBlockPos(this.pos,
-			this.remoteConnections.values().stream()
-			.map(connection -> connection.toPos)
-			.collect(Collectors.toSet()));
+		super.func_230337_a_(state, compound);
+		this.readNBT(compound);
 	}
 
 	@Override	// write entire inventory by default (for server -> hard disk purposes this is what is called)
@@ -669,6 +637,44 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	@Override
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet)
 	{
-		this.read(packet.getNbtCompound());
+		this.readNBT(packet.getNbtCompound());
+	}
+	
+	public void readNBT(CompoundNBT compound)
+	{
+
+		if (compound.contains(INV_NBT_KEY_RESET))	// only update inventory if the compound has an inv. key
+		{									// this lets the client receive packets without the inventory being cleared
+			ListNBT invList = compound.getList(INV_NBT_KEY_RESET, 10);
+			Queue<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
+			for (int i = 0; i < invList.size(); i++)
+			{
+				CompoundNBT itemTag = invList.getCompound(i);
+				inventory.add(ItemInTubeWrapper.readFromNBT(itemTag));
+			}
+			this.inventory = inventory;
+		}
+		else if (compound.contains(INV_NBT_KEY_ADD))	// add newly inserted items to this tube
+		{
+			ListNBT invList = compound.getList(INV_NBT_KEY_ADD, 10);
+			for (int i=0; i<invList.size(); i++)
+			{
+				CompoundNBT itemTag = invList.getCompound(i);
+				this.inventory.add(ItemInTubeWrapper.readFromNBT(itemTag));
+			}
+		}
+		
+
+		if (compound.contains(CONNECTIONS))
+		{
+			Map<Direction, RemoteConnection.Storage> rawMap = REMOTE_CONNECTIONS_CODEC.read(compound);
+			Map<Direction, RemoteConnection> newMap = new HashMap<>();
+			rawMap.entrySet().forEach(entry -> newMap.put(entry.getKey(), RemoteConnection.fromStorage(entry.getValue(), entry.getKey(), this.pos)));
+			this.remoteConnections = newMap;
+		}
+		this.renderAABB = getAABBContainingAllBlockPos(this.pos,
+			this.remoteConnections.values().stream()
+			.map(connection -> connection.toPos)
+			.collect(Collectors.toSet()));
 	}
 }

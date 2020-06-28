@@ -7,7 +7,7 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 
 public class RemoteConnection
 {
@@ -37,12 +37,12 @@ public class RemoteConnection
 	
 	private static NestedBoundingBox getNestedBoundingBoxForConnectedPos(BlockPos from, BlockPos to)
 	{
-		Vec3d thisVec = TubeTileEntity.getCenter(from);
-		Vec3d otherVec = TubeTileEntity.getCenter(to);
+		Vector3d thisVec = TubeTileEntity.getCenter(from);
+		Vector3d otherVec = TubeTileEntity.getCenter(to);
 		boolean otherHigher = otherVec.y > thisVec.y;
-		Vec3d higherVec = otherHigher ? otherVec : thisVec;
-		Vec3d lowerVec = otherHigher ? thisVec : otherVec;
-		Vec3d[] points = RaytraceHelper.getInterpolatedPoints(lowerVec, higherVec);
+		Vector3d higherVec = otherHigher ? otherVec : thisVec;
+		Vector3d lowerVec = otherHigher ? thisVec : otherVec;
+		Vector3d[] points = RaytraceHelper.getInterpolatedPoints(lowerVec, higherVec);
 		int segmentCount = points.length - 1;
 		AxisAlignedBB[] boxes = new AxisAlignedBB[segmentCount];
 		for (int i=0; i<segmentCount; i++)

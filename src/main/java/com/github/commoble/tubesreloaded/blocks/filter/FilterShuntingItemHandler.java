@@ -5,7 +5,7 @@ import com.github.commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -69,8 +69,8 @@ public class FilterShuntingItemHandler implements IItemHandler
 		if (!this.targetInventory.isPresent())
 		{
 			// if the block we are attempting to insert the item into is a shuntlike block, do not insert
-			Tag<Block> shuntTag = BlockTags.getCollection().get(new ResourceLocation("tubesreloaded", "shunts"));
-			this.targetInventory = WorldHelper.getTEItemHandlerAtIf(filter.getWorld(), output_pos, output_dir.getOpposite(), te -> !shuntTag.contains(te.getBlockState().getBlock()));
+			ITag<Block> shuntTag = BlockTags.getCollection().get(new ResourceLocation("tubesreloaded", "shunts"));
+			this.targetInventory = WorldHelper.getTEItemHandlerAtIf(this.filter.getWorld(), output_pos, output_dir.getOpposite(), te -> !shuntTag.func_230235_a_((te.getBlockState().getBlock())));
 		}
 		return this.targetInventory;
 	}

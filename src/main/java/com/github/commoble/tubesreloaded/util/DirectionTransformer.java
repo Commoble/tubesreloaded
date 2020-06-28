@@ -8,8 +8,8 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 
 public class DirectionTransformer
 {
@@ -123,26 +123,26 @@ public class DirectionTransformer
 	 * @param startCenter
 	 * @param startSide
 	 * @param endSide
-	 * @return A Vec3d[4][2], an array of four pairs of vertices in local coordinate space.
+	 * @return A Vector3d[4][2], an array of four pairs of vertices in local coordinate space.
 	 * array[x][0] are relative to the starting block's center, array[x][1] are relative to the ending block's center
 	 */
-	public static Vec3d[][] getVertexPairs(Direction startSide, Direction endSide)
+	public static Vector3d[][] getVertexPairs(Direction startSide, Direction endSide)
 	{
-		Vec3i startSideVec = startSide.getDirectionVec();
-		Vec3i endSideVec = endSide.getDirectionVec();
+		Vector3i startSideVec = startSide.getDirectionVec();
+		Vector3i endSideVec = endSide.getDirectionVec();
 		Direction[] startEdgeDirections = ORTHAGONAL_ROTATION_TABLE[startSide.ordinal()];
 		double tubeSideOffset = 4F/16F;	// distance from center of tube to center of side
 		double tubeEdgeOffset = 2F/16F; // distance from center of side of tube to center of edge of hole
 		double tubeCornerOffset = 2F/16F; // distance from center of edge of tube hole to corner of hole
-		Vec3d[][] result = new Vec3d[4][2];
+		Vector3d[][] result = new Vector3d[4][2];
 		
 		for (int i=0; i<4; i++)
 		{
 			// determine the vertices of the origin side
 			Direction firstOrthagonal = startEdgeDirections[i];
-			Vec3i firstOrthagonalSideVec = firstOrthagonal.getDirectionVec();
+			Vector3i firstOrthagonalSideVec = firstOrthagonal.getDirectionVec();
 			Direction secondOrthagonal = startEdgeDirections[(i+1) % 4];;
-			Vec3i secondOrthagonalSideVec = secondOrthagonal.getDirectionVec();
+			Vector3i secondOrthagonalSideVec = secondOrthagonal.getDirectionVec();
 			result[i][0] = getVertexOffset(startSideVec, firstOrthagonalSideVec, secondOrthagonalSideVec, tubeSideOffset, tubeEdgeOffset, tubeCornerOffset);
 				
 			// now we do the end side
@@ -164,8 +164,8 @@ public class DirectionTransformer
 				// second orthagonal also rotates in the opposite direction
 				Direction firstEndOrthagonal = getRotatedDirection(endSide, startSide, firstOrthagonal);
 				Direction secondEndOrthagonal = getRotatedDirection(endSide, startSide, secondOrthagonal);
-				Vec3i firstEndSideVec = firstEndOrthagonal.getDirectionVec();
-				Vec3i secondEndSideVec = secondEndOrthagonal.getDirectionVec();
+				Vector3i firstEndSideVec = firstEndOrthagonal.getDirectionVec();
+				Vector3i secondEndSideVec = secondEndOrthagonal.getDirectionVec();
 				result[i][1] = getVertexOffset(endSideVec, firstEndSideVec, secondEndSideVec, tubeSideOffset, tubeEdgeOffset, tubeCornerOffset);
 			}
 		}
@@ -173,9 +173,9 @@ public class DirectionTransformer
 		return result;
 	}
 	
-	public static Vec3d getVertexOffset(Vec3i sideVec, Vec3i orthagonalA, Vec3i orthagonalB, double side, double edge, double corner)
+	public static Vector3d getVertexOffset(Vector3i sideVec, Vector3i orthagonalA, Vector3i orthagonalB, double side, double edge, double corner)
 	{
-		return new Vec3d(
+		return new Vector3d(
 			sideVec.getX() * side + orthagonalA.getX() * edge + orthagonalB.getX() * corner,
 			sideVec.getY() * side + orthagonalA.getY() * edge + orthagonalB.getY() * corner,
 			sideVec.getZ() * side + orthagonalA.getZ() * edge + orthagonalB.getZ() * corner

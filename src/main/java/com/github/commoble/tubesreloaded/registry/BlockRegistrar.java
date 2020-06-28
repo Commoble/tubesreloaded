@@ -53,15 +53,17 @@ public class BlockRegistrar
 	{
 		IForgeRegistry<Block> registry = event.getRegistry();
 		
+		Material tubeMaterial = (new Material.Builder(MaterialColor.CLAY)).build();
+		
 		registerBlock(registry, new TubeBlock(new ResourceLocation("tubesreloaded:block/tube"), Block.Properties.create(Material.GLASS, MaterialColor.YELLOW_TERRACOTTA).hardnessAndResistance(0.4F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.TUBE);
-		registerBlock(registry, new ShuntBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.SHUNT);
-		registerBlock(registry, new LoaderBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.LOADER);
+		registerBlock(registry, new ShuntBlock(Block.Properties.create(tubeMaterial).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.SHUNT);
+		registerBlock(registry, new LoaderBlock(Block.Properties.create(tubeMaterial).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.LOADER);
 		registerBlock(registry, new RedstoneTubeBlock(new ResourceLocation("tubesreloaded:block/tube"), Block.Properties.create(Material.GLASS, MaterialColor.GOLD).hardnessAndResistance(0.4F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.REDSTONE_TUBE);
-		registerBlock(registry, new ExtractorBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.EXTRACTOR);
-		registerBlock(registry, new FilterBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.FILTER);
-		registerBlock(registry, new OsmosisFilterBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.OSMOSIS_FILTER);
-		registerBlock(registry, new OsmosisSlimeBlock(Block.Properties.create(Material.CLAY)), Names.OSMOSIS_SLIME);
-		registerBlock(registry, new DistributorBlock(Block.Properties.create(Material.CLAY).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.DISTRIBUTOR);
+		registerBlock(registry, new ExtractorBlock(Block.Properties.create(tubeMaterial).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.EXTRACTOR);
+		registerBlock(registry, new FilterBlock(Block.Properties.create(tubeMaterial).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.FILTER);
+		registerBlock(registry, new OsmosisFilterBlock(Block.Properties.create(tubeMaterial).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.OSMOSIS_FILTER);
+		registerBlock(registry, new OsmosisSlimeBlock(Block.Properties.create(tubeMaterial)), Names.OSMOSIS_SLIME);
+		registerBlock(registry, new DistributorBlock(Block.Properties.create(tubeMaterial).hardnessAndResistance(2F, 6F).harvestTool(ToolType.PICKAXE).sound(SoundType.METAL)), Names.DISTRIBUTOR);
 		
 		IntStream.range(0, 16).forEach(i -> registerBlock(
 			registry,

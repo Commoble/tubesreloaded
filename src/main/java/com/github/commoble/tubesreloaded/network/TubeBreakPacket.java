@@ -6,15 +6,15 @@ import com.github.commoble.tubesreloaded.client.ClientPacketHandlers;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class TubeBreakPacket
 {
-	public final Vec3d start;
-	public final Vec3d end;
+	public final Vector3d start;
+	public final Vector3d end;
 	
-	public TubeBreakPacket(Vec3d start, Vec3d end)
+	public TubeBreakPacket(Vector3d start, Vector3d end)
 	{
 		this.start = start;
 		this.end = end;
@@ -37,15 +37,15 @@ public class TubeBreakPacket
 		CompoundNBT nbt = buffer.readCompoundTag();
 		if (nbt == null)
 		{
-			return new TubeBreakPacket(Vec3d.ZERO, Vec3d.ZERO);
+			return new TubeBreakPacket(Vector3d.ZERO, Vector3d.ZERO);
 		}
 		else
 		{
-			Vec3d start = new Vec3d(
+			Vector3d start = new Vector3d(
 				nbt.getDouble("startX"),
 				nbt.getDouble("startY"),
 				nbt.getDouble("startZ"));
-			Vec3d end = new Vec3d(
+			Vector3d end = new Vector3d(
 				nbt.getDouble("endX"),
 				nbt.getDouble("endY"),
 				nbt.getDouble("endZ"));
