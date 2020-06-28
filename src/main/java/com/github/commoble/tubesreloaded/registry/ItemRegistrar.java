@@ -48,7 +48,7 @@ public class ItemRegistrar
 				);
 		
 		// real items
-		registerItem(registry, new TubingPliersItem(new Item.Properties().group(CreativeTabs.tab)), Names.TUBING_PLIERS);
+		registerItem(registry, new TubingPliersItem(new Item.Properties().group(CreativeTabs.tab).maxDamage(128)), Names.TUBING_PLIERS);
 		
 	}
 	
