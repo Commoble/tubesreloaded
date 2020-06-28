@@ -185,26 +185,29 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	{
 		BlockPos newPos = pos.offset(face);
 		BlockState state = world.getBlockState(newPos);
-		Block block = state.getBlock();
-		if (block instanceof TubeBlock && world instanceof World)
+		Block newBlock = state.getBlock();
+		if (newBlock instanceof TubeBlock && world instanceof World)
 		{
-			return this.isTubeCompatible((TubeBlock) block) &&
+			return this.isTubeCompatible((TubeBlock) newBlock) &&
 				TubeTileEntity.getTubeTEAt((World)world, newPos)
 					.map(tube -> !tube.hasRemoteConnection(face.getOpposite()))
-					.orElse(false)
-				&&
-				TubeTileEntity.getTubeTEAt((World)world, pos)
-					.map(tube -> !tube.hasRemoteConnection(face))
-					.orElse(true);
+					.orElse(false);
 		}
 		
-		if (block instanceof LoaderBlock && state.get(LoaderBlock.FACING).equals(face.getOpposite()))
+		if (TubeTileEntity.getTubeTEAt((World)world, pos)
+				.map(tube -> tube.hasRemoteConnection(face))
+				.orElse(false))
+		{
+			return false;
+		}
+		
+		if (newBlock instanceof LoaderBlock && state.get(LoaderBlock.FACING).equals(face.getOpposite()))
 			return true;	// todo make this configurable for arbitrary blocks instead of hardcoded
 		
-		if (block instanceof ExtractorBlock && state.get(ExtractorBlock.FACING).equals(face.getOpposite()))
+		if (newBlock instanceof ExtractorBlock && state.get(ExtractorBlock.FACING).equals(face.getOpposite()))
 			return true;
 		
-		if (block instanceof FilterBlock && state.get(FilterBlock.FACING).equals(face.getOpposite()))
+		if (newBlock instanceof FilterBlock && state.get(FilterBlock.FACING).equals(face.getOpposite()))
 			return true;
 
 		TileEntity te = world.getTileEntity(newPos);
