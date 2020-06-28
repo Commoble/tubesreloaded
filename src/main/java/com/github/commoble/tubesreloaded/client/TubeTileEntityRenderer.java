@@ -362,7 +362,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 									handVector = handVector.rotateYaw(swingZ * 0.5F);
 									handVector = handVector.rotatePitch(-swingZ * 0.7F);
 									handX = MathHelper.lerp(partialTicks, player.prevPosX, player.getPosX()) + handVector.x;
-									handY = MathHelper.lerp(partialTicks, player.prevPosY, player.getPosY()) + handVector.y + 0.3F;
+									handY = MathHelper.lerp(partialTicks, player.prevPosY, player.getPosY()) + handVector.y + 0.0F;
 									handZ = MathHelper.lerp(partialTicks, player.prevPosZ, player.getPosZ()) + handVector.z;
 									eyeHeight = player.getEyeHeight();
 								}
@@ -381,7 +381,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 								Vector3d[] points = RaytraceHelper.getInterpolatedPoints(startVec, endVec);
 								for (Vector3d point : points)
 								{
-									world.addParticle(ParticleTypes.UNDERWATER, point.x, point.y, point.z, 0D, 0D, 0D);
+									world.addParticle(ParticleTypes.CURRENT_DOWN, point.x, point.y, point.z, 0D, 0D, 0D);
 								}
 							}
 						}
