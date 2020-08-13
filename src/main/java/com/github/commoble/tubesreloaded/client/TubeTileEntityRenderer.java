@@ -109,7 +109,10 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 			return;
 		ItemStack itemstack = wrapper.stack;
 		ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer(); // itemrenderer knows how to render items
-		Random random = new Random();
+		
+		@SuppressWarnings("resource")
+		Random random = tube.getWorld().rand;
+		
 		Item item = itemstack.getItem();
 		int i = itemstack.isEmpty() ? 187 : Item.getIdFromItem(item) + itemstack.getDamage(); // the random is used to
 																								// offset sub-items
