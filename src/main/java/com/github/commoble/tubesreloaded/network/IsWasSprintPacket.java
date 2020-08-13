@@ -27,12 +27,16 @@ public class IsWasSprintPacket
 		return new IsWasSprintPacket(buf.readByte() > 0);
 	}
 	
-	public void handle(Supplier<NetworkEvent.Context> context)
+	public void handle(Supplier<NetworkEvent.Context> contextGetter)
 	{
-		ServerPlayerEntity player = context.get().getSender();
-		if (player != null)
-		{
-			PlayerData.setSprinting(player.getUniqueID(), this.isSprintHeld);
-		}
+		NetworkEvent.Context context = contextGetter.get();
+		// PlayerData needs to be threadsafed, packet handling is done on worker threads, delegate to main thread
+		context.enqueueWork(() -> {
+			ServerPlayerEntity player = context.getSender();
+			if (player != null)
+			{
+				PlayerData.setSprinting(player.getUniqueID(), this.isSprintHeld);
+			}
+		});
 	}
 }
