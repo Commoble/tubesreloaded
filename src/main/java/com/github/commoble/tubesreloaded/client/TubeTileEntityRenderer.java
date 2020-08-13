@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.client.settings.PointOfView;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -355,7 +356,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 								float eyeHeight;
 								
 								// first person
-								if ((renderManager.options == null || renderManager.options.thirdPersonView <= 0))
+								if ((renderManager.options == null || renderManager.options.func_243230_g() == PointOfView.FIRST_PERSON))
 								{
 									double fov = renderManager.options.fov;
 									fov = fov / 100.0D;

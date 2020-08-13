@@ -78,8 +78,7 @@ public class DistributorTileEntity extends TileEntity
 	}
 	
 	@Override
-	/** read **/
-	public void func_230337_a_(BlockState state, CompoundNBT nbt)
+	public void read(BlockState state, CompoundNBT nbt)
 	{
 		int[] directionIndices = nbt.getIntArray(NEXT_DIRECTIONS);
 		int maxSize = Math.min(this.handlers.length, directionIndices.length);
@@ -87,6 +86,6 @@ public class DistributorTileEntity extends TileEntity
 		{
 			this.handlers[i].setNextDirectionIndex(directionIndices[i]);
 		}
-		super.func_230337_a_(state, nbt);
+		super.read(state, nbt);
 	}
 }

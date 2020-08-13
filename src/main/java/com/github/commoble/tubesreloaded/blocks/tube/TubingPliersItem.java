@@ -97,7 +97,7 @@ public class TubingPliersItem extends Item
 						if (player instanceof ServerPlayerEntity && world instanceof ServerWorld)
 						{
 							// TODO Vector3d.getCenterOfBlockPos
-							PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)player), new TubeBreakPacket(Vector3d.func_237489_a_(lastPos), Vector3d.func_237489_a_(pos)));
+							PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)player), new TubeBreakPacket(Vector3d.copyCentered(lastPos), Vector3d.copyCentered(pos)));
 							
 							((ServerPlayerEntity)player).playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
 						}
@@ -188,7 +188,7 @@ public class TubingPliersItem extends Item
 	{
 		double maxDistance = TubesReloaded.serverConfig.max_remote_tube_connection_range.get();
 		// Vector3d.getCenterOfBlockPos
-		if (holder.getPositionVec().squareDistanceTo(Vector3d.func_237489_a_(connectionPos)) > maxDistance*maxDistance)
+		if (holder.getPositionVec().squareDistanceTo(Vector3d.copyCentered(connectionPos)) > maxDistance*maxDistance)
 		{
 			return true;
 		}

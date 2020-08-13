@@ -45,32 +45,22 @@ public class StandardSizeContainerScreenFactory<ContainerType extends Container>
 			this.texture = texture;
 		}
 
-		/** render **/
 		@Override
-		public void func_230430_a_(MatrixStack matrix, int x, int y, float partialTicks)
+		public void render(MatrixStack matrix, int x, int y, float partialTicks)
 		{
-			this.func_230446_a_(matrix); // renderBackground
-			super.func_230430_a_(matrix, x, y, partialTicks);
-			this.func_230459_a_(matrix, x, y); // renderHoveredTooltip
+			this.renderBackground(matrix);
+			super.render(matrix, x, y, partialTicks);
+			this.renderHoveredTooltip(matrix, x, y);
 		}
-
-//		@Override
-//		protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
-//		{
-//			String playerName = this.playerInventory.getName().getFormattedText();
-//			String windowTitle = new TranslationTextComponent(this.windowTitleTranslationKey).getFormattedText();
-//			this.font.drawString(windowTitle, this.xSize/2 - this.font.getStringWidth(windowTitle)/2, 6, 4210752);	// y-value and color from dispenser, etc
-//			this.font.drawString(playerName, 8, this.ySize-96+2, 4210752);
-//		}
+		
 		@Override
-		/** drawGuiContainerBackgroundLayer **/
-		protected void func_230450_a_(MatrixStack matrix, float partialTicks, int mouseX, int mouseY)
+		protected void drawGuiContainerBackgroundLayer(MatrixStack matrix, float partialTicks, int mouseX, int mouseY)
 		{
 			RenderSystem.color4f(1F, 1F, 1F, 1F);
-			this.field_230706_i_.getTextureManager().bindTexture(this.texture);
-			int xStart = (this.field_230708_k_ - this.xSize) / 2; // width - xSize
-			int yStart = (this.field_230709_l_ - this.ySize) / 2; // height - ySize
-			this.func_238474_b_(matrix, xStart,  yStart, 0, 0, this.xSize, this.ySize); // blit
+			this.minecraft.getTextureManager().bindTexture(this.texture);
+			int xStart = (this.width - this.xSize) / 2;
+			int yStart = (this.height - this.ySize) / 2;
+			this.blit(matrix, xStart,  yStart, 0, 0, this.xSize, this.ySize);
 		}
 	}
 }

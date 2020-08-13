@@ -24,8 +24,8 @@ public class TubeQuadRenderer
 		TextureAtlasSprite textureatlassprite = new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, block.textureLocation).getSprite();
 		
 		// this Vector3d method converts (1,2,3) into (1D, 2D, 3D)
-		Vector3d startVec = Vector3d.func_237491_b_(startPos);
-		Vector3d endVec = Vector3d.func_237491_b_(endPos);
+		Vector3d startVec = Vector3d.copy(startPos);
+		Vector3d endVec = Vector3d.copy(endPos);
 		
 		Vector3d[][] vertices = DirectionTransformer.getVertexPairs(startFace, endFace);
 		Vector3d offsetToEndPos = endVec.subtract(startVec);

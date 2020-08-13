@@ -70,7 +70,7 @@ public class FilterShuntingItemHandler implements IItemHandler
 		{
 			// if the block we are attempting to insert the item into is a shuntlike block, do not insert
 			ITag<Block> shuntTag = BlockTags.getCollection().get(new ResourceLocation("tubesreloaded", "shunts"));
-			this.targetInventory = WorldHelper.getTEItemHandlerAtIf(this.filter.getWorld(), output_pos, output_dir.getOpposite(), te -> !shuntTag.func_230235_a_((te.getBlockState().getBlock())));
+			this.targetInventory = WorldHelper.getTEItemHandlerAtIf(this.filter.getWorld(), output_pos, output_dir.getOpposite(), te -> !shuntTag.contains((te.getBlockState().getBlock())));
 		}
 		return this.targetInventory;
 	}

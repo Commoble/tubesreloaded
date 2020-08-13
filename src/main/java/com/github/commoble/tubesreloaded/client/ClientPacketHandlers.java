@@ -32,7 +32,7 @@ public class ClientPacketHandlers
 				BlockPos pos = new BlockPos(point);
 				manager.addEffect(
 					new DiggingParticle(world, point.x, point.y, point.z, 0.0D, 0.0D, 0.0D, state)
-						.setBlockPos(pos).multiplyVelocity(0.2F).multipleParticleScaleBy(0.6F));
+						.setBlockPos(pos).multiplyVelocity(0.2F).multiplyParticleScaleBy(0.6F));
 			}
 		}
 	}
