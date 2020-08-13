@@ -9,6 +9,7 @@ modLoader="javafml" #mandatory
 loaderVersion="[26,)" #mandatory (26 is current forge version)
 # A URL to refer people to when problems occur with this mod
 issueTrackerURL="https://github.com/Commoble/tubesreloaded/issues" #optional
+license="MIT License"
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
 # The modid of the mod
