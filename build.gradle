@@ -1,6 +1,7 @@
 buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
+		maven { url 'https://www.dogforce-games.com/maven/' }
         jcenter()
         mavenCentral()
     }
@@ -93,6 +94,12 @@ jar {
 }
 
 jar.finalizedBy('reobfJar') 
+
+repositories {
+	maven {
+		url 'https://www.dogforce-games.com/maven/'
+	}
+}
 
 publishing {
     publications {
