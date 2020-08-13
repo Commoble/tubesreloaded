@@ -36,7 +36,6 @@ public class StandardSizeContainerScreenFactory<ContainerType extends Container>
 	static class StandardSizeContainerScreen<ContainerType extends Container> extends ContainerScreen<ContainerType>
 	{
 		private final ResourceLocation texture;
-		private final String windowTitleTranslationKey;
 		
 		public StandardSizeContainerScreen(ContainerType screenContainer, PlayerInventory inv, ITextComponent titleIn, ResourceLocation texture, String windowTitleTranslationKey)
 		{
@@ -44,7 +43,6 @@ public class StandardSizeContainerScreenFactory<ContainerType extends Container>
 			this.xSize = 176;
 			this.ySize = 166;
 			this.texture = texture;
-			this.windowTitleTranslationKey = windowTitleTranslationKey;
 		}
 
 		/** render **/
