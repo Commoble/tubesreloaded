@@ -29,27 +29,29 @@ public class TubeQuadRenderer
 		
 		Vector3d[][] vertices = DirectionTransformer.getVertexPairs(startFace, endFace);
 		Vector3d offsetToEndPos = endVec.subtract(startVec);
+		
+		IVertexBuilder ivertexbuilder = buffer.getBuffer(Atlases.getCutoutBlockType());
+		float totalMinU = textureatlassprite.getMinU();
+		float totalMinV = textureatlassprite.getMinV();
+		float totalMaxU = textureatlassprite.getMaxU();
+		float totalMaxV = textureatlassprite.getMaxV();
+		float texWidth = totalMaxU - totalMinU;
+		float texHeight = totalMaxV - totalMinV;
+		float tubeStartX = ((6F / 16F) * texWidth) + totalMinU;
+		float tubeStartY = totalMinV;
+		float tubeWidth = (4F / 16F) * texWidth;
+		float tubeHeight = (4F / 16F) * texHeight;
+		float minU = tubeStartX;
+		float minV = tubeStartY;
+		float maxU = tubeStartX + tubeWidth;
+		float maxV = tubeStartY + tubeHeight;
+		
+		int startLight = getPackedLight(world, startPos);
+		int endLight = getPackedLight(world, endPos);
 
 		for (int side=0; side<4; side++)
 		{
 			matrix.push();
-
-			
-			IVertexBuilder ivertexbuilder = buffer.getBuffer(Atlases.getCutoutBlockType());
-			float totalMinU = textureatlassprite.getMinU();
-			float totalMinV = textureatlassprite.getMinV();
-			float totalMaxU = textureatlassprite.getMaxU();
-			float totalMaxV = textureatlassprite.getMaxV();
-			float texWidth = totalMaxU - totalMinU;
-			float texHeight = totalMaxV - totalMinV;
-			float tubeStartX = ((6F / 16F) * texWidth) + totalMinU;
-			float tubeStartY = totalMinV;
-			float tubeWidth = (4F / 16F) * texWidth;
-			float tubeHeight = (4F / 16F) * texHeight;
-			float minU = tubeStartX;
-			float minV = tubeStartY;
-			float maxU = tubeStartX + tubeWidth;
-			float maxV = tubeStartY + tubeHeight;
 			
 			int vertIndexA = side;
 			int vertIndexB = (side+1)%4;
@@ -70,9 +72,6 @@ public class TubeQuadRenderer
 			float zB = (float) startVertexB.z + 0.5F;
 			float zC = (float) endVertexB.z + 0.5F;
 			float zD = (float) endVertexA.z + 0.5F;
-			
-			int startLight = getPackedLight(world, startPos);
-			int endLight = getPackedLight(world, endPos);
 
 			MatrixStack.Entry matrixEntry = matrix.getLast();
 			
