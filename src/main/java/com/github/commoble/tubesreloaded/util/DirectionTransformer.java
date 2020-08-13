@@ -113,6 +113,14 @@ public class DirectionTransformer
 		}
 	};
 	
+	/**
+	 * Given two directions and a third, applies the rotation-of-the-first-direction-to-the-second
+	 * to the third direction
+	 * @param from
+	 * @param to
+	 * @param toRotate
+	 * @return
+	 */
 	public static Direction getRotatedDirection(Direction from, Direction to, Direction toRotate)
 	{
 		return ROTATION_TABLE[from.ordinal()][to.ordinal()][toRotate.ordinal()];
