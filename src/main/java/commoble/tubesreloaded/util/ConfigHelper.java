@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.util;
+package commoble.tubesreloaded.util;
 
 /*
 The MIT License (MIT)

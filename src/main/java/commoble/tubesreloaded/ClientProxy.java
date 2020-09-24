@@ -1,10 +1,9 @@
-package com.github.commoble.tubesreloaded;
+package commoble.tubesreloaded;
 
 import java.util.Optional;
 
-import com.github.commoble.tubesreloaded.network.IsWasSprintPacket;
-import com.github.commoble.tubesreloaded.network.PacketHandler;
-
+import commoble.tubesreloaded.network.IsWasSprintPacket;
+import commoble.tubesreloaded.network.PacketHandler;
 import net.minecraftforge.fml.DistExecutor;
 
 public class ClientProxy

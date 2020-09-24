@@ -1,8 +1,7 @@
-package com.github.commoble.tubesreloaded.util;
+package commoble.tubesreloaded.util;
 
-import com.github.commoble.tubesreloaded.ClientProxy;
-import com.github.commoble.tubesreloaded.PlayerData;
-
+import commoble.tubesreloaded.ClientProxy;
+import commoble.tubesreloaded.PlayerData;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.util.Direction;
 

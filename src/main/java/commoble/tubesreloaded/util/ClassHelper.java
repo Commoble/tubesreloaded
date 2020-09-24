@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.util;
+package commoble.tubesreloaded.util;
 
 import java.util.Optional;
 

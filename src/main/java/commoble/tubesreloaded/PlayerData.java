@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded;
+package commoble.tubesreloaded;
 
 import java.util.HashSet;
 import java.util.Set;

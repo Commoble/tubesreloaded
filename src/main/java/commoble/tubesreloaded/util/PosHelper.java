@@ -1,9 +1,8 @@
-package com.github.commoble.tubesreloaded.util;
+package commoble.tubesreloaded.util;
 
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
-
+import commoble.tubesreloaded.blocks.tube.TubeTileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;

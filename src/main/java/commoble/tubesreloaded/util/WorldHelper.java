@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.util;
+package commoble.tubesreloaded.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,8 +10,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
-
+import commoble.tubesreloaded.blocks.tube.TubeTileEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;

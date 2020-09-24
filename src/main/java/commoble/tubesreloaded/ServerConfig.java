@@ -1,8 +1,7 @@
-package com.github.commoble.tubesreloaded;
+package commoble.tubesreloaded;
 
-import com.github.commoble.tubesreloaded.util.ConfigHelper;
-import com.github.commoble.tubesreloaded.util.ConfigHelper.ConfigValueListener;
-
+import commoble.tubesreloaded.util.ConfigHelper;
+import commoble.tubesreloaded.util.ConfigHelper.ConfigValueListener;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class ServerConfig
