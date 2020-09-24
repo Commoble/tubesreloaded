@@ -1,13 +1,13 @@
-package com.github.commoble.tubesreloaded.client;
+package commoble.tubesreloaded.client;
 
-import com.github.commoble.tubesreloaded.TubesReloaded;
-import com.github.commoble.tubesreloaded.blocks.filter.FilterTileEntity;
-import com.github.commoble.tubesreloaded.blocks.filter.OsmosisFilterBlock;
-import com.github.commoble.tubesreloaded.blocks.filter.OsmosisSlimeBlock;
-import com.github.commoble.tubesreloaded.registry.BlockRegistrar;
-import com.github.commoble.tubesreloaded.registry.ItemRegistrar;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import commoble.tubesreloaded.TubesReloaded;
+import commoble.tubesreloaded.blocks.filter.FilterTileEntity;
+import commoble.tubesreloaded.blocks.filter.OsmosisFilterBlock;
+import commoble.tubesreloaded.blocks.filter.OsmosisSlimeBlock;
+import commoble.tubesreloaded.registry.BlockRegistrar;
+import commoble.tubesreloaded.registry.ItemRegistrar;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;

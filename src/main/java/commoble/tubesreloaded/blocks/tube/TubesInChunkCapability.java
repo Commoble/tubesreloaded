@@ -1,10 +1,9 @@
-package com.github.commoble.tubesreloaded.blocks.tube;
+package commoble.tubesreloaded.blocks.tube;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import com.github.commoble.tubesreloaded.util.NBTListHelper;
-
+import commoble.tubesreloaded.util.NBTListHelper;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NBTUtil;

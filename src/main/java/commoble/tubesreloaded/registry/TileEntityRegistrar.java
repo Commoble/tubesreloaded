@@ -1,15 +1,14 @@
-package com.github.commoble.tubesreloaded.registry;
+package commoble.tubesreloaded.registry;
 
 import java.util.stream.IntStream;
 
-import com.github.commoble.tubesreloaded.TubesReloaded;
-import com.github.commoble.tubesreloaded.blocks.distributor.DistributorTileEntity;
-import com.github.commoble.tubesreloaded.blocks.filter.FilterTileEntity;
-import com.github.commoble.tubesreloaded.blocks.filter.OsmosisFilterTileEntity;
-import com.github.commoble.tubesreloaded.blocks.shunt.ShuntTileEntity;
-import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
-import com.github.commoble.tubesreloaded.blocks.tube.redstone_tube.RedstoneTubeTileEntity;
-
+import commoble.tubesreloaded.TubesReloaded;
+import commoble.tubesreloaded.blocks.distributor.DistributorTileEntity;
+import commoble.tubesreloaded.blocks.filter.FilterTileEntity;
+import commoble.tubesreloaded.blocks.filter.OsmosisFilterTileEntity;
+import commoble.tubesreloaded.blocks.shunt.ShuntTileEntity;
+import commoble.tubesreloaded.blocks.tube.TubeTileEntity;
+import commoble.tubesreloaded.blocks.tube.redstone_tube.RedstoneTubeTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;

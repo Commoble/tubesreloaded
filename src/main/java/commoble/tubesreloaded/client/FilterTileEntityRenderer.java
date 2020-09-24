@@ -1,9 +1,9 @@
-package com.github.commoble.tubesreloaded.client;
+package commoble.tubesreloaded.client;
 
-import com.github.commoble.tubesreloaded.blocks.filter.FilterBlock;
-import com.github.commoble.tubesreloaded.blocks.filter.FilterTileEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import commoble.tubesreloaded.blocks.filter.FilterBlock;
+import commoble.tubesreloaded.blocks.filter.FilterTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.ItemRenderer;

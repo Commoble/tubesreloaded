@@ -1,17 +1,17 @@
-package com.github.commoble.tubesreloaded.client;
+package commoble.tubesreloaded.client;
 
 import java.util.Map;
 import java.util.Random;
 
-import com.github.commoble.tubesreloaded.blocks.tube.ItemInTubeWrapper;
-import com.github.commoble.tubesreloaded.blocks.tube.RaytraceHelper;
-import com.github.commoble.tubesreloaded.blocks.tube.RemoteConnection;
-import com.github.commoble.tubesreloaded.blocks.tube.TubeBlock;
-import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
-import com.github.commoble.tubesreloaded.blocks.tube.TubingPliersItem;
-import com.github.commoble.tubesreloaded.util.DirectionTransformer;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import commoble.tubesreloaded.blocks.tube.ItemInTubeWrapper;
+import commoble.tubesreloaded.blocks.tube.RaytraceHelper;
+import commoble.tubesreloaded.blocks.tube.RemoteConnection;
+import commoble.tubesreloaded.blocks.tube.TubeBlock;
+import commoble.tubesreloaded.blocks.tube.TubeTileEntity;
+import commoble.tubesreloaded.blocks.tube.TubingPliersItem;
+import commoble.tubesreloaded.util.DirectionTransformer;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;

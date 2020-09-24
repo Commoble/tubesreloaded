@@ -1,10 +1,9 @@
-package com.github.commoble.tubesreloaded.registry;
+package commoble.tubesreloaded.registry;
 
 import java.util.stream.IntStream;
 
-import com.github.commoble.tubesreloaded.TubesReloaded;
-import com.github.commoble.tubesreloaded.blocks.tube.TubingPliersItem;
-
+import commoble.tubesreloaded.TubesReloaded;
+import commoble.tubesreloaded.blocks.tube.TubingPliersItem;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;

@@ -1,7 +1,6 @@
-package com.github.commoble.tubesreloaded.blocks.filter;
+package commoble.tubesreloaded.blocks.filter;
 
-import com.github.commoble.tubesreloaded.util.WorldHelper;
-
+import commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.BlockTags;

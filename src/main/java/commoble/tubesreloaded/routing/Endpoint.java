@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.routing;
+package commoble.tubesreloaded.routing;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;

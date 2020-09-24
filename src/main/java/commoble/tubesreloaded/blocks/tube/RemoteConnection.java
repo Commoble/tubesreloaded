@@ -1,7 +1,6 @@
-package com.github.commoble.tubesreloaded.blocks.tube;
+package commoble.tubesreloaded.blocks.tube;
 
-import com.github.commoble.tubesreloaded.util.NestedBoundingBox;
-
+import commoble.tubesreloaded.util.NestedBoundingBox;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.Direction;

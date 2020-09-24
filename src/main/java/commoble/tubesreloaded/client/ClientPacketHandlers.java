@@ -1,9 +1,8 @@
-package com.github.commoble.tubesreloaded.client;
+package commoble.tubesreloaded.client;
 
-import com.github.commoble.tubesreloaded.blocks.tube.RaytraceHelper;
-import com.github.commoble.tubesreloaded.network.TubeBreakPacket;
-import com.github.commoble.tubesreloaded.registry.BlockRegistrar;
-
+import commoble.tubesreloaded.blocks.tube.RaytraceHelper;
+import commoble.tubesreloaded.network.TubeBreakPacket;
+import commoble.tubesreloaded.registry.BlockRegistrar;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.DiggingParticle;

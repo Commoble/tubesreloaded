@@ -1,12 +1,11 @@
-package com.github.commoble.tubesreloaded.blocks.filter;
+package commoble.tubesreloaded.blocks.filter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.blocks.shunt.ShuntBlock;
-import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
-import com.github.commoble.tubesreloaded.util.WorldHelper;
-
+import commoble.tubesreloaded.blocks.shunt.ShuntBlock;
+import commoble.tubesreloaded.registry.TileEntityRegistrar;
+import commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.InventoryHelper;

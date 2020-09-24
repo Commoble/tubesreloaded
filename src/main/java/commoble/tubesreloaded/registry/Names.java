@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.registry;
+package commoble.tubesreloaded.registry;
 
 import java.util.Arrays;
 

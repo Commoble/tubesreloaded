@@ -1,10 +1,9 @@
-package com.github.commoble.tubesreloaded.blocks.filter;
+package commoble.tubesreloaded.blocks.filter;
 
-import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
-import com.github.commoble.tubesreloaded.util.ClassHelper;
-import com.github.commoble.tubesreloaded.util.DirectionHelper;
-import com.github.commoble.tubesreloaded.util.WorldHelper;
-
+import commoble.tubesreloaded.registry.TileEntityRegistrar;
+import commoble.tubesreloaded.util.ClassHelper;
+import commoble.tubesreloaded.util.DirectionHelper;
+import commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DirectionalBlock;

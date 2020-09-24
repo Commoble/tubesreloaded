@@ -1,7 +1,6 @@
-package com.github.commoble.tubesreloaded.registry;
+package commoble.tubesreloaded.registry;
 
-import com.github.commoble.tubesreloaded.TubesReloaded;
-
+import commoble.tubesreloaded.TubesReloaded;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;

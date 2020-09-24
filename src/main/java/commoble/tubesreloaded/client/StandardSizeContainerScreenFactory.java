@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.client;
+package commoble.tubesreloaded.client;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;

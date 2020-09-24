@@ -1,7 +1,6 @@
-package com.github.commoble.tubesreloaded.network;
+package commoble.tubesreloaded.network;
 
-import com.github.commoble.tubesreloaded.TubesReloaded;
-
+import commoble.tubesreloaded.TubesReloaded;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;

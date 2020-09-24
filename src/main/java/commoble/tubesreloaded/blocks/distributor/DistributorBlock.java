@@ -1,7 +1,6 @@
-package com.github.commoble.tubesreloaded.blocks.distributor;
+package commoble.tubesreloaded.blocks.distributor;
 
-import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
-
+import commoble.tubesreloaded.registry.TileEntityRegistrar;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;

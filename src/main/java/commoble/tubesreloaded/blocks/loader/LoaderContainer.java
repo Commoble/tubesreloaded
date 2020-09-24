@@ -1,8 +1,7 @@
-package com.github.commoble.tubesreloaded.blocks.loader;
+package commoble.tubesreloaded.blocks.loader;
 
-import com.github.commoble.tubesreloaded.registry.BlockRegistrar;
-import com.github.commoble.tubesreloaded.registry.ContainerRegistrar;
-
+import commoble.tubesreloaded.registry.BlockRegistrar;
+import commoble.tubesreloaded.registry.ContainerRegistrar;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;

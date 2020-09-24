@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.blocks.filter;
+package commoble.tubesreloaded.blocks.filter;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

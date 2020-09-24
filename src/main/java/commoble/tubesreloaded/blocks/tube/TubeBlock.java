@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.blocks.tube;
+package commoble.tubesreloaded.blocks.tube;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,12 +8,12 @@ import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.blocks.extractor.ExtractorBlock;
-import com.github.commoble.tubesreloaded.blocks.filter.FilterBlock;
-import com.github.commoble.tubesreloaded.blocks.loader.LoaderBlock;
-import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
 import com.google.common.collect.ImmutableList;
 
+import commoble.tubesreloaded.blocks.extractor.ExtractorBlock;
+import commoble.tubesreloaded.blocks.filter.FilterBlock;
+import commoble.tubesreloaded.blocks.loader.LoaderBlock;
+import commoble.tubesreloaded.registry.TileEntityRegistrar;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.IBucketPickupHandler;

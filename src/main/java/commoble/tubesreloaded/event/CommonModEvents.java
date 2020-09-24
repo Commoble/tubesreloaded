@@ -1,17 +1,16 @@
-package com.github.commoble.tubesreloaded.event;
+package commoble.tubesreloaded.event;
 
-import com.github.commoble.tubesreloaded.TubesReloaded;
-import com.github.commoble.tubesreloaded.blocks.tube.ITubesInChunk;
-import com.github.commoble.tubesreloaded.blocks.tube.TubesInChunk;
-import com.github.commoble.tubesreloaded.blocks.tube.TubesInChunkCapability;
-import com.github.commoble.tubesreloaded.network.IsWasSprintPacket;
-import com.github.commoble.tubesreloaded.network.PacketHandler;
-import com.github.commoble.tubesreloaded.network.TubeBreakPacket;
-import com.github.commoble.tubesreloaded.registry.BlockRegistrar;
-import com.github.commoble.tubesreloaded.registry.ContainerRegistrar;
-import com.github.commoble.tubesreloaded.registry.ItemRegistrar;
-import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
-
+import commoble.tubesreloaded.TubesReloaded;
+import commoble.tubesreloaded.blocks.tube.ITubesInChunk;
+import commoble.tubesreloaded.blocks.tube.TubesInChunk;
+import commoble.tubesreloaded.blocks.tube.TubesInChunkCapability;
+import commoble.tubesreloaded.network.IsWasSprintPacket;
+import commoble.tubesreloaded.network.PacketHandler;
+import commoble.tubesreloaded.network.TubeBreakPacket;
+import commoble.tubesreloaded.registry.BlockRegistrar;
+import commoble.tubesreloaded.registry.ContainerRegistrar;
+import commoble.tubesreloaded.registry.ItemRegistrar;
+import commoble.tubesreloaded.registry.TileEntityRegistrar;
 import net.minecraft.block.Block;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;

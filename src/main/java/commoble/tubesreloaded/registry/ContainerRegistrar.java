@@ -1,9 +1,8 @@
-package com.github.commoble.tubesreloaded.registry;
+package commoble.tubesreloaded.registry;
 
-import com.github.commoble.tubesreloaded.TubesReloaded;
-import com.github.commoble.tubesreloaded.blocks.filter.FilterContainer;
-import com.github.commoble.tubesreloaded.blocks.loader.LoaderContainer;
-
+import commoble.tubesreloaded.TubesReloaded;
+import commoble.tubesreloaded.blocks.filter.FilterContainer;
+import commoble.tubesreloaded.blocks.loader.LoaderContainer;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.ObjectHolder;

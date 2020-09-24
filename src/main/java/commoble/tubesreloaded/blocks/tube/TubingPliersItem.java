@@ -1,13 +1,12 @@
-package com.github.commoble.tubesreloaded.blocks.tube;
+package commoble.tubesreloaded.blocks.tube;
 
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-import com.github.commoble.tubesreloaded.TubesReloaded;
-import com.github.commoble.tubesreloaded.network.PacketHandler;
-import com.github.commoble.tubesreloaded.network.TubeBreakPacket;
-
+import commoble.tubesreloaded.TubesReloaded;
+import commoble.tubesreloaded.network.PacketHandler;
+import commoble.tubesreloaded.network.TubeBreakPacket;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SixWayBlock;
 import net.minecraft.entity.Entity;

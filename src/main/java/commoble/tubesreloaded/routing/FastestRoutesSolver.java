@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.routing;
+package commoble.tubesreloaded.routing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,10 +9,9 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import com.github.commoble.tubesreloaded.blocks.tube.TubeBlock;
-import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
-import com.github.commoble.tubesreloaded.util.PosHelper;
-
+import commoble.tubesreloaded.blocks.tube.TubeBlock;
+import commoble.tubesreloaded.blocks.tube.TubeTileEntity;
+import commoble.tubesreloaded.util.PosHelper;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.Direction;

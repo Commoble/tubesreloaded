@@ -1,7 +1,6 @@
-package com.github.commoble.tubesreloaded.registry;
+package commoble.tubesreloaded.registry;
 
-import com.github.commoble.tubesreloaded.TubesReloaded;
-
+import commoble.tubesreloaded.TubesReloaded;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 

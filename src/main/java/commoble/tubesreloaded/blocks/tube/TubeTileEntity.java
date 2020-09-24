@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.blocks.tube;
+package commoble.tubesreloaded.blocks.tube;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,17 +13,17 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.TubesReloaded;
-import com.github.commoble.tubesreloaded.network.PacketHandler;
-import com.github.commoble.tubesreloaded.network.TubeBreakPacket;
-import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
-import com.github.commoble.tubesreloaded.routing.Route;
-import com.github.commoble.tubesreloaded.routing.RoutingNetwork;
-import com.github.commoble.tubesreloaded.util.NBTMapHelper;
-import com.github.commoble.tubesreloaded.util.NestedBoundingBox;
-import com.github.commoble.tubesreloaded.util.WorldHelper;
 import com.google.common.collect.Maps;
 
+import commoble.tubesreloaded.TubesReloaded;
+import commoble.tubesreloaded.network.PacketHandler;
+import commoble.tubesreloaded.network.TubeBreakPacket;
+import commoble.tubesreloaded.registry.TileEntityRegistrar;
+import commoble.tubesreloaded.routing.Route;
+import commoble.tubesreloaded.routing.RoutingNetwork;
+import commoble.tubesreloaded.util.NBTMapHelper;
+import commoble.tubesreloaded.util.NestedBoundingBox;
+import commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.inventory.InventoryHelper;

@@ -1,8 +1,7 @@
-package com.github.commoble.tubesreloaded.blocks.tube.redstone_tube;
+package commoble.tubesreloaded.blocks.tube.redstone_tube;
 
-import com.github.commoble.tubesreloaded.blocks.tube.TubeBlock;
-import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
-
+import commoble.tubesreloaded.blocks.tube.TubeBlock;
+import commoble.tubesreloaded.registry.TileEntityRegistrar;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.BooleanProperty;

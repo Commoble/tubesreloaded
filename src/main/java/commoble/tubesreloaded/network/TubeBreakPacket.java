@@ -1,9 +1,8 @@
-package com.github.commoble.tubesreloaded.network;
+package commoble.tubesreloaded.network;
 
 import java.util.function.Supplier;
 
-import com.github.commoble.tubesreloaded.client.ClientPacketHandlers;
-
+import commoble.tubesreloaded.client.ClientPacketHandlers;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.vector.Vector3d;

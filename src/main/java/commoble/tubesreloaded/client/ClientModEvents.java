@@ -1,10 +1,9 @@
-package com.github.commoble.tubesreloaded.client;
+package commoble.tubesreloaded.client;
 
-import com.github.commoble.tubesreloaded.TubesReloaded;
-import com.github.commoble.tubesreloaded.registry.BlockRegistrar;
-import com.github.commoble.tubesreloaded.registry.ContainerRegistrar;
-import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
-
+import commoble.tubesreloaded.TubesReloaded;
+import commoble.tubesreloaded.registry.BlockRegistrar;
+import commoble.tubesreloaded.registry.ContainerRegistrar;
+import commoble.tubesreloaded.registry.TileEntityRegistrar;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;

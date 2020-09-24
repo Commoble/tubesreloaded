@@ -1,8 +1,7 @@
-package com.github.commoble.tubesreloaded.client;
+package commoble.tubesreloaded.client;
 
-import com.github.commoble.tubesreloaded.ClientProxy;
-import com.github.commoble.tubesreloaded.TubesReloaded;
-
+import commoble.tubesreloaded.ClientProxy;
+import commoble.tubesreloaded.TubesReloaded;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent;

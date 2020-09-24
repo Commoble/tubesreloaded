@@ -1,9 +1,8 @@
-package com.github.commoble.tubesreloaded.network;
+package commoble.tubesreloaded.network;
 
 import java.util.function.Supplier;
 
-import com.github.commoble.tubesreloaded.PlayerData;
-
+import commoble.tubesreloaded.PlayerData;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;

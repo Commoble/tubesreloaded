@@ -1,16 +1,16 @@
-package com.github.commoble.tubesreloaded.event;
+package commoble.tubesreloaded.event;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import com.github.commoble.tubesreloaded.TubesReloaded;
-import com.github.commoble.tubesreloaded.blocks.tube.TubeTileEntity;
-import com.github.commoble.tubesreloaded.blocks.tube.TubesInChunk;
-import com.github.commoble.tubesreloaded.blocks.tube.TubesInChunkCapability;
-import com.github.commoble.tubesreloaded.registry.Names;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 
+import commoble.tubesreloaded.TubesReloaded;
+import commoble.tubesreloaded.blocks.tube.TubeTileEntity;
+import commoble.tubesreloaded.blocks.tube.TubesInChunk;
+import commoble.tubesreloaded.blocks.tube.TubesInChunkCapability;
+import commoble.tubesreloaded.registry.Names;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;

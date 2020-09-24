@@ -1,10 +1,9 @@
-package com.github.commoble.tubesreloaded.blocks.tube;
+package commoble.tubesreloaded.blocks.tube;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import com.github.commoble.tubesreloaded.TubesReloaded;
-
+import commoble.tubesreloaded.TubesReloaded;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;

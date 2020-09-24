@@ -1,4 +1,4 @@
-package com.github.commoble.tubesreloaded.blocks.distributor;
+package commoble.tubesreloaded.blocks.distributor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,8 +9,7 @@ import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.commoble.tubesreloaded.registry.TileEntityRegistrar;
-
+import commoble.tubesreloaded.registry.TileEntityRegistrar;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;

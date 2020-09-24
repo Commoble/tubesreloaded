@@ -1,10 +1,10 @@
-package com.github.commoble.tubesreloaded.client;
+package commoble.tubesreloaded.client;
 
-import com.github.commoble.tubesreloaded.blocks.tube.TubeBlock;
-import com.github.commoble.tubesreloaded.util.DirectionTransformer;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import commoble.tubesreloaded.blocks.tube.TubeBlock;
+import commoble.tubesreloaded.util.DirectionTransformer;
 import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.LightTexture;
