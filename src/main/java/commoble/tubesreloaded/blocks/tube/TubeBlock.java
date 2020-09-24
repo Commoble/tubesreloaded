@@ -1,7 +1,6 @@
 package commoble.tubesreloaded.blocks.tube;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -442,7 +441,6 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	@Override
 	public FluidState getFluidState(BlockState state)
 	{
-		HashMap<Direction, Direction> map = new HashMap<>();
 		return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(state);
 	}
 
