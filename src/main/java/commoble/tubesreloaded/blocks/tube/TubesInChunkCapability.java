@@ -1,9 +1,11 @@
 package commoble.tubesreloaded.blocks.tube;
 
 import java.util.Set;
+import java.util.function.UnaryOperator;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import commoble.databuddy.codec.SetCodecHelper;
 import net.minecraft.nbt.CompoundNBT;
@@ -20,10 +22,11 @@ public class TubesInChunkCapability
 	public static Capability<ITubesInChunk> INSTANCE = null;
 	
 	public static class Storage implements Capability.IStorage<ITubesInChunk>
-	{
-		public static final String POSITIONS = "positions";
-		
-		private static final Codec<Set<BlockPos>> CODEC = SetCodecHelper.makeSetCodec(BlockPos.CODEC);
+	{		
+		// use a record codec so it gets treated as a CompoundNBT
+		private static final Codec<Set<BlockPos>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+				SetCodecHelper.makeSetCodec(BlockPos.CODEC).fieldOf("positions").forGetter(UnaryOperator.identity())
+			).apply(instance, UnaryOperator.identity()));
 		
 		@Override
 		public INBT writeNBT(Capability<ITubesInChunk> capability, ITubesInChunk instance, Direction side)
