@@ -9,8 +9,14 @@ buildscript {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
     }
 }
+plugins {
+	// this version works on gradle 4.9
+	// more recent versions of shadow work on more recent versions of gradle
+	id 'com.github.johnrengelman.shadow' version '4.0.4'
+}
 apply plugin: 'net.minecraftforge.gradle'
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'java' // java plugin is needed for the shadow plugin to work
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
@@ -68,8 +74,21 @@ minecraft {
     }
 }
 
+repositories {
+	maven { url 'https://www.dogforce-games.com/maven/' }
+	maven { url "https://cubicinterpolation.net/maven/" }
+}
+
+configurations {
+	shade
+}
+
+
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+	compile "commoble.databuddy:${databuddy_branch}:${databuddy_version}"
+	shade "commoble.databuddy:${databuddy_branch}:${databuddy_version}"
+    
     
 	// compile against the JEI API but do not include it at runtime
 	// compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api")
@@ -93,13 +112,19 @@ jar {
     }
 }
 
-jar.finalizedBy('reobfJar') 
-
-repositories {
-	maven {
-		url 'https://www.dogforce-games.com/maven/'
-	}
+shadowJar {
+	classifier = ''
+	configurations = [project.configurations.shade]
+	relocate 'commoble.databuddy', "${project.group}.shadow.commoble.databuddy"
 }
+
+reobf {
+    shadowJar { }
+}
+
+// this replaces jar.finalizedBy('reobfJar') in the standard forge mod buildscript
+tasks.build.dependsOn reobfShadowJar
+jar.finalizedBy('reobfShadowJar')
 
 publishing {
     publications {

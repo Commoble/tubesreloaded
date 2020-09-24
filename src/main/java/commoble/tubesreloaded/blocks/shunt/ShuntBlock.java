@@ -1,7 +1,7 @@
 package commoble.tubesreloaded.blocks.shunt;
 
 import commoble.tubesreloaded.registry.TileEntityRegistrar;
-import commoble.tubesreloaded.util.DirectionHelper;
+import commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DirectionalBlock;
@@ -47,7 +47,7 @@ public class ShuntBlock extends Block
 
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
-		return this.getDefaultState().with(FACING, DirectionHelper.getBlockFacingForPlacement(context));
+		return this.getDefaultState().with(FACING, WorldHelper.getBlockFacingForPlacement(context));
 	}
 
 	public BlockState rotate(BlockState state, Rotation rot)

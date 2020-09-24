@@ -30,6 +30,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -45,6 +46,12 @@ public class CommonForgeEvents
 		TubesInChunk tubesInChunk = new TubesInChunk();
 		event.addCapability(new ResourceLocation(TubesReloaded.MODID, Names.TUBES_IN_CHUNK), tubesInChunk);
 		event.addListener(tubesInChunk::onCapabilityInvalidated);
+	}
+	
+	@SubscribeEvent
+	public static void onRightClickBlock(RightClickBlock event)
+	{
+		
 	}
 	
 

@@ -10,8 +10,11 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import commoble.tubesreloaded.ClientProxy;
+import commoble.tubesreloaded.PlayerData;
 import commoble.tubesreloaded.blocks.tube.TubeTileEntity;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -153,5 +156,26 @@ public class WorldHelper
 		return IntStream.range(0,handler.getSlots())
 			.mapToObj(i -> handler.extractItem(i, 1, true))
 			.anyMatch(stack -> stack.getCount() > 0 && doesCallerWantItem.test(stack));
+	}
+
+	@SuppressWarnings("resource")
+	public static Direction getBlockFacingForPlacement(BlockItemUseContext context)
+	{
+		// if sprint is being held (i.e. ctrl by default), facing is based on the face of the block that was clicked on
+		// otherwise, facing is based on the look vector of the player
+		// holding sneak reverses the facing of the placement to the opposite face
+		boolean isSprintKeyHeld;
+		if (context.getWorld().isRemote)	// client thread
+		{
+			isSprintKeyHeld = ClientProxy.INSTANCE.map(client -> client.isHoldingSprint).orElse(false);
+		}
+		else	// server thread
+		{
+			isSprintKeyHeld = PlayerData.getSprinting(context.getPlayer().getUniqueID());
+		}
+				
+		Direction placeDir = isSprintKeyHeld ? context.getFace().getOpposite() : context.getNearestLookingDirection();
+		placeDir = context.hasSecondaryUseForPlayer() ? placeDir : placeDir.getOpposite();	// is player sneaking
+		return placeDir;		
 	}
 }

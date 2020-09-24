@@ -1,7 +1,7 @@
 package commoble.tubesreloaded;
 
-import commoble.tubesreloaded.util.ConfigHelper;
-import commoble.tubesreloaded.util.ConfigHelper.ConfigValueListener;
+import commoble.databuddy.config.ConfigHelper;
+import commoble.databuddy.config.ConfigHelper.ConfigValueListener;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class ServerConfig

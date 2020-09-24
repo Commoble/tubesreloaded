@@ -2,7 +2,6 @@ package commoble.tubesreloaded.blocks.filter;
 
 import commoble.tubesreloaded.registry.TileEntityRegistrar;
 import commoble.tubesreloaded.util.ClassHelper;
-import commoble.tubesreloaded.util.DirectionHelper;
 import commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -97,7 +96,7 @@ public class FilterBlock extends Block
 	@Override
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
-		return this.getDefaultState().with(FACING, DirectionHelper.getBlockFacingForPlacement(context));
+		return this.getDefaultState().with(FACING, WorldHelper.getBlockFacingForPlacement(context));
 	}
 
 	@Override

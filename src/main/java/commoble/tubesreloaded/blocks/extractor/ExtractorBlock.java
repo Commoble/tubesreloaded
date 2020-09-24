@@ -1,6 +1,5 @@
 package commoble.tubesreloaded.blocks.extractor;
 
-import commoble.tubesreloaded.util.DirectionHelper;
 import commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -122,7 +121,7 @@ public class ExtractorBlock extends Block
 
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
-		return this.getDefaultState().with(FACING, DirectionHelper.getBlockFacingForPlacement(context).getOpposite());
+		return this.getDefaultState().with(FACING, WorldHelper.getBlockFacingForPlacement(context).getOpposite());
 	}
 
 	public BlockState rotate(BlockState state, Rotation rot)
