@@ -7,6 +7,7 @@ import net.minecraft.util.Direction;
 
 public class DirectionHelper
 {
+	@SuppressWarnings("resource")
 	public static Direction getBlockFacingForPlacement(BlockItemUseContext context)
 	{
 		// if sprint is being held (i.e. ctrl by default), facing is based on the face of the block that was clicked on
@@ -23,7 +24,7 @@ public class DirectionHelper
 		}
 				
 		Direction placeDir = isSprintKeyHeld ? context.getFace().getOpposite() : context.getNearestLookingDirection();
-		placeDir = context.func_225518_g_() ? placeDir : placeDir.getOpposite();	// is player sneaking
+		placeDir = context.hasSecondaryUseForPlayer() ? placeDir : placeDir.getOpposite();	// is player sneaking
 		return placeDir;		
 	}
 }

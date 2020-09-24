@@ -356,7 +356,7 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 								float eyeHeight;
 								
 								// first person
-								if ((renderManager.options == null || renderManager.options.func_243230_g() == PointOfView.FIRST_PERSON))
+								if ((renderManager.options == null || renderManager.options.getPointOfView() == PointOfView.FIRST_PERSON))
 								{
 									double fov = renderManager.options.fov;
 									fov = fov / 100.0D;
