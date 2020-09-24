@@ -42,11 +42,11 @@ public class FilterTileEntity extends TileEntity
 	}
 	
 	@Override
-	public void remove()
+	public void invalidateCaps()
 	{
 		this.shuntingOptional.invalidate();
 		this.storageOptional.invalidate();
-		super.remove();
+		super.invalidateCaps();
 	}
 	
 	public boolean canItemPassThroughFilter(ItemStack stack)

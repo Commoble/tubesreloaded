@@ -338,9 +338,15 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	{
 		this.dropItems();
 		this.network.invalid = true;
-		Arrays.stream(this.handlerOptionals).forEach(optional -> optional.invalidate());
 		this.clearRemoteConnections();
 		super.remove();
+	}
+	
+	@Override
+	public void invalidateCaps()
+	{
+		Arrays.stream(this.handlerOptionals).forEach(optional -> optional.invalidate());
+		super.invalidateCaps();
 	}
 	
 	public void onPossibleNetworkUpdateRequired()

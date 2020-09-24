@@ -32,11 +32,11 @@ public class ShuntTileEntity extends TileEntity
 	}
 	
 	@Override
-	public void remove()
+	public void invalidateCaps()
 	{
 		this.output_handler.invalidate();
 		this.input_handler.invalidate();
-		super.remove();
+		super.invalidateCaps();
 	}
 	
 	@Override

@@ -49,10 +49,10 @@ public class DistributorTileEntity extends TileEntity
 	}
 	
 	@Override
-	public void remove()
+	public void invalidateCaps()
 	{
 		this.handlerOptionals.forEach(LazyOptional::invalidate);
-		super.remove();
+		super.invalidateCaps();
 	}
 	
 	@Override
