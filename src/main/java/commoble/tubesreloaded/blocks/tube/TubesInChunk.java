@@ -72,5 +72,10 @@ public class TubesInChunk implements ITubesInChunk, ICapabilityProvider, INBTSer
 		
 		return set;
 	}
+	
+	public void onCapabilityInvalidated()
+	{
+		this.holder.invalidate();
+	}
 
 }

@@ -42,7 +42,9 @@ public class CommonForgeEvents
 	@SubscribeEvent
 	public static void onAttachChunkCapabilities(AttachCapabilitiesEvent<Chunk> event)
 	{
-		event.addCapability(new ResourceLocation(TubesReloaded.MODID, Names.TUBES_IN_CHUNK), new TubesInChunk());
+		TubesInChunk tubesInChunk = new TubesInChunk();
+		event.addCapability(new ResourceLocation(TubesReloaded.MODID, Names.TUBES_IN_CHUNK), tubesInChunk);
+		event.addListener(tubesInChunk::onCapabilityInvalidated);
 	}
 	
 
