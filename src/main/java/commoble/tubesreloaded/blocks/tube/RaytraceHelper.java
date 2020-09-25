@@ -10,6 +10,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceContext.BlockMode;
 import net.minecraft.util.math.RayTraceContext.FluidMode;
 import net.minecraft.util.math.RayTraceResult;
@@ -69,12 +70,11 @@ public class RaytraceHelper
 	public static Vector3d getTubeRaytraceHit(Vector3d startVec, Vector3d endVec, IBlockReader world)
 	{
 		Vector3d[] points = getInterpolatedPoints(startVec, endVec);
-		TubeRayTraceSelectionContext selector = new TubeRayTraceSelectionContext();
 		int pointCount = points.length;
 		int rayTraceCount = pointCount-1;
 		for (int i=0; i<rayTraceCount; i++)
 		{
-			TubeRayTraceContext context = new TubeRayTraceContext(selector, points[i], points[i+1], BlockMode.COLLIDER, FluidMode.NONE);
+			RayTraceContext context = new RayTraceContext(points[i], points[i+1], BlockMode.COLLIDER, FluidMode.NONE, null);
 			BlockRayTraceResult result = rayTraceBlocks(world, context);
 			if (result.getType() != RayTraceResult.Type.MISS)
 			{
@@ -88,7 +88,7 @@ public class RaytraceHelper
 
 	// vanilla raytracer requires a non-null entity when the context is constructed
 	// we don't need an entity though
-	public static BlockRayTraceResult rayTraceBlocks(IBlockReader world, TubeRayTraceContext context)
+	public static BlockRayTraceResult rayTraceBlocks(IBlockReader world, RayTraceContext context)
 	{
 		return doRayTrace(context, (rayTraceContext, pos) ->
 		{
@@ -104,7 +104,7 @@ public class RaytraceHelper
 		});
 	}
 
-	static <T> T doRayTrace(TubeRayTraceContext context, BiFunction<TubeRayTraceContext, BlockPos, T> rayTracer, Function<TubeRayTraceContext, T> missFactory)
+	static <T> T doRayTrace(RayTraceContext context, BiFunction<RayTraceContext, BlockPos, T> rayTracer, Function<RayTraceContext, T> missFactory)
 	{
 		Vector3d start = context.getStartVec();
 		Vector3d end = context.getEndVec();
