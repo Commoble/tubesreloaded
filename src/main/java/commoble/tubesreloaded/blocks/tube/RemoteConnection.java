@@ -3,7 +3,7 @@ package commoble.tubesreloaded.blocks.tube;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import commoble.tubesreloaded.util.ExtraCodecs;
+import commoble.databuddy.codec.ExtraCodecs;
 import commoble.tubesreloaded.util.NestedBoundingBox;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;

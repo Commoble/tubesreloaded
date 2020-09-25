@@ -2,11 +2,12 @@ package commoble.tubesreloaded.event;
 
 import commoble.tubesreloaded.TubesReloaded;
 import commoble.tubesreloaded.blocks.tube.ITubesInChunk;
+import commoble.tubesreloaded.blocks.tube.SyncTubesInChunkPacket;
+import commoble.tubesreloaded.blocks.tube.TubeBreakPacket;
 import commoble.tubesreloaded.blocks.tube.TubesInChunk;
 import commoble.tubesreloaded.blocks.tube.TubesInChunkCapability;
 import commoble.tubesreloaded.network.IsWasSprintPacket;
 import commoble.tubesreloaded.network.PacketHandler;
-import commoble.tubesreloaded.network.TubeBreakPacket;
 import commoble.tubesreloaded.registry.BlockRegistrar;
 import commoble.tubesreloaded.registry.ContainerRegistrar;
 import commoble.tubesreloaded.registry.ItemRegistrar;
@@ -69,8 +70,14 @@ public class CommonModEvents
 			TubeBreakPacket::read,
 			TubeBreakPacket::handle
 			);
+		PacketHandler.INSTANCE.registerMessage(packetID++,
+			SyncTubesInChunkPacket.class,
+			SyncTubesInChunkPacket::write,
+			SyncTubesInChunkPacket::read,
+			SyncTubesInChunkPacket::handle
+			);
 		
 		// register capabilities
-		CapabilityManager.INSTANCE.register(ITubesInChunk.class, new TubesInChunkCapability.Storage(), TubesInChunk::new);
+		CapabilityManager.INSTANCE.register(ITubesInChunk.class, new TubesInChunkCapability.Storage(), () -> new TubesInChunk(null));
 	}
 }

@@ -4,9 +4,11 @@ buildscript {
 		maven { url 'https://www.dogforce-games.com/maven/' }
         jcenter()
         mavenCentral()
+        maven {url='https://dist.creeper.host/Sponge/maven'}
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 plugins {
@@ -42,6 +44,7 @@ minecraft {
     runs {
         client {
             workingDirectory project.file('run')
+            arg "-mixin.config="+"tubesreloaded"+".mixins.json"
 
             // Recommended logging data for a userdev environment
             // property 'forge.logging.markers'
@@ -58,6 +61,7 @@ minecraft {
 
         server {
             workingDirectory project.file('run')
+            arg "-mixin.config="+"tubesreloaded"+".mixins.json"
 
             // Recommended logging data for a userdev environment
             // property 'forge.logging.markers'
@@ -77,6 +81,9 @@ minecraft {
 repositories {
 	maven { url 'https://www.dogforce-games.com/maven/' }
 	maven { url "https://cubicinterpolation.net/maven/" }
+	// repos for mixin
+	jcenter()
+	mavenCentral()
 }
 
 configurations {
@@ -86,8 +93,8 @@ configurations {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
-	compile "commoble.databuddy:${databuddy_branch}:${databuddy_version}"
-	shade "commoble.databuddy:${databuddy_branch}:${databuddy_version}"
+	compile fg.deobf("commoble.databuddy:${databuddy_branch}:${databuddy_version}")
+	shade fg.deobf("commoble.databuddy:${databuddy_branch}:${databuddy_version}")
     
     
 	// compile against the JEI API but do not include it at runtime
@@ -107,7 +114,8 @@ jar {
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",
             "Implementation-Vendor" :"Commoble",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+			"MixinConfigs": "${modid}.mixins.json"
         ])
     }
 }
@@ -137,4 +145,9 @@ publishing {
             url "file:///${project.projectDir}/mcmodsrepo"
         }
     }
+}
+apply plugin: 'org.spongepowered.mixin'
+
+mixin {
+    add sourceSets.main, "${modid}.refmap.json"
 }

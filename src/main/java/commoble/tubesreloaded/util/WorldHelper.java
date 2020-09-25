@@ -167,7 +167,7 @@ public class WorldHelper
 		boolean isSprintKeyHeld;
 		if (context.getWorld().isRemote)	// client thread
 		{
-			isSprintKeyHeld = ClientProxy.INSTANCE.map(client -> client.isHoldingSprint).orElse(false);
+			isSprintKeyHeld = ClientProxy.INSTANCE.map(client -> client.getWasSprinting()).orElse(false);
 		}
 		else	// server thread
 		{

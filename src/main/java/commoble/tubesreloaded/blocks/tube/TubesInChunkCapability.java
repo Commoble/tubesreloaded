@@ -16,16 +16,20 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 
+/** Don't call INSTANCE.getDefaultInstance(), default instance isn't supported **/
 public class TubesInChunkCapability
 {
 	@CapabilityInject(ITubesInChunk.class)
 	public static Capability<ITubesInChunk> INSTANCE = null;
 	
+	/** This codec serializes a list-like element **/
+	public static final Codec<Set<BlockPos>> TUBE_SET_CODEC = SetCodecHelper.makeSetCodec(BlockPos.CODEC);
+	
 	public static class Storage implements Capability.IStorage<ITubesInChunk>
 	{		
-		// use a record codec so it gets treated as a CompoundNBT
+		/** Wrap in a record coded -- this serializes to a map-like element, so it will convert to a CompoundNBT **/
 		private static final Codec<Set<BlockPos>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				SetCodecHelper.makeSetCodec(BlockPos.CODEC).fieldOf("positions").forGetter(UnaryOperator.identity())
+				TUBE_SET_CODEC.fieldOf("positions").forGetter(UnaryOperator.identity())
 			).apply(instance, UnaryOperator.identity()));
 		
 		@Override

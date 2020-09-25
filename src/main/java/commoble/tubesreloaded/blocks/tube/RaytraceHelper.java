@@ -15,7 +15,7 @@ import net.minecraft.util.math.RayTraceContext.FluidMode;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.world.IBlockReader;
 
 public class RaytraceHelper
 {
@@ -66,7 +66,7 @@ public class RaytraceHelper
 	}
 
 	@Nullable
-	public static Vector3d getTubeRaytraceHit(Vector3d startVec, Vector3d endVec, World world)
+	public static Vector3d getTubeRaytraceHit(Vector3d startVec, Vector3d endVec, IBlockReader world)
 	{
 		Vector3d[] points = getInterpolatedPoints(startVec, endVec);
 		TubeRayTraceSelectionContext selector = new TubeRayTraceSelectionContext();
@@ -88,7 +88,7 @@ public class RaytraceHelper
 
 	// vanilla raytracer requires a non-null entity when the context is constructed
 	// we don't need an entity though
-	public static BlockRayTraceResult rayTraceBlocks(World world, TubeRayTraceContext context)
+	public static BlockRayTraceResult rayTraceBlocks(IBlockReader world, TubeRayTraceContext context)
 	{
 		return doRayTrace(context, (rayTraceContext, pos) ->
 		{

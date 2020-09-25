@@ -1,4 +1,4 @@
-package commoble.tubesreloaded.network;
+package commoble.tubesreloaded.blocks.tube;
 
 import java.util.function.Supplier;
 

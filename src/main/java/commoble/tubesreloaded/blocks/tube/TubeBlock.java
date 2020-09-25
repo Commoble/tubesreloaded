@@ -39,7 +39,6 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunk;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidContainer
@@ -98,7 +97,7 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	@Deprecated
 	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
-		this.doTubeSetOperation(world, pos, Set<BlockPos>::add);
+		this.updateTubeSet(world, pos, Set<BlockPos>::add);
 		super.onBlockAdded(state, world, pos, oldState, isMoving);
 	}
 
@@ -114,18 +113,22 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		}
 		else
 		{
-			this.doTubeSetOperation(world, pos, Set<BlockPos>::remove);
+			this.updateTubeSet(world, pos, Set<BlockPos>::remove);
 			super.onReplaced(state, world, pos, newState, isMoving);
 		}
 	}
 	
-	public void doTubeSetOperation(World world, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
+	public void updateTubeSet(World world, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
 	{
-		IChunk chunk = world.getChunk(pos);
-		if (chunk instanceof Chunk)
+		Chunk chunk = world.getChunkAt(pos);
+		if (chunk != null)
 		{
-			((Chunk)chunk).getCapability(TubesInChunkCapability.INSTANCE)
-				.ifPresent(tubes -> consumer.accept(tubes.getPositions(), pos));
+			chunk.getCapability(TubesInChunkCapability.INSTANCE)
+				.ifPresent(tubes -> {
+					Set<BlockPos> set = tubes.getPositions();
+					consumer.accept(set, pos);
+					tubes.setPositions(set);
+				});
 		}
 	}
 

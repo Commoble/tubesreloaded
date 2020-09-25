@@ -6,7 +6,6 @@ import javax.annotation.Nonnull;
 
 import commoble.tubesreloaded.TubesReloaded;
 import commoble.tubesreloaded.network.PacketHandler;
-import commoble.tubesreloaded.network.TubeBreakPacket;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SixWayBlock;
 import net.minecraft.entity.Entity;

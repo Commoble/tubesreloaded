@@ -1,7 +1,7 @@
 package commoble.tubesreloaded.client;
 
 import commoble.tubesreloaded.blocks.tube.RaytraceHelper;
-import commoble.tubesreloaded.network.TubeBreakPacket;
+import commoble.tubesreloaded.blocks.tube.TubeBreakPacket;
 import commoble.tubesreloaded.registry.BlockRegistrar;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;

@@ -20,7 +20,7 @@ public class ClientForgeEvents
 		if (mc.player != null)
 		{
 			boolean sprintIsDown = mc.gameSettings.keyBindSprint.isKeyDown();
-			boolean sprintWasDown = ClientProxy.INSTANCE.map(client -> client.isHoldingSprint).orElse(false);
+			boolean sprintWasDown = ClientProxy.INSTANCE.map(client -> client.getWasSprinting()).orElse(false);
 			if (sprintWasDown != sprintIsDown)	// change in sprint key detected
 			{
 				ClientProxy.INSTANCE.ifPresent(instance -> instance.setIsSprintingAndNotifyServer(sprintIsDown));

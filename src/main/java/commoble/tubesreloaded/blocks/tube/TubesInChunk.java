@@ -4,20 +4,31 @@ import java.util.HashSet;
 import java.util.Set;
 
 import commoble.tubesreloaded.TubesReloaded;
+import commoble.tubesreloaded.network.PacketHandler;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 public class TubesInChunk implements ITubesInChunk, ICapabilityProvider, INBTSerializable<CompoundNBT>
 {	
 	private final LazyOptional<ITubesInChunk> holder = LazyOptional.of(() -> this);
 	
+	/** The positions in this set are world coordinates, not local-to-chunk coordinates **/
 	private Set<BlockPos> positions = new HashSet<>();
+	
+	private final Chunk chunk; public Chunk getChunk() {return this.chunk;}
+	
+	public TubesInChunk(Chunk chunk)
+	{
+		this.chunk = chunk;
+	}
 	
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
@@ -42,6 +53,7 @@ public class TubesInChunk implements ITubesInChunk, ICapabilityProvider, INBTSer
 	public void setPositions(Set<BlockPos> set)
 	{
 		this.positions = set;
+		PacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(this::getChunk), new SyncTubesInChunkPacket(this.chunk.getPos(), set));
 	}
 
 	@Override
