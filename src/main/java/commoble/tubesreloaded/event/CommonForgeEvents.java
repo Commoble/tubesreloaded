@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 
 import commoble.tubesreloaded.TubesReloaded;
+import commoble.tubesreloaded.blocks.tube.RaytraceHelper;
 import commoble.tubesreloaded.blocks.tube.SyncTubesInChunkPacket;
 import commoble.tubesreloaded.blocks.tube.TubeTileEntity;
 import commoble.tubesreloaded.blocks.tube.TubesInChunk;
@@ -70,7 +71,7 @@ public class CommonForgeEvents
 		BlockPos pos = event.getPos();
 		IWorld iworld = event.getWorld();
 		BlockState state = event.getState();
-		if (iworld instanceof World && !iworld.isRemote())
+		if (iworld instanceof World && !iworld.isRemote() && state != null)
 		{
 			@SuppressWarnings("resource")
 			World world = (World)iworld;
@@ -90,7 +91,8 @@ public class CommonForgeEvents
 							TileEntity te = world.getTileEntity(tubePos);
 							if (te instanceof TubeTileEntity)
 							{
-								Vector3d hit = ((TubeTileEntity)te).doesBlockStateIntersectConnection(pos, state, checkedTubePositions);
+								TubeTileEntity tube = (TubeTileEntity)te;
+								Vector3d hit = RaytraceHelper.doesBlockStateIntersectTubeConnections(tube.getPos(), pos, world, state, checkedTubePositions, tube.getRemoteConnections());
 								if (hit != null)
 								{
 									event.setCanceled(true);

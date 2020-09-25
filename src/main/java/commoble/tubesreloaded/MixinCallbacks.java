@@ -5,8 +5,10 @@ import java.util.Set;
 
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import commoble.tubesreloaded.blocks.tube.RaytraceHelper;
 import commoble.tubesreloaded.blocks.tube.TubeTileEntity;
 import commoble.tubesreloaded.blocks.tube.TubesInChunk;
+import commoble.tubesreloaded.client.FakeWorldForTubeRaytrace;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
@@ -46,42 +48,47 @@ public abstract class MixinCallbacks
 			BlockPos pos = context.getPos();
 			BlockItem blockItem = (BlockItem)item;
 			BlockState placementState = TubesReloadedBlockItemHelper.getStateForPlacement(blockItem, context);
-				
-			Set<ChunkPos> chunkPositions = TubesInChunk.getRelevantChunkPositionsNearPos(pos);
 			
-			for (ChunkPos chunkPos : chunkPositions)
+			if (placementState != null)
 			{
-				if (world.isBlockLoaded(chunkPos.asBlockPos()))
+				Set<ChunkPos> chunkPositions = TubesInChunk.getRelevantChunkPositionsNearPos(pos);
+				
+				chunkLoop:
+				for (ChunkPos chunkPos : chunkPositions)
 				{
-					Set<BlockPos> tubePositions = proxy.getTubesInChunk(chunkPos);
-					
-					Set<BlockPos> checkedTubePositions = new HashSet<BlockPos>();
-					for (BlockPos tubePos : tubePositions)
+					if (world.isBlockLoaded(chunkPos.asBlockPos()))
 					{
-						TileEntity te = world.getTileEntity(tubePos);
-						if (te instanceof TubeTileEntity)
+						Set<BlockPos> tubePositions = proxy.getTubesInChunk(chunkPos);
+						
+						Set<BlockPos> checkedTubePositions = new HashSet<BlockPos>();
+						for (BlockPos tubePos : tubePositions)
 						{
-							Vector3d hit = ((TubeTileEntity)te).doesBlockStateIntersectConnection(pos, placementState, checkedTubePositions);
-							if (hit != null)
+							TileEntity te = world.getTileEntity(tubePos);
+							if (te instanceof TubeTileEntity)
 							{
-								PlayerEntity player = context.getPlayer();
-								if (player != null)
+								Vector3d hit = RaytraceHelper.doesBlockStateIntersectTubeConnections(te.getPos(), pos, new FakeWorldForTubeRaytrace(world, pos, placementState), placementState, checkedTubePositions, ((TubeTileEntity)te).getRemoteConnections());
+								if (hit != null)
 								{
-									world.addParticle(RedstoneParticleData.REDSTONE_DUST, hit.x, hit.y, hit.z, 0.05D, 0.05D, 0.05D);
-									player.playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
-//									serverPlayer.connection.sendPacket(new SEntityEquipmentPacket(serverPlayer.getEntityId(), ImmutableList.of(Pair.of(EquipmentSlotType.MAINHAND, serverPlayer.getHeldItem(Hand.MAIN_HAND)))));
-//									((ServerWorld)world).spawnParticle(serverPlayer, RedstoneParticleData.REDSTONE_DUST, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
-//									serverPlayer.playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
+									PlayerEntity player = context.getPlayer();
+									if (player != null)
+									{
+										world.addParticle(RedstoneParticleData.REDSTONE_DUST, hit.x, hit.y, hit.z, 0.05D, 0.05D, 0.05D);
+										player.playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
+	//									serverPlayer.connection.sendPacket(new SEntityEquipmentPacket(serverPlayer.getEntityId(), ImmutableList.of(Pair.of(EquipmentSlotType.MAINHAND, serverPlayer.getHeldItem(Hand.MAIN_HAND)))));
+	//									((ServerWorld)world).spawnParticle(serverPlayer, RedstoneParticleData.REDSTONE_DUST, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
+	//									serverPlayer.playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
+									}
+									info.setReturnValue(ActionResultType.SUCCESS);
+									break chunkLoop; // "return" here just continues the inner loop for some reason
 								}
-								info.setReturnValue(ActionResultType.SUCCESS);
-							}
-							else
-							{
-								checkedTubePositions.add(tubePos);
+								else
+								{
+									checkedTubePositions.add(tubePos);
+								}
 							}
 						}
+						
 					}
-					
 				}
 			}
 		}

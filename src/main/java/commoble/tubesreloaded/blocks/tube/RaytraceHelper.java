@@ -1,12 +1,17 @@
 package commoble.tubesreloaded.blocks.tube;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import commoble.tubesreloaded.util.NestedBoundingBox;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
@@ -48,6 +53,57 @@ public class RaytraceHelper
 			points[i] = lower.add(diffs[i]);
 		}
 		return points;
+	}
+
+	
+	/**
+	 * Checks if a placed block would intersect any of the connections of the tube block at the given position
+	 * @param tubePos the position of the tube
+	 * @param placePos The position the block is being placed at
+	 * @param raytraceWorld the world to do raytracing in -- must have the block we are trying to hit with the raytrace
+	 * @param placeState The blockstate being placed
+	 * @param checkedTubePositions The positions of tubes that have already been checked.
+	 * Any tubes in this list that this tube is connected to is also connected to this tube, and this connection has been
+	 * verified to not intersect the placed block, so we don't need to check again.
+	 * @param connections the remote connections of the given tube
+	 * @return A Vector3d of the intersecting hit, or null if there was no intersecting hit
+	 */
+	@Nullable
+	public static Vector3d doesBlockStateIntersectTubeConnections(BlockPos tubePos, BlockPos placePos, IBlockReader raytraceWorld, @Nonnull BlockState placeState, Set<BlockPos> checkedTubePositions, Map<Direction, RemoteConnection> connections)
+	{
+		for (Map.Entry<Direction, RemoteConnection> entry : connections.entrySet())
+		{
+			RemoteConnection connection = entry.getValue();
+			BlockPos pos = connection.toPos;
+			if (!checkedTubePositions.contains(pos))
+			{
+				Direction fromSide = entry.getKey();
+				Direction toSide = connection.toSide;
+				Vector3d hit = doesBlockStateIntersectConnection(tubePos, fromSide, pos, toSide, placePos, placeState, connection.box, raytraceWorld);
+				if (hit != null)
+				{
+					return hit;
+				}
+			}
+		}
+		return null;
+	}
+	
+	@Nullable
+	public static Vector3d doesBlockStateIntersectConnection(BlockPos startPos, Direction startSide, BlockPos endPos, Direction endSide, BlockPos placePos, @Nonnull BlockState placeState, NestedBoundingBox box, IBlockReader world)
+	{
+		VoxelShape shape = placeState.getCollisionShape(world, placePos);
+		for (AxisAlignedBB aabb : shape.toBoundingBoxList())
+		{
+			if (box.intersects(aabb.offset(placePos)))
+			{
+				// if we confirm the AABB intersects, do a raytrace as well
+				Vector3d startVec = RaytraceHelper.getTubeSideCenter(startPos, startSide);
+				Vector3d endVec = RaytraceHelper.getTubeSideCenter(endPos, endSide);
+				return RaytraceHelper.getTubeRaytraceHit(startVec, endVec, world);
+			}
+		}
+		return null;
 	}
 
 	public static double getFractionalLerp(int current, int max)

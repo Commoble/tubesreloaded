@@ -23,7 +23,6 @@ import commoble.tubesreloaded.network.PacketHandler;
 import commoble.tubesreloaded.registry.TileEntityRegistrar;
 import commoble.tubesreloaded.routing.Route;
 import commoble.tubesreloaded.routing.RoutingNetwork;
-import commoble.tubesreloaded.util.NestedBoundingBox;
 import commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -40,10 +39,8 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
@@ -278,53 +275,6 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	public AxisAlignedBB getRenderBoundingBox()
 	{
 		return this.renderAABB;
-	}
-	
-	/**
-	 * Checks if a placed block would intersect any of this block's connections.
-	 * @param placePos The position the block is being placed at
-	 * @param placeState The blockstate being placed
-	 * @param checkedTubePositions The positions of tubes that have already been checked.
-	 * Any tubes in this list that this tube is connected to is also connected to this tube, and this connection has been
-	 * verified to not intersect the placed block, so we don't need to check again.
-	 * @return A Vector3d of the intersecting hit, or null if there was no intersecting hit
-	 */
-	@Nullable
-	public Vector3d doesBlockStateIntersectConnection(BlockPos placePos, BlockState placeState, Set<BlockPos> checkedTubePositions)
-	{
-		for (Map.Entry<Direction, RemoteConnection> entry : this.remoteConnections.entrySet())
-		{
-			RemoteConnection connection = entry.getValue();
-			BlockPos pos = connection.toPos;
-			if (!checkedTubePositions.contains(pos))
-			{
-				Direction fromSide = entry.getKey();
-				Direction toSide = connection.toSide;
-				Vector3d hit = doesBlockStateIntersectConnection(this.pos, fromSide, pos, toSide, placePos, placeState, connection.box, this.getWorld());
-				if (hit != null)
-				{
-					return hit;
-				}
-			}
-		}
-		return null;
-	}
-	
-	@Nullable
-	public static Vector3d doesBlockStateIntersectConnection(BlockPos startPos, Direction startSide, BlockPos endPos, Direction endSide, BlockPos placePos, BlockState placeState, NestedBoundingBox box, World world)
-	{
-		VoxelShape shape = placeState.getCollisionShape(world, placePos);
-		for (AxisAlignedBB aabb : shape.toBoundingBoxList())
-		{
-			if (box.intersects(aabb.offset(placePos)))
-			{
-				// if we confirm the AABB intersects, do a raytrace as well
-				Vector3d startVec = RaytraceHelper.getTubeSideCenter(startPos, startSide);
-				Vector3d endVec = RaytraceHelper.getTubeSideCenter(endPos, endSide);
-				return RaytraceHelper.getTubeRaytraceHit(startVec, endVec, world);
-			}
-		}
-		return null;
 	}
 
 	/**** Event Handling ****/
