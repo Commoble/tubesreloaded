@@ -1,5 +1,9 @@
 package commoble.tubesreloaded.blocks.tube;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
+import commoble.tubesreloaded.util.ExtraCodecs;
 import commoble.tubesreloaded.util.NestedBoundingBox;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
@@ -9,7 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 
 public class RemoteConnection
-{
+{	
 	public final Direction toSide;
 	public final BlockPos toPos;
 	/** Every connection is stored inside both tubes, but only the primary connection will be rendered **/
@@ -56,6 +60,12 @@ public class RemoteConnection
 		public final Direction toSide;
 		public final BlockPos toPos;
 		public final boolean isPrimary;
+		
+		public static final Codec<Storage> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+				ExtraCodecs.DIRECTION.fieldOf("toSide").forGetter(storage -> storage.toSide),
+				BlockPos.CODEC.fieldOf("toPos").forGetter(storage -> storage.toPos),
+				Codec.BOOL.fieldOf("isPrimary").forGetter(storage -> storage.isPrimary)
+			).apply(instance, Storage::new));
 		
 		public Storage(Direction toSide, BlockPos toPos, boolean isPrimary)
 		{

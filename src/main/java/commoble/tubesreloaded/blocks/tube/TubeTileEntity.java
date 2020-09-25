@@ -14,6 +14,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
 
 import commoble.tubesreloaded.TubesReloaded;
 import commoble.tubesreloaded.network.PacketHandler;
@@ -21,7 +23,7 @@ import commoble.tubesreloaded.network.TubeBreakPacket;
 import commoble.tubesreloaded.registry.TileEntityRegistrar;
 import commoble.tubesreloaded.routing.Route;
 import commoble.tubesreloaded.routing.RoutingNetwork;
-import commoble.tubesreloaded.util.NBTMapHelper;
+import commoble.tubesreloaded.util.ExtraCodecs;
 import commoble.tubesreloaded.util.NestedBoundingBox;
 import commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.block.Block;
@@ -29,8 +31,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.ITickableTileEntity;
@@ -61,12 +63,7 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	public static final AxisAlignedBB EMPTY_AABB = new AxisAlignedBB(0,0,0,0,0,0);
 	
 	public static final String SIDE = "side";
-	public static final NBTMapHelper<Direction, IntNBT, RemoteConnection.Storage, CompoundNBT> REMOTE_CONNECTIONS_CODEC = new NBTMapHelper<>(
-		CONNECTIONS,
-		side -> IntNBT.valueOf(side.ordinal()),
-		nbt -> Direction.byIndex(nbt.getInt()),
-		rcs -> rcs.toNBT(),
-		nbt -> RemoteConnection.Storage.fromNBT(nbt));
+	public static final Codec<Map<Direction, RemoteConnection.Storage>> REMOTE_CONNECTIONS_CODEC = Codec.unboundedMap(ExtraCodecs.DIRECTION, RemoteConnection.Storage.CODEC);
 
 	private Map<Direction, RemoteConnection> remoteConnections = new HashMap<>();
 	
@@ -589,7 +586,11 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			compound.put(INV_NBT_KEY_RESET, invList);
 		}
 		
-		REMOTE_CONNECTIONS_CODEC.write(Maps.transformValues(this.remoteConnections, connection -> connection.toStorage()), compound);
+		REMOTE_CONNECTIONS_CODEC.encodeStart(NBTDynamicOps.INSTANCE, Maps.transformValues(this.remoteConnections, RemoteConnection::toStorage))
+			.result().ifPresent(nbt -> compound.put(CONNECTIONS, nbt));
+		
+//		compound.put(CONNECTIONS, REMOTE_CONNECTIONS_CODEC.encode(NBTDynamicOps.INSTANCE, this.remoteConnections));
+//		REMOTE_CONNECTIONS_CODEC.write(Maps.transformValues(this.remoteConnections, connection -> connection.toStorage()), compound);
 
 		return super.write(compound);
 	}
@@ -614,8 +615,8 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	@Override
 	public SUpdateTileEntityPacket getUpdatePacket()
 	{
-		CompoundNBT nbt = new CompoundNBT();
-		super.write(nbt); // write the basic TE stuff
+		CompoundNBT compound = new CompoundNBT();
+		super.write(compound); // write the basic TE stuff
 
 		ListNBT invList = new ListNBT();
 
@@ -629,12 +630,14 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 		}
 		if (!invList.isEmpty())
 		{
-			nbt.put(INV_NBT_KEY_ADD, invList);
+			compound.put(INV_NBT_KEY_ADD, invList);
 		}
 		
-		REMOTE_CONNECTIONS_CODEC.write(Maps.transformValues(this.remoteConnections, connection -> connection.toStorage()), nbt);
 		
-		return new SUpdateTileEntityPacket(this.getPos(), 1, nbt);
+		REMOTE_CONNECTIONS_CODEC.encodeStart(NBTDynamicOps.INSTANCE, Maps.transformValues(this.remoteConnections, RemoteConnection::toStorage))
+			.result().ifPresent(connectionsNBT -> compound.put(CONNECTIONS, connectionsNBT));
+		
+		return new SUpdateTileEntityPacket(this.getPos(), 1, compound);
 	}
 
 	/**
@@ -673,7 +676,8 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 
 		if (compound.contains(CONNECTIONS))
 		{
-			Map<Direction, RemoteConnection.Storage> rawMap = REMOTE_CONNECTIONS_CODEC.read(compound);
+			Map<Direction, RemoteConnection.Storage> rawMap = REMOTE_CONNECTIONS_CODEC.decode(NBTDynamicOps.INSTANCE, compound.get(CONNECTIONS))
+				.result().map(Pair::getFirst).orElse(new HashMap<>());
 			Map<Direction, RemoteConnection> newMap = new HashMap<>();
 			rawMap.entrySet().forEach(entry -> newMap.put(entry.getKey(), RemoteConnection.fromStorage(entry.getValue(), entry.getKey(), this.pos)));
 			this.remoteConnections = newMap;
