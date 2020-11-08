@@ -24,6 +24,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class ExtractorBlock extends Block
 {
 	// output is current facing, input is face.getOpposite()

@@ -28,6 +28,8 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class FilterBlock extends Block
 {
 	public static final DirectionProperty FACING = DirectionalBlock.FACING;	// facing of output

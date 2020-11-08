@@ -29,6 +29,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.PacketDistributor;
 
+import net.minecraft.item.Item.Properties;
+
 public class TubingPliersItem extends Item
 {
 	public static final String LAST_TUBE_DATA = "last_tube_data";

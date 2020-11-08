@@ -18,9 +18,9 @@ import net.minecraft.util.math.vector.Vector3f;
 
 public class FilterTileEntityRenderer extends TileEntityRenderer<FilterTileEntity>
 {
-	public FilterTileEntityRenderer(TileEntityRendererDispatcher p_i226006_1_)
+	public FilterTileEntityRenderer(TileEntityRendererDispatcher rendererDispatcherIn)
 	{
-		super(p_i226006_1_);
+		super(rendererDispatcherIn);
 	}
 
 	@Override
@@ -43,7 +43,7 @@ public class FilterTileEntityRenderer extends TileEntityRenderer<FilterTileEntit
 		if (facing.getAxis() == Axis.X)
 		{
 			matrix.rotate(Vector3f.YP.rotationDegrees(90F));	// rotate 90 degrees about y-axis
-			//matrix.func_227863_a_(90D, 0D, 1D, 0D);
+			//matrix.rotate(90D, 0D, 1D, 0D);
 		}
 
 		

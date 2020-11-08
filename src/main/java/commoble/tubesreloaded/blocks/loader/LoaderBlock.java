@@ -25,6 +25,8 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class LoaderBlock extends Block
 {
 	public static final DirectionProperty FACING = DirectionalBlock.FACING;

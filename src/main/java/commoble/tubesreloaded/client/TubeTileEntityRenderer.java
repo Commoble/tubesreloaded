@@ -46,9 +46,9 @@ public class TubeTileEntityRenderer extends TileEntityRenderer<TubeTileEntity>
 {
 	private final ModelRenderer field_228875_k_;
 
-	public TubeTileEntityRenderer(TileEntityRendererDispatcher p_i226006_1_)
+	public TubeTileEntityRenderer(TileEntityRendererDispatcher rendererDispatcherIn)
 	{
-		super(p_i226006_1_);
+		super(rendererDispatcherIn);
 		this.field_228875_k_ = new ModelRenderer(32, 16, 0, 0);
 		this.field_228875_k_.addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F);
 	}

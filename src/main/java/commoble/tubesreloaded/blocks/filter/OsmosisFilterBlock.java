@@ -22,6 +22,8 @@ import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class OsmosisFilterBlock extends FilterBlock
 {
 	public static final BooleanProperty TRANSFERRING_ITEMS = BlockStateProperties.ENABLED; // if false, will not extract items automatically

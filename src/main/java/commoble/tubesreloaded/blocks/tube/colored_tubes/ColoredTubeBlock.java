@@ -4,6 +4,8 @@ import commoble.tubesreloaded.blocks.tube.TubeBlock;
 import net.minecraft.item.DyeColor;
 import net.minecraft.util.ResourceLocation;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class ColoredTubeBlock extends TubeBlock
 {
 	private DyeColor color;

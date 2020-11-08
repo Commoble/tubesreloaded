@@ -11,6 +11,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.util.ActionResultType;
 
+import net.minecraft.item.Item.Properties;
+
 @Mixin(BlockItem.class)
 public class ClientBlockItemMixin extends Item
 {	

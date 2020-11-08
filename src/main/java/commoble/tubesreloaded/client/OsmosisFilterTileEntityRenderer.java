@@ -25,9 +25,9 @@ public class OsmosisFilterTileEntityRenderer extends FilterTileEntityRenderer
 {
 	public final ItemStack SLIME_STACK;
 	
-	public OsmosisFilterTileEntityRenderer(TileEntityRendererDispatcher p_i226006_1_)
+	public OsmosisFilterTileEntityRenderer(TileEntityRendererDispatcher rendererDispatcherIn)
 	{
-		super(p_i226006_1_);
+		super(rendererDispatcherIn);
 		this.SLIME_STACK = new ItemStack(ItemRegistrar.OSMOSIS_SLIME);
 	}
 

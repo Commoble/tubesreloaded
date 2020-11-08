@@ -41,6 +41,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.items.CapabilityItemHandler;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidContainer
 {
 	public static final Direction[] FACING_VALUES = Direction.values();
