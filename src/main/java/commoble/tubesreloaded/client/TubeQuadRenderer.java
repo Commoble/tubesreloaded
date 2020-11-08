@@ -1,5 +1,8 @@
 package commoble.tubesreloaded.client;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -12,6 +15,7 @@ import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.LightType;
@@ -19,9 +23,20 @@ import net.minecraft.world.World;
 
 public class TubeQuadRenderer
 {
+	public static final LoadingCache<ResourceLocation, RenderMaterial> MATERIALS = CacheBuilder.newBuilder()
+		.build(
+			new CacheLoader<ResourceLocation, RenderMaterial>()
+			{
+				@Override
+				public RenderMaterial load(ResourceLocation key)
+				{
+					return new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, key);
+				}
+			});
+	
 	public static void renderQuads(World world, float partialTicks, BlockPos startPos, BlockPos endPos, Direction startFace, Direction endFace, MatrixStack matrix, IRenderTypeBuffer buffer, TubeBlock block)
 	{
-		TextureAtlasSprite textureatlassprite = new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE, block.textureLocation).getSprite();
+		TextureAtlasSprite textureatlassprite = MATERIALS.getUnchecked(block.textureLocation).getSprite();
 		
 		// this Vector3d method converts (1,2,3) into (1D, 2D, 3D)
 		Vector3d startVec = Vector3d.copy(startPos);
