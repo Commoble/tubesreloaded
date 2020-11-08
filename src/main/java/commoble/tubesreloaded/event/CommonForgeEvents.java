@@ -8,11 +8,9 @@ import com.mojang.datafixers.util.Pair;
 
 import commoble.tubesreloaded.TubesReloaded;
 import commoble.tubesreloaded.blocks.tube.RaytraceHelper;
-import commoble.tubesreloaded.blocks.tube.SyncTubesInChunkPacket;
 import commoble.tubesreloaded.blocks.tube.TubeTileEntity;
 import commoble.tubesreloaded.blocks.tube.TubesInChunk;
 import commoble.tubesreloaded.blocks.tube.TubesInChunkCapability;
-import commoble.tubesreloaded.network.PacketHandler;
 import commoble.tubesreloaded.registry.Names;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -34,11 +32,9 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.fml.network.PacketDistributor;
 
 @Mod.EventBusSubscriber(modid = TubesReloaded.MODID, bus=Bus.FORGE)
 public class CommonForgeEvents
@@ -53,16 +49,16 @@ public class CommonForgeEvents
 	}
 	
 	// sync tube positions to clients when a chunk needs to be loaded on the client
-	@SubscribeEvent
-	public static void onPlayerStartWatchingChunk(ChunkWatchEvent.Watch event)
-	{
-		ServerWorld world = event.getWorld();
-		ChunkPos pos = event.getPos();
-		Chunk chunk = world.getChunkAt(pos.asBlockPos());
-		chunk.getCapability(TubesInChunkCapability.INSTANCE).ifPresent(cap -> 
-			PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(event::getPlayer), new SyncTubesInChunkPacket(pos, cap.getPositions()))
-		);
-	}
+//	@SubscribeEvent
+//	public static void onPlayerStartWatchingChunk(ChunkWatchEvent.Watch event)
+//	{
+//		ServerWorld world = event.getWorld();
+//		ChunkPos pos = event.getPos();
+//		Chunk chunk = world.getChunkAt(pos.asBlockPos());
+//		chunk.getCapability(TubesInChunkCapability.INSTANCE).ifPresent(cap -> 
+//			PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(event::getPlayer), new SyncTubesInChunkPacket(pos, cap.getPositions()))
+//		);
+//	}
 	
 	// catch and deny block placements on the server if they weren't caught on the client
 	@SubscribeEvent
