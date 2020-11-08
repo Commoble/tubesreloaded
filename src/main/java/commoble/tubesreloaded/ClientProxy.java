@@ -15,8 +15,8 @@ import net.minecraftforge.fml.DistExecutor;
 
 public class ClientProxy
 {
-	public static final Optional<ClientProxy> INSTANCE = DistExecutor.runForDist(
-			() -> () -> Optional.of(new ClientProxy()), 
+	public static Optional<ClientProxy> INSTANCE = DistExecutor.unsafeRunForDist(
+			() -> () -> ClientProxy.makeClientProxy(),
 			() -> () -> Optional.empty());
 	
 	private static final Set<BlockPos> NO_TUBES = ImmutableSet.of();
@@ -24,6 +24,11 @@ public class ClientProxy
 	private boolean isHoldingSprint = false;
 	
 	private Map<ChunkPos, Set<BlockPos>> tubesInChunk = new HashMap<>();
+	
+	public static Optional<ClientProxy> makeClientProxy()
+	{
+		return Optional.of(new ClientProxy());
+	}
 	
 	public boolean getWasSprinting()
 	{

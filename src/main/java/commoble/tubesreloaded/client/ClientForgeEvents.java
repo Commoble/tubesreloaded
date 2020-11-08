@@ -4,6 +4,7 @@ import commoble.tubesreloaded.ClientProxy;
 import commoble.tubesreloaded.TubesReloaded;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -26,5 +27,19 @@ public class ClientForgeEvents
 				ClientProxy.INSTANCE.ifPresent(instance -> instance.setIsSprintingAndNotifyServer(sprintIsDown));
 			}
 		}
+	}
+	
+	@SubscribeEvent
+	public static void onClientLogIn(ClientPlayerNetworkEvent.LoggedInEvent event)
+	{
+		// clean up static data on the client
+		ClientProxy.INSTANCE = ClientProxy.makeClientProxy();
+	}
+
+	@SubscribeEvent
+	public static void onClientLogOut(ClientPlayerNetworkEvent.LoggedOutEvent event)
+	{
+		// clean up static data on the client
+		ClientProxy.INSTANCE = ClientProxy.makeClientProxy();
 	}
 }
