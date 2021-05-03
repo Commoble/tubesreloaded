@@ -1,6 +1,7 @@
 package commoble.tubesreloaded.event;
 
 import commoble.tubesreloaded.TubesReloaded;
+import commoble.tubesreloaded.bagofyurting.BagOfYurtingProxy;
 import commoble.tubesreloaded.blocks.tube.ITubesInChunk;
 import commoble.tubesreloaded.blocks.tube.SyncTubesInChunkPacket;
 import commoble.tubesreloaded.blocks.tube.TubeBreakPacket;
@@ -19,6 +20,7 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -79,5 +81,12 @@ public class CommonModEvents
 		
 		// register capabilities
 		CapabilityManager.INSTANCE.register(ITubesInChunk.class, new TubesInChunkCapability.Storage(), () -> new TubesInChunk(null));
+		
+		// mod compat
+		ModList modList = ModList.get();
+		if (modList.isLoaded("bagofyurting"))
+		{
+			BagOfYurtingProxy.addBagOfYurtingCompat();
+		}
 	}
 }

@@ -18,14 +18,22 @@ public class RemoteConnection
 	public final BlockPos toPos;
 	/** Every connection is stored inside both tubes, but only the primary connection will be rendered **/
 	public final boolean isPrimary;
-	public NestedBoundingBox box;
+	private final BlockPos fromPos;
+	private NestedBoundingBox box;
 	
 	public RemoteConnection(Direction fromSide, Direction toSide, BlockPos fromPos, BlockPos toPos, boolean isPrimary)
 	{
 		this.toSide = toSide;
 		this.toPos = toPos;
 		this.isPrimary = isPrimary;
-		this.box = getNestedBoundingBoxForConnectedPos(fromPos, toPos);
+		this.fromPos = fromPos;
+	}
+	
+	public NestedBoundingBox getBox()
+	{
+		if (this.box == null)
+			this.box = getNestedBoundingBoxForConnectedPos(this.fromPos, this.toPos);
+		return this.box;
 	}
 	
 	public Storage toStorage()

@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.IntArrayNBT;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Rotation;
 
 /** Wrapper for the itemstacks being routed for the tubes
  * Tracks an itemstack as well as which tubes the stack has been through
@@ -51,6 +52,21 @@ public class ItemInTubeWrapper
 			this.remainingMoves.addFirst(firstMove);
 			this.freshlyInserted = true;
 		}
+	}
+	
+	/**
+	 * Creates a copy of this wrapper but with the move list rotated
+	 * @param rotation rotation
+	 * @return rotated copy
+	 */
+	public ItemInTubeWrapper rotate(Rotation rotation)
+	{
+		LinkedList<Direction> newMoveList = new LinkedList<>();
+		this.remainingMoves.forEach(dir -> newMoveList.add(rotation.rotate(dir)));
+		ItemInTubeWrapper wrapper = new ItemInTubeWrapper(this.stack.copy(), newMoveList, this.maximumDurationInTube);
+		wrapper.ticksElapsed = this.ticksElapsed;
+		wrapper.freshlyInserted = this.freshlyInserted;
+		return wrapper;
 	}
 	
 	public static ItemInTubeWrapper readFromNBT(CompoundNBT compound)

@@ -282,7 +282,6 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 	@Override
 	public void remove()
 	{
-		this.dropItems();
 		this.network.invalid = true;
 		this.clearRemoteConnections();
 		super.remove();
@@ -635,5 +634,10 @@ public class TubeTileEntity extends TileEntity implements ITickableTileEntity
 			this.remoteConnections.values().stream()
 			.map(connection -> connection.toPos)
 			.collect(Collectors.toSet()));
+	}
+	
+	public void setConnectionsRaw(Map<Direction, RemoteConnection> newConnections)
+	{
+		this.remoteConnections = newConnections;
 	}
 }

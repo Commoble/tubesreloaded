@@ -79,7 +79,7 @@ public class RaytraceHelper
 			{
 				Direction fromSide = entry.getKey();
 				Direction toSide = connection.toSide;
-				Vector3d hit = doesBlockStateIntersectConnection(tubePos, fromSide, pos, toSide, placePos, placeState, connection.box, raytraceWorld);
+				Vector3d hit = doesBlockStateIntersectConnection(tubePos, fromSide, pos, toSide, placePos, placeState, connection.getBox(), raytraceWorld);
 				if (hit != null)
 				{
 					return hit;

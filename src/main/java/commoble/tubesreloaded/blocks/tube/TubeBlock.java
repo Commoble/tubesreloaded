@@ -41,8 +41,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.items.CapabilityItemHandler;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
 public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidContainer
 {
 	public static final Direction[] FACING_VALUES = Direction.values();
@@ -115,6 +113,12 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		}
 		else
 		{
+			TileEntity te = world.getTileEntity(pos);
+			if (te instanceof TubeTileEntity)
+			{
+				TubeTileEntity tube = (TubeTileEntity)te;
+				tube.dropItems();
+			}
 			this.updateTubeSet(world, pos, Set<BlockPos>::remove);
 			super.onReplaced(state, world, pos, newState, isMoving);
 		}
