@@ -1,6 +1,0 @@
-{
-    "parent": "tubesreloaded:block/tube_core",
-    "textures": {
-        "all": "tubesreloaded:block/redstone_tube_on"
-    }
-}

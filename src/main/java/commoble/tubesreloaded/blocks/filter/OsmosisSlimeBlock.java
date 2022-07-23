@@ -1,32 +1,30 @@
 package commoble.tubesreloaded.blocks.filter;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.DirectionalBlock;
-import net.minecraft.state.StateContainer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-
-import net.minecraft.block.AbstractBlock.Properties;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DirectionalBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class OsmosisSlimeBlock extends DirectionalBlock
 {
 	public OsmosisSlimeBlock(Properties builder)
 	{
 		super(builder);
-		this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
+		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context)
 	{
-		return VoxelShapes.empty();
+		return Shapes.empty();
 	}
 
 	/**
@@ -40,13 +38,7 @@ public class OsmosisSlimeBlock extends DirectionalBlock
 	@Override
 	public BlockState rotate(BlockState state, Rotation rot)
 	{
-		return state.with(FACING, rot.rotate(state.get(FACING)));
-	}
-
-	@Override
-	public BlockState rotate(BlockState state, net.minecraft.world.IWorld world, BlockPos pos, Rotation direction)
-	{
-		return super.rotate(state, world, pos, direction);
+		return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
 	}
 
 	/**
@@ -60,11 +52,11 @@ public class OsmosisSlimeBlock extends DirectionalBlock
 	@Override
 	public BlockState mirror(BlockState state, Mirror mirrorIn)
 	{
-		return state.rotate(mirrorIn.toRotation(state.get(FACING)));
+		return state.rotate(mirrorIn.getRotation(state.getValue(FACING)));
 	}
 
 	@Override
-	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
 	{
 		builder.add(FACING);
 	}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "t": {
+      "tag": "tubesreloaded:tubes"
+    }
+  },
+  "pattern": [
+    "  I",
+    "It ",
+    " I "
+  ],
+  "result": {
+    "item": "tubesreloaded:tubing_pliers"
+  }
+}

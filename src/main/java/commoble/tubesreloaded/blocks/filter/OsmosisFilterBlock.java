@@ -1,28 +1,24 @@
 package commoble.tubesreloaded.blocks.filter;
 
-import java.util.Optional;
-
-import commoble.tubesreloaded.registry.TileEntityRegistrar;
-import commoble.tubesreloaded.util.ClassHelper;
+import commoble.tubesreloaded.TubesReloaded;
 import commoble.tubesreloaded.util.WorldHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition.Builder;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.items.CapabilityItemHandler;
-
-import net.minecraft.block.AbstractBlock.Properties;
 
 public class OsmosisFilterBlock extends FilterBlock
 {
@@ -31,87 +27,100 @@ public class OsmosisFilterBlock extends FilterBlock
 	public OsmosisFilterBlock(Properties properties)
 	{
 		super(properties);
-
-		this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(TRANSFERRING_ITEMS, false));
+		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(TRANSFERRING_ITEMS, false));
 	}
-
-	@Override
-	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
-	{
-		builder.add(FACING, TRANSFERRING_ITEMS);
-	}
-
-	@Override
-	public TileEntity createTileEntity(BlockState state, IBlockReader world)
-	{
-		return TileEntityRegistrar.OSMOSIS_FILTER.create();
-	}   
 	
 	@Override
-	public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
+	protected void createBlockStateDefinition(Builder<Block, BlockState> builder)
+	{
+		super.createBlockStateDefinition(builder);
+		builder.add(TRANSFERRING_ITEMS);
+	}
+
+	@Override
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+	{
+		return TubesReloaded.get().osmosisFilterEntity.get().create(pos, state);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
+	{
+		if (!level.isClientSide && type == TubesReloaded.get().osmosisFilterEntity.get())
+		{
+			return (BlockEntityTicker<T>) OsmosisFilterBlockEntity.SERVER_TICKER;
+		}
+		return super.getTicker(level, state, type);
+	}
+
+	@Override
+	public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
 		if (oldState.getBlock() != state.getBlock())
 		{
-			this.updateState(worldIn, pos, state);
+			this.updateState(level, pos, state);
 		}
 	}
 	
-	private void updateState(World world, BlockPos pos, BlockState state)
+	private void updateState(Level level, BlockPos pos, BlockState state)
 	{
-		if (!world.isRemote)
+		if (!level.isClientSide())
 		{
-			final boolean hasRedstoneSignal = world.isBlockPowered(pos);
-			final boolean active = state.get(TRANSFERRING_ITEMS);
-			final Direction outputDirection = state.get(FACING);
+			final boolean hasRedstoneSignal = level.hasNeighborSignal(pos);
+			final boolean active = state.getValue(TRANSFERRING_ITEMS);
+			final Direction outputDirection = state.getValue(FACING);
 			final Direction inputDirection = outputDirection.getOpposite();
-
-			Optional<OsmosisFilterTileEntity> maybeFilter = WorldHelper.getTileEntityAt(OsmosisFilterTileEntity.class, world, pos);
-			
-			boolean checkedItemsThisTick = maybeFilter.map(OsmosisFilterTileEntity::getCheckedItemsAndMarkChecked).orElse(true);
-			
-			if (!checkedItemsThisTick)
+		
+			if (level.getBlockEntity(pos) instanceof OsmosisFilterBlockEntity filter)
 			{
-				final boolean canExtractItems = maybeFilter
-					.filter(filter ->
-						WorldHelper.getTileEntityAt(world, pos.offset(inputDirection))
-						.filter(te ->
-							te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, outputDirection)
-							.filter(handler -> (Boolean)WorldHelper.doesItemHandlerHaveAnyExtractableItems(handler, filter::canItemPassThroughFilter))
-							.isPresent())
-						.isPresent())
-					.isPresent();
-				if (active && (hasRedstoneSignal || !canExtractItems))
+				boolean checkedItemsThisTick = filter.getCheckedItemsAndMarkChecked();
+				
+				if (!checkedItemsThisTick)
 				{
-					world.setBlockState(pos, state.with(TRANSFERRING_ITEMS, Boolean.valueOf(false)), 6);
-				}
-				else if (!active && !hasRedstoneSignal && canExtractItems)
-				{
-					world.setBlockState(pos, state.with(TRANSFERRING_ITEMS, Boolean.valueOf(true)), 6);
+					BlockEntity neighborBe = level.getBlockEntity(pos.relative(inputDirection));
+					boolean canExtractItems = neighborBe != null
+						&& neighborBe.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, outputDirection)
+							.map(handler -> WorldHelper.doesItemHandlerHaveAnyExtractableItems(handler, filter::canItemPassThroughFilter))
+							.orElse(false);
+					
+					if (active && (hasRedstoneSignal || !canExtractItems))
+					{
+						level.setBlock(pos, state.setValue(TRANSFERRING_ITEMS, false), 6);
+					}
+					else if (!active && !hasRedstoneSignal && canExtractItems)
+					{
+						level.setBlock(pos, state.setValue(TRANSFERRING_ITEMS, true), 6);
+					}
 				}
 			}
 		}
 	}
 
 	@Override
-	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
+	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
 	{
-		ActionResultType result = super.onBlockActivated(state, worldIn, pos, player, handIn, hit);
-		this.updateState(worldIn, pos, state);
+		InteractionResult result = super.use(state, level, pos, player, hand, hit);
+		this.updateState(level, pos, state);
 		return result;
 	}
 	
 	@Override
-	public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
+	@Deprecated
+	public void neighborChanged(BlockState thisState, Level level, BlockPos thisPos, Block neighborBlock, BlockPos neighborPos, boolean isMoving)
 	{
-		super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
-		this.updateState(worldIn, pos, state);
+		super.neighborChanged(thisState, level, thisPos, neighborBlock, neighborPos, isMoving);
+		this.updateState(level, thisPos, thisState);
 	}
 	
 	@Override
-	public void onNeighborChange(BlockState state, IWorldReader worldReader, BlockPos pos, BlockPos neighbor)
+	public void onNeighborChange(BlockState state, LevelReader levelReader, BlockPos thisPos, BlockPos neighborPos)
 	{
-		super.onNeighborChange(state, worldReader, pos, neighbor);
-		ClassHelper.as(worldReader, World.class).ifPresent(world -> this.updateState(world, pos, state));
+		super.onNeighborChange(state, levelReader, thisPos, neighborPos);
+		if (levelReader instanceof Level level)
+		{
+			this.updateState(level, thisPos, state);
+		}
 	}
 
 }

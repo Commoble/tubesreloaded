@@ -1,75 +1,63 @@
 package commoble.tubesreloaded.blocks.shunt;
 
-import commoble.tubesreloaded.registry.TileEntityRegistrar;
+import commoble.tubesreloaded.TubesReloaded;
 import commoble.tubesreloaded.util.WorldHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.DirectionalBlock;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DirectionalBlock;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
-public class ShuntBlock extends Block
+public class ShuntBlock extends Block implements EntityBlock
 {
 	public static final DirectionProperty FACING = DirectionalBlock.FACING;
 	
-	protected final VoxelShape[] shapes;
+	public static final VoxelShape[] SHAPES = makeShapes();
 
 	public ShuntBlock(Properties properties)
 	{
 		super(properties);
-		this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
-		this.shapes=this.makeShapes();
-	}
-
-	@Override
-	public boolean hasTileEntity(BlockState state)
-	{
-		return true;
-	}
-
-	@Override
-	public TileEntity createTileEntity(BlockState state, IBlockReader world)
-	{
-		return TileEntityRegistrar.SHUNT.create();
+		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}
 
 	//// facing and blockstate boilerplate
 
-	public BlockState getStateForPlacement(BlockItemUseContext context)
+	public BlockState getStateForPlacement(BlockPlaceContext context)
 	{
-		return this.getDefaultState().with(FACING, WorldHelper.getBlockFacingForPlacement(context));
+		return this.defaultBlockState().setValue(FACING, WorldHelper.getBlockFacingForPlacement(context));
 	}
 
 	public BlockState rotate(BlockState state, Rotation rot)
 	{
-		return state.with(FACING, rot.rotate(state.get(FACING)));
+		return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
 	}
 
+	@Deprecated
 	public BlockState mirror(BlockState state, Mirror mirrorIn)
 	{
-		return state.rotate(mirrorIn.toRotation(state.get(FACING)));
+		return state.rotate(mirrorIn.getRotation(state.getValue(FACING)));
 	}
 
-	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
+	@Override
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
 	{
 		builder.add(FACING);
 	}
 	
 	/// model shapes
 
-	protected VoxelShape[] makeShapes()
+	public static VoxelShape[] makeShapes()
 	{
 		final double MIN_VOXEL = 0D;
 		final double ONE_QUARTER = 4D;
@@ -85,31 +73,31 @@ public class ShuntBlock extends Block
 		// reminder: north = negative
 		
 		// core voxels
-		VoxelShape coreNorth = Block.makeCuboidShape(ONE_QUARTER, ONE_QUARTER, MIN_VOXEL,
+		VoxelShape coreNorth = Block.box(ONE_QUARTER, ONE_QUARTER, MIN_VOXEL,
 				THREE_QUARTERS, THREE_QUARTERS, THREE_QUARTERS);
-		VoxelShape coreSouth = Block.makeCuboidShape(ONE_QUARTER, ONE_QUARTER, ONE_QUARTER,
+		VoxelShape coreSouth = Block.box(ONE_QUARTER, ONE_QUARTER, ONE_QUARTER,
 				THREE_QUARTERS, THREE_QUARTERS,	MAX_VOXEL);
-		VoxelShape coreWest = Block.makeCuboidShape(MIN_VOXEL, ONE_QUARTER, ONE_QUARTER,
+		VoxelShape coreWest = Block.box(MIN_VOXEL, ONE_QUARTER, ONE_QUARTER,
 				THREE_QUARTERS, THREE_QUARTERS, THREE_QUARTERS);
-		VoxelShape coreEast = Block.makeCuboidShape(ONE_QUARTER, ONE_QUARTER, ONE_QUARTER,
+		VoxelShape coreEast = Block.box(ONE_QUARTER, ONE_QUARTER, ONE_QUARTER,
 				MAX_VOXEL, THREE_QUARTERS, THREE_QUARTERS);
-		VoxelShape coreDown = Block.makeCuboidShape(ONE_QUARTER, MIN_VOXEL, ONE_QUARTER,
+		VoxelShape coreDown = Block.box(ONE_QUARTER, MIN_VOXEL, ONE_QUARTER,
 				THREE_QUARTERS, THREE_QUARTERS, THREE_QUARTERS);
-		VoxelShape coreUp = Block.makeCuboidShape(ONE_QUARTER, ONE_QUARTER, ONE_QUARTER,
+		VoxelShape coreUp = Block.box(ONE_QUARTER, ONE_QUARTER, ONE_QUARTER,
 				THREE_QUARTERS, MAX_VOXEL, THREE_QUARTERS);
 		
 		// tube voxels
-		VoxelShape down = Block.makeCuboidShape(SIX_SIXTEENTHS, MIN_VOXEL, SIX_SIXTEENTHS, TEN_SIXTEENTHS,
+		VoxelShape down = Block.box(SIX_SIXTEENTHS, MIN_VOXEL, SIX_SIXTEENTHS, TEN_SIXTEENTHS,
 				THREE_QUARTERS, TEN_SIXTEENTHS);
-		VoxelShape up = Block.makeCuboidShape(SIX_SIXTEENTHS, THREE_QUARTERS, SIX_SIXTEENTHS, TEN_SIXTEENTHS, MAX_VOXEL,
+		VoxelShape up = Block.box(SIX_SIXTEENTHS, THREE_QUARTERS, SIX_SIXTEENTHS, TEN_SIXTEENTHS, MAX_VOXEL,
 				TEN_SIXTEENTHS);
-		VoxelShape north = Block.makeCuboidShape(SIX_SIXTEENTHS, SIX_SIXTEENTHS, MIN_VOXEL, TEN_SIXTEENTHS,
+		VoxelShape north = Block.box(SIX_SIXTEENTHS, SIX_SIXTEENTHS, MIN_VOXEL, TEN_SIXTEENTHS,
 				TEN_SIXTEENTHS, ONE_QUARTER);
-		VoxelShape south = Block.makeCuboidShape(SIX_SIXTEENTHS, SIX_SIXTEENTHS, THREE_QUARTERS, TEN_SIXTEENTHS,
+		VoxelShape south = Block.box(SIX_SIXTEENTHS, SIX_SIXTEENTHS, THREE_QUARTERS, TEN_SIXTEENTHS,
 				TEN_SIXTEENTHS, MAX_VOXEL);
-		VoxelShape west = Block.makeCuboidShape(MIN_VOXEL, SIX_SIXTEENTHS, SIX_SIXTEENTHS, THREE_QUARTERS,
+		VoxelShape west = Block.box(MIN_VOXEL, SIX_SIXTEENTHS, SIX_SIXTEENTHS, THREE_QUARTERS,
 				TEN_SIXTEENTHS, TEN_SIXTEENTHS);
-		VoxelShape east = Block.makeCuboidShape(THREE_QUARTERS, SIX_SIXTEENTHS, SIX_SIXTEENTHS, MAX_VOXEL,
+		VoxelShape east = Block.box(THREE_QUARTERS, SIX_SIXTEENTHS, SIX_SIXTEENTHS, MAX_VOXEL,
 				TEN_SIXTEENTHS, TEN_SIXTEENTHS);
 		
 		VoxelShape[] tube_dunswe = { down, up, north, south, west, east };
@@ -122,7 +110,7 @@ public class ShuntBlock extends Block
 			{
 				if (voxel_dir != state_dir)
 				{
-					stateShape = VoxelShapes.or(stateShape, tube_dunswe[voxel_dir]);
+					stateShape = Shapes.or(stateShape, tube_dunswe[voxel_dir]);
 				}
 			}
 			shapes[state_dir] = stateShape;
@@ -132,25 +120,19 @@ public class ShuntBlock extends Block
 	}
 
 	@Override
-	public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos)
+	public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context)
 	{
-		return state.getShape(worldIn, pos);
-	}
-
-	@Override
-	public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
-	{
-		return this.getShape(state, worldIn, pos, context);
-	}
-
-	@Override
-	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
-	{
-		return this.shapes[this.getShapeIndex(state)];
+		return SHAPES[this.getShapeIndex(state)];
 	}
 
 	public int getShapeIndex(BlockState state)
 	{
-		return state.get(FACING).getIndex();
+		return state.getValue(FACING).ordinal();
+	}
+
+	@Override
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+	{
+		return TubesReloaded.get().shuntEntity.get().create(pos, state);
 	}
 }

@@ -1,57 +1,53 @@
 package commoble.tubesreloaded.client;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 
 import commoble.tubesreloaded.blocks.filter.FilterBlock;
-import commoble.tubesreloaded.blocks.filter.FilterTileEntity;
+import commoble.tubesreloaded.blocks.filter.FilterBlockEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.world.item.ItemStack;
 
-public class FilterTileEntityRenderer extends TileEntityRenderer<FilterTileEntity>
+public class FilterTileEntityRenderer implements BlockEntityRenderer<FilterBlockEntity>
 {
-	public FilterTileEntityRenderer(TileEntityRendererDispatcher rendererDispatcherIn)
+	public FilterTileEntityRenderer(BlockEntityRendererProvider.Context context)
 	{
-		super(rendererDispatcherIn);
 	}
 
 	@Override
-	public void render(FilterTileEntity te, float partialTicks, MatrixStack matrix, IRenderTypeBuffer buffer, int intA, int intB)
+	public void render(FilterBlockEntity filter, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int intA, int intB)
 	{
-		if (te.filterStack.getCount() > 0)
+		if (filter.filterStack.getCount() > 0)
 		{
-			this.renderItem(te.filterStack, te.getBlockState().get(FilterBlock.FACING), matrix, buffer, intA);
+			this.renderItem(filter.filterStack, filter.getBlockState().getValue(FilterBlock.FACING), matrix, buffer, intA, (int)filter.getBlockPos().asLong());
 		}
 	}
 
-	private void renderItem(ItemStack stack, Direction facing, MatrixStack matrix, IRenderTypeBuffer buffer, int intA)
+	private void renderItem(ItemStack stack, Direction facing, PoseStack matrix, MultiBufferSource buffer, int intA, int renderSeed)
 	{
 		ItemRenderer renderer = Minecraft.getInstance().getItemRenderer();
 
-		matrix.push();	// push
+		matrix.pushPose();
 
-		matrix.translate(0.501D, 0.502D, 0.503D);	// translation
-		matrix.scale(0.9F, 0.9F, 0.9F);	// scale
+		matrix.translate(0.501D, 0.502D, 0.503D);
+		matrix.scale(0.9F, 0.9F, 0.9F);
 		if (facing.getAxis() == Axis.X)
 		{
-			matrix.rotate(Vector3f.YP.rotationDegrees(90F));	// rotate 90 degrees about y-axis
-			//matrix.rotate(90D, 0D, 1D, 0D);
+			matrix.mulPose(Vector3f.YP.rotationDegrees(90F));	// rotate 90 degrees about y-axis
 		}
 
-		
-		//renderer.renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
-		renderer.renderItem(stack, ItemCameraTransforms.TransformType.FIXED, intA, OverlayTexture.NO_OVERLAY, matrix, buffer);
+		renderer.renderStatic(stack, ItemTransforms.TransformType.FIXED, intA, OverlayTexture.NO_OVERLAY, matrix, buffer, renderSeed);
 		
 		
 
-		matrix.pop();
+		matrix.popPose();
 	}
 }

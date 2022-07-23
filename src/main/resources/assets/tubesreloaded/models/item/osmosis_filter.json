@@ -1,14 +1,24 @@
 {
 	"credit": "Made with Blockbench",
+	"render_type": "translucent",
 	"textures": {
 		"slime": "minecraft:block/slime_block",
-		"front": "tubesreloaded:block/osmosis_output",
+		"front": "tubesreloaded:block/shunt_output",
 		"filter": "tubesreloaded:block/osmosis_filter",
-		"particle": "tubesreloaded:block/osmosis_output"
+		"particle": "tubesreloaded:block/shunt_output"
 	},
 	"elements": [
 		{
-			"name": "output_plate",
+			"name": "slime_overlay",
+			"from": [0, 0, 0],
+			"to": [16, 16, 2],
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "#slime"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#slime"}
+			}
+		},
+		{
+			"name": "input_plate",
 			"from": [0, 0, 0],
 			"to": [16, 16, 2],
 			"faces": {
@@ -21,7 +31,7 @@
 			}
 		},
 		{
-			"name": "input_east",
+			"name": "east",
 			"from": [14, 6, 2],
 			"to": [16, 10, 16],
 			"faces": {
@@ -34,7 +44,7 @@
 			}
 		},
 		{
-			"name": "input_west",
+			"name": "west",
 			"from": [0, 6, 2],
 			"to": [2, 10, 16],
 			"faces": {
@@ -47,7 +57,7 @@
 			}
 		},
 		{
-			"name": "input_south",
+			"name": "output",
 			"from": [6, 2, 14],
 			"to": [10, 14, 16],
 			"faces": {
@@ -60,7 +70,7 @@
 			}
 		},
 		{
-			"name": "input_up",
+			"name": "up",
 			"from": [6, 14, 2],
 			"to": [10, 16, 16],
 			"faces": {
@@ -73,7 +83,7 @@
 			}
 		},
 		{
-			"name": "input_down",
+			"name": "down",
 			"from": [6, 0, 2],
 			"to": [10, 2, 16],
 			"faces": {

@@ -1,26 +1,23 @@
 package commoble.tubesreloaded.blocks.shunt;
 
 import commoble.tubesreloaded.util.WorldHelper;
-import net.minecraft.block.Block;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 
 public class ShuntItemHandler implements IItemHandler
 {
-	public final ShuntTileEntity shunt;
-	public final boolean can_take_items;
+	public final ShuntBlockEntity shunt;
+	public final boolean canTakeItems;
+	private boolean shunting = false; // prevent infinite loops
 
-	public ShuntItemHandler(ShuntTileEntity shunt, boolean can_take_items)
+	public ShuntItemHandler(ShuntBlockEntity shunt, boolean canTakeItems)
 	{
 		this.shunt = shunt;
-		this.can_take_items = can_take_items;
+		this.canTakeItems = canTakeItems;
 	}
 
 	@Override
@@ -40,36 +37,43 @@ public class ShuntItemHandler implements IItemHandler
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
 	{
-		if (!this.can_take_items)
+		if (!this.canTakeItems)
 		{
 			return stack.copy();
 		}
 		
 		if (!simulate) // actually inserting an item
 		{
-			// attempt to insert item
-			BlockPos shunt_pos = this.shunt.getPos();
-			Direction output_dir = this.shunt.getBlockState().get(ShuntBlock.FACING);
-			BlockPos output_pos = shunt_pos.offset(output_dir);
-			ItemStack remaining = this.getOutputOptional(output_pos, output_dir)
-					.map(handler -> WorldHelper.disperseItemToHandler(stack, handler))
-					.orElse(stack.copy());
+			BlockPos shuntPos = this.shunt.getBlockPos();
+			Direction outputDir = this.shunt.getBlockState().getValue(ShuntBlock.FACING);
+			BlockPos outputPos = shuntPos.relative(outputDir);
 			
-			if (remaining.getCount() > 0) // we have remaining items
+			if (!this.shunting)
 			{
-				WorldHelper.ejectItemstack(this.shunt.getWorld(), shunt_pos, output_dir, remaining);
+				// attempt to insert item
+				this.shunting = true;
+				ItemStack remaining = this.getOutputOptional(outputPos, outputDir)
+						.map(handler -> WorldHelper.disperseItemToHandler(stack, handler))
+						.orElseGet(() -> stack.copy());
+				this.shunting = false;
+				
+				if (remaining.getCount() > 0) // we have remaining items
+				{
+					WorldHelper.ejectItemstack(this.shunt.getLevel(), shuntPos, outputDir, remaining);
+				}
+			}
+			else
+			{
+				WorldHelper.ejectItemstack(this.shunt.getLevel(), shuntPos, outputDir, stack.copy());
 			}
 		}
 		
 		return ItemStack.EMPTY;
 	}
 	
-	private LazyOptional<IItemHandler> getOutputOptional(BlockPos output_pos, Direction output_dir)
+	private LazyOptional<IItemHandler> getOutputOptional(BlockPos outputPos, Direction outputDir)
 	{
-		// if the block we are attempting to insert the item into is a shuntlike block, do not insert
-		ITag<Block> shuntTag = BlockTags.getCollection().get(new ResourceLocation("tubesreloaded", "shunts"));
-		// "shuntTag.contains"
-		return WorldHelper.getTEItemHandlerAtIf(this.shunt.getWorld(), output_pos, output_dir.getOpposite(), te -> !shuntTag.contains(te.getBlockState().getBlock()));
+		return WorldHelper.getItemHandlerAt(this.shunt.getLevel(), outputPos, outputDir.getOpposite());
 	}
 
 	@Override
@@ -88,9 +92,9 @@ public class ShuntItemHandler implements IItemHandler
 	@Override
 	public boolean isItemValid(int slot, ItemStack stack)
 	{
-		World world = this.shunt.getWorld();
-		BlockPos pos = this.shunt.getPos();
-		return this.can_take_items && !world.isBlockPowered(pos);
+		Level world = this.shunt.getLevel();
+		BlockPos pos = this.shunt.getBlockPos();
+		return this.canTakeItems && !world.hasNeighborSignal(pos);
 	}
 
 }

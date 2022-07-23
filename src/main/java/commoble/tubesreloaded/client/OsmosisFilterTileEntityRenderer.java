@@ -1,54 +1,49 @@
 package commoble.tubesreloaded.client;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 import commoble.tubesreloaded.TubesReloaded;
-import commoble.tubesreloaded.blocks.filter.FilterTileEntity;
+import commoble.tubesreloaded.blocks.filter.FilterBlockEntity;
 import commoble.tubesreloaded.blocks.filter.OsmosisFilterBlock;
 import commoble.tubesreloaded.blocks.filter.OsmosisSlimeBlock;
-import commoble.tubesreloaded.registry.BlockRegistrar;
-import commoble.tubesreloaded.registry.ItemRegistrar;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.model.data.ModelData;
 
 public class OsmosisFilterTileEntityRenderer extends FilterTileEntityRenderer
-{
-	public final ItemStack SLIME_STACK;
-	
-	public OsmosisFilterTileEntityRenderer(TileEntityRendererDispatcher rendererDispatcherIn)
+{	
+	public OsmosisFilterTileEntityRenderer(BlockEntityRendererProvider.Context context)
 	{
-		super(rendererDispatcherIn);
-		this.SLIME_STACK = new ItemStack(ItemRegistrar.OSMOSIS_SLIME);
+		super(context);
 	}
 
 	@Override
-	public void render(FilterTileEntity te, float partialTicks, MatrixStack matrix, IRenderTypeBuffer buffer, int intA, int intB)
+	public void render(FilterBlockEntity filter, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int intA, int intB)
 	{
-		this.renderSlime(te, partialTicks, matrix, buffer, intA, intB);
-		super.render(te, partialTicks, matrix, buffer, intA, intB);
+		super.render(filter, partialTicks, matrix, buffer, intA, intB);
+		this.renderSlime(filter, partialTicks, matrix, buffer, intA, intB);
 	}
 
-	private void renderSlime(FilterTileEntity te, float partialTicks, MatrixStack matrix, IRenderTypeBuffer buffer, int intA, int intB)
+	private void renderSlime(FilterBlockEntity filter, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int intA, int intB)
 	{
-		BlockPos blockpos = te.getPos();
-		BlockState filterState = te.getBlockState();
-		Direction dir = filterState.get(OsmosisFilterBlock.FACING);
-		BlockState renderState = BlockRegistrar.OSMOSIS_SLIME.getDefaultState().with(OsmosisSlimeBlock.FACING, dir);
+		BlockPos blockpos = filter.getBlockPos();
+		BlockState filterState = filter.getBlockState();
+		Direction dir = filterState.getValue(OsmosisFilterBlock.FACING);
+		BlockState renderState = TubesReloaded.get().osmosisSlimeBlock.get().defaultBlockState().setValue(OsmosisSlimeBlock.FACING, dir);
 		long transferhash = blockpos.hashCode();
-		int rate = TubesReloaded.serverConfig.osmosis_filter_transfer_rate.get();
-		double ticks = te.getWorld().getGameTime() + transferhash + partialTicks;
+		int rate = TubesReloaded.get().serverConfig().osmosisFilterTransferRate().get();
+		double ticks = (double)filter.getLevel().getGameTime() + (double)transferhash + (double)partialTicks; // casting to doubles fixes a weird rounding error that was causing choppy animation
 		double minScale = 0.25D;
-		double lengthScale = minScale + (te.getBlockState().get(OsmosisFilterBlock.TRANSFERRING_ITEMS)
+		double lengthScale = minScale + (filter.getBlockState().getValue(OsmosisFilterBlock.TRANSFERRING_ITEMS)
 			? (-Math.cos(2 * Math.PI * ticks / rate) + 1D) * 0.25D
 			: 0D);
 		double lengthTranslateFactor = 1D - lengthScale;
@@ -59,9 +54,9 @@ public class OsmosisFilterTileEntityRenderer extends FilterTileEntityRenderer
 
 		double zFightFix = 0.9999D;
 		
-		int dirOffsetX = dir.getXOffset();
-		int dirOffsetY = dir.getYOffset();
-		int dirOffsetZ = dir.getZOffset();
+		int dirOffsetX = dir.getStepX();
+		int dirOffsetY = dir.getStepY();
+		int dirOffsetZ = dir.getStepZ();
 		
 		float scaleX = (float) (dirOffsetX == 0 ? zFightFix : lengthScale);
 		float scaleY = (float) (dirOffsetY == 0 ? zFightFix : lengthScale);
@@ -71,43 +66,36 @@ public class OsmosisFilterTileEntityRenderer extends FilterTileEntityRenderer
 		int translateFactorY = dirOffsetY == 0 ? 0 : 1;
 		int translateFactorZ = dirOffsetZ == 0 ? 0 : 1;
 		
-		double tX = dirOffsetX > 0 ? 1D : 0D;
-		double tY = dirOffsetY > 0 ? 1D : 0D;
-		double tZ = dirOffsetZ > 0 ? 1D : 0D;
+		double tX = dirOffsetX < 0 ? 1D : 0D;
+		double tY = dirOffsetY < 0 ? 1D : 0D;
+		double tZ = dirOffsetZ < 0 ? 1D : 0D;
 		
-		double translateX = translateFactorX * (tX * lengthTranslateFactor - 0.125D*dirOffsetX);
-		double translateY = translateFactorY * (tY * lengthTranslateFactor - 0.125D*dirOffsetY);
-		double translateZ = translateFactorZ * (tZ * lengthTranslateFactor - 0.125D*dirOffsetZ);
+		double translateX = translateFactorX * (tX * lengthTranslateFactor + 0.125D*dirOffsetX);
+		double translateY = translateFactorY * (tY * lengthTranslateFactor + 0.125D*dirOffsetY);
+		double translateZ = translateFactorZ * (tZ * lengthTranslateFactor + 0.125D*dirOffsetZ);
 		
-		matrix.push();	// push
+		matrix.pushPose();
 		matrix.translate(translateX, translateY, translateZ);
 		matrix.scale(scaleX, scaleY, scaleZ);
-		RenderType renderType = RenderTypeLookup.func_239221_b_(renderState); // RenderTypeLookup.getRenderType
-		net.minecraftforge.client.ForgeHooksClient.setRenderLayer(renderType);
 		
-		BlockRendererDispatcher blockDispatcher = Minecraft.getInstance().getBlockRendererDispatcher();
-		World world = te.getWorld();
-		blockDispatcher.getBlockModelRenderer().renderModel(
-      	  world,
-      	  blockDispatcher.getModelForState(renderState),
-      	  renderState,
-      	  blockpos,
-      	  matrix,
-      	  buffer.getBuffer(renderType),
-      	  false,
-      	  world.rand,
-      	  renderState.getPositionRandom(blockpos),
-      	  OverlayTexture.NO_OVERLAY,
-      	  net.minecraftforge.client.model.data.EmptyModelData.INSTANCE
-      	 );
-		matrix.pop();
+		Minecraft mc = Minecraft.getInstance();
+		var blockRenderer = mc.getBlockRenderer();
+		RenderType bufferType = Sheets.translucentCullBlockSheet();
+		RenderType renderType = RenderType.translucent();
+		BakedModel blockModel = blockRenderer.getBlockModel(renderState);
+		blockRenderer.getModelRenderer().tesselateWithAO(
+			filter.getLevel(),
+			blockModel,
+			renderState,
+			blockpos,
+			matrix,
+			Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(bufferType),
+			false,
+			RandomSource.create(),
+			blockpos.asLong(),
+			OverlayTexture.NO_OVERLAY,
+			ModelData.EMPTY,
+			renderType);
+		matrix.popPose();
 	}
-
-//	private boolean renderStateModel(BlockPos pos, BlockState state, BufferBuilder buffer, World p_188186_4_, boolean checkSides)
-//	{
-//		if (this.blockRenderer == null)
-//			this.blockRenderer = Minecraft.getInstance().getBlockRendererDispatcher();
-//		return this.blockRenderer.getBlockModelRenderer().renderModel(p_188186_4_, this.blockRenderer.getModelForState(state), state, pos, buffer, checkSides, new Random(),
-//			state.getPositionRandom(pos));
-//	}
 }

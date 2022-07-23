@@ -1,6 +1,6 @@
 package commoble.tubesreloaded.routing;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 public class PosAndDist implements Comparable<PosAndDist>
 {

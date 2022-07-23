@@ -1,0 +1,6 @@
+{
+  "parent": "tubesreloaded:block/tube_extension",
+  "textures": {
+    "all": "tubesreloaded:block/light_gray_tube"
+  }
+}

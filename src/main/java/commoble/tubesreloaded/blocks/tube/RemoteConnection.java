@@ -1,16 +1,15 @@
 package commoble.tubesreloaded.blocks.tube;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.mojang.math.OctahedralGroup;
 
-import commoble.databuddy.codec.ExtraCodecs;
 import commoble.tubesreloaded.util.NestedBoundingBox;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
+import commoble.tubesreloaded.util.PosHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public class RemoteConnection
 {	
@@ -36,29 +35,29 @@ public class RemoteConnection
 		return this.box;
 	}
 	
-	public Storage toStorage()
+	public Storage toStorage(BlockPos tubePos)
 	{
-		return new Storage(this.toSide, this.toPos, this.isPrimary);
+		return new Storage(this.toSide, this.toPos.subtract(tubePos), this.isPrimary);
 	}
 	
 	public static RemoteConnection fromStorage(Storage storage, Direction fromSide, BlockPos fromPos)
 	{
-		return new RemoteConnection(fromSide, storage.toSide, fromPos, storage.toPos, storage.isPrimary);
+		return new RemoteConnection(fromSide, storage.toSide, fromPos, storage.toPos.offset(fromPos), storage.isPrimary);
 	}
 	
 	private static NestedBoundingBox getNestedBoundingBoxForConnectedPos(BlockPos from, BlockPos to)
 	{
-		Vector3d thisVec = TubeTileEntity.getCenter(from);
-		Vector3d otherVec = TubeTileEntity.getCenter(to);
+		Vec3 thisVec = Vec3.atCenterOf(from);
+		Vec3 otherVec = Vec3.atCenterOf(to);
 		boolean otherHigher = otherVec.y > thisVec.y;
-		Vector3d higherVec = otherHigher ? otherVec : thisVec;
-		Vector3d lowerVec = otherHigher ? thisVec : otherVec;
-		Vector3d[] points = RaytraceHelper.getInterpolatedPoints(lowerVec, higherVec);
+		Vec3 higherVec = otherHigher ? otherVec : thisVec;
+		Vec3 lowerVec = otherHigher ? thisVec : otherVec;
+		Vec3[] points = RaytraceHelper.getInterpolatedPoints(lowerVec, higherVec);
 		int segmentCount = points.length - 1;
-		AxisAlignedBB[] boxes = new AxisAlignedBB[segmentCount];
+		AABB[] boxes = new AABB[segmentCount];
 		for (int i=0; i<segmentCount; i++)
 		{
-			boxes[i] = new AxisAlignedBB(points[i], points[i+1]);
+			boxes[i] = new AABB(points[i], points[i+1]);
 		}
 		return NestedBoundingBox.fromAABBs(boxes);
 	}
@@ -69,12 +68,6 @@ public class RemoteConnection
 		public final BlockPos toPos;
 		public final boolean isPrimary;
 		
-		public static final Codec<Storage> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				ExtraCodecs.DIRECTION.fieldOf("toSide").forGetter(storage -> storage.toSide),
-				BlockPos.CODEC.fieldOf("toPos").forGetter(storage -> storage.toPos),
-				Codec.BOOL.fieldOf("isPrimary").forGetter(storage -> storage.isPrimary)
-			).apply(instance, Storage::new));
-		
 		public Storage(Direction toSide, BlockPos toPos, boolean isPrimary)
 		{
 			this.toSide = toSide;
@@ -82,19 +75,33 @@ public class RemoteConnection
 			this.isPrimary = isPrimary;
 		}
 		
-		public static Storage fromNBT(CompoundNBT nbt)
+		/**
+		 * Reads from nbt, denormalizing position and side
+		 * @param nbt CompoundTag being read
+		 * @param group OctahedralGroup of the tube being loaded, the tube's rotation from e.g. a structure piece.
+		 * Must rotate directions and blockspos to "denormalize" them.
+		 * @return Storage
+		 */
+		public static Storage fromNBT(CompoundTag nbt, OctahedralGroup group)
 		{
-			Direction toSide = Direction.byIndex(nbt.getInt("toSide"));
-			BlockPos toPos = NBTUtil.readBlockPos(nbt.getCompound("toPos"));
+			Direction toSide = group.rotate(Direction.byName(nbt.getString("toSide")));
+			BlockPos toPos = PosHelper.transform(NbtUtils.readBlockPos(nbt.getCompound("toPos")), group);
 			boolean isPrimary = nbt.getBoolean("isPrimary");
 			return new Storage(toSide, toPos, isPrimary);
 		}
 		
-		public CompoundNBT toNBT()
+		/**
+		 * Normalizes position and side and writes to nbt
+		 * @param group OctahedralGroup representing the orientation of the tube.
+		 * The inverse of this will apply to position and side.
+		 * @return
+		 */
+		public CompoundTag toNBT(OctahedralGroup group)
 		{
-			CompoundNBT nbt = new CompoundNBT();
-			nbt.putInt("toSide", this.toSide.ordinal());
-			nbt.put("toPos", NBTUtil.writeBlockPos(this.toPos));
+			OctahedralGroup normalizer = group.inverse();
+			CompoundTag nbt = new CompoundTag();
+			nbt.putString("toSide", normalizer.rotate(this.toSide).getName());
+			nbt.put("toPos", NbtUtils.writeBlockPos(PosHelper.transform(this.toPos, normalizer)));
 			nbt.putBoolean("isPrimary", this.isPrimary);
 			return nbt;
 		}

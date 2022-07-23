@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "G": {
+      "tag": "forge:glass/orange"
+    },
+    "i": {
+      "tag": "forge:ingots/copper"
+    }
+  },
+  "pattern": [
+    "iGi"
+  ],
+  "result": {
+    "count": 2,
+    "item": "tubesreloaded:orange_tube"
+  }
+}

@@ -2,36 +2,33 @@ package commoble.tubesreloaded.client;
 
 import commoble.tubesreloaded.blocks.tube.RaytraceHelper;
 import commoble.tubesreloaded.blocks.tube.TubeBreakPacket;
-import commoble.tubesreloaded.registry.BlockRegistrar;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.DiggingParticle;
-import net.minecraft.client.particle.ParticleManager;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.particle.TerrainParticle;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.NetworkEvent;
 
 public class ClientPacketHandlers
 {
-	
-	public static void onWireBreakPacket(NetworkEvent.Context context, TubeBreakPacket packet)
+	public static void onTubeBreakPacket(NetworkEvent.Context context, TubeBreakPacket packet)
 	{
 		Minecraft mc = Minecraft.getInstance();
-		ClientWorld world = mc.world;
+		ClientLevel level = mc.level;
 		
-		if (world != null)
+		if (level != null)
 		{
-			Vector3d[] points = RaytraceHelper.getInterpolatedPoints(packet.start, packet.end);
-			ParticleManager manager = mc.particles;
-			BlockState state = BlockRegistrar.TUBE.getDefaultState();
+			Vec3[] points = RaytraceHelper.getInterpolatedPoints(packet.start, packet.end);
+			ParticleEngine manager = mc.particleEngine;
+			BlockState state = level.getBlockState(new BlockPos(packet.start));
 			
-			for (Vector3d point : points)
+			for (Vec3 point : points)
 			{
-				BlockPos pos = new BlockPos(point);
-				manager.addEffect(
-					new DiggingParticle(world, point.x, point.y, point.z, 0.0D, 0.0D, 0.0D, state)
-						.setBlockPos(pos).multiplyVelocity(0.2F).multiplyParticleScaleBy(0.6F));
+				manager.add(
+					new TerrainParticle(level, point.x, point.y, point.z, 0.0D, 0.0D, 0.0D, state)
+						.setPower(0.2F).scale(0.6F));
 			}
 		}
 	}

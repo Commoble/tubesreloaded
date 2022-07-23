@@ -2,22 +2,16 @@ package commoble.tubesreloaded;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
-import commoble.tubesreloaded.network.IsWasSprintPacket;
-import commoble.tubesreloaded.network.PacketHandler;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraftforge.fml.DistExecutor;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
 
 public class ClientProxy
 {
-	public static Optional<ClientProxy> INSTANCE = DistExecutor.unsafeRunForDist(
-			() -> () -> ClientProxy.makeClientProxy(),
-			() -> () -> Optional.empty());
+	private static ClientProxy instance = new ClientProxy();
 	
 	private static final Set<BlockPos> NO_TUBES = ImmutableSet.of();
 	
@@ -25,30 +19,30 @@ public class ClientProxy
 	
 	private Map<ChunkPos, Set<BlockPos>> tubesInChunk = new HashMap<>();
 	
-	public static Optional<ClientProxy> makeClientProxy()
+	public static void reset()
 	{
-		return Optional.of(new ClientProxy());
+		instance = new ClientProxy();
 	}
 	
-	public boolean getWasSprinting()
+	public static boolean getWasSprinting()
 	{
-		return this.isHoldingSprint;
+		return instance.isHoldingSprint;
 	}
 	
-	public void setIsSprintingAndNotifyServer(boolean isSprinting)
+	public static void setIsSprintingAndNotifyServer(boolean isSprinting)
 	{
 		// mark the capability on the client and send a packet to the server to do the same
-		this.isHoldingSprint = isSprinting;
-		PacketHandler.INSTANCE.sendToServer(new IsWasSprintPacket(isSprinting));
+		instance.isHoldingSprint = isSprinting;
+		TubesReloaded.CHANNEL.sendToServer(new IsWasSprintPacket(isSprinting));
 	}
 	
-	public void updateTubesInChunk(ChunkPos pos, Set<BlockPos> tubes)
+	public static void updateTubesInChunk(ChunkPos pos, Set<BlockPos> tubes)
 	{
-		this.tubesInChunk.put(pos, tubes);
+		instance.tubesInChunk.put(pos, tubes);
 	}
 	
-	public Set<BlockPos> getTubesInChunk(ChunkPos pos)
+	public static Set<BlockPos> getTubesInChunk(ChunkPos pos)
 	{
-		return this.tubesInChunk.getOrDefault(pos, NO_TUBES);
+		return instance.tubesInChunk.getOrDefault(pos, NO_TUBES);
 	}
 }

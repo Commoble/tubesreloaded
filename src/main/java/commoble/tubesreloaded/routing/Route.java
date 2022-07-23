@@ -3,10 +3,10 @@ package commoble.tubesreloaded.routing;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 /** This class has a natural ordering that is inconsistent with equals() **/
 public class Route implements Comparable<Route>
@@ -27,10 +27,10 @@ public class Route implements Comparable<Route>
 	// given the position of the tube the item was inserted into,
 	// the side of that tube the item was inserted into,
 	// and the item itself?
-	public boolean isRouteDestinationValid(World world, BlockPos startPos, Direction insertionSide, ItemStack stack)
+	public boolean isRouteDestinationValid(Level world, BlockPos startPos, Direction insertionSide, ItemStack stack)
 	{
 		// if the route's endpoint was the position/face the item was inserted from, this route is not valid
-		if (this.destination.pos.equals(startPos.offset(insertionSide)) && this.destination.face.getOpposite().equals(insertionSide))
+		if (this.destination.pos.equals(startPos.relative(insertionSide)) && this.destination.face.getOpposite().equals(insertionSide))
 		{
 			return false;
 		}

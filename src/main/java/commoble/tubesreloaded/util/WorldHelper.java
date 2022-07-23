@@ -1,108 +1,52 @@
 package commoble.tubesreloaded.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
 import commoble.tubesreloaded.ClientProxy;
 import commoble.tubesreloaded.PlayerData;
-import commoble.tubesreloaded.blocks.tube.TubeTileEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 public class WorldHelper
-{
-	public static List<TubeTileEntity> getTubesAdjacentTo(World world, BlockPos pos)
+{	
+	public static LazyOptional<IItemHandler> getItemHandlerAt(Level world, BlockPos pos, Direction faceOfBlockPos)
 	{
-		List<TubeTileEntity> tes = new ArrayList<TubeTileEntity>(6);
-		for (Direction face : Direction.values())
-		{
-			BlockPos checkPos = pos.offset(face);
-			TileEntity te = world.getTileEntity(checkPos);
-			if (te instanceof TubeTileEntity)
-			{
-				tes.add((TubeTileEntity)te);
-			}
-		}
-		
-		return tes;
-	}
-	
-	public static Stream<TubeTileEntity> getBlockPositionsAsTubeTileEntities(World world, Collection<BlockPos> posCollection)
-	{
-		Stream<TileEntity> teStream = posCollection.stream().map(tubePos -> world.getTileEntity(tubePos));
-		Stream<TileEntity> filteredStream = teStream.filter(te -> te instanceof TubeTileEntity);
-		return filteredStream.map(te -> (TubeTileEntity) te);
-	}
-	
-	public static Optional<TileEntity> getTileEntityAt(World world, BlockPos pos)
-	{
-		TileEntity te = world.getTileEntity(pos);
-		return Optional.ofNullable(te);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static <T extends TileEntity> Optional<T> getTileEntityAt(Class<? extends T> clazz, IWorldReader world, BlockPos pos)
-	{
-		TileEntity te = world.getTileEntity(pos);
-		return Optional.ofNullable(te != null && clazz.isInstance(te) ? (T)te : null);
-	}
-	
-	public static LazyOptional<IItemHandler> getTEItemHandlerAt(World world, BlockPos pos, Direction faceOfBlockPos)
-	{
-		TileEntity te = world.getTileEntity(pos);
+		BlockEntity te = world.getBlockEntity(pos);
 		
 		return te != null ? te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, faceOfBlockPos) : LazyOptional.empty();
 	}
 	
-	public static LazyOptional<IItemHandler> getTEItemHandlerAtIf(World world, BlockPos pos, Direction faceOfBlockPos, Predicate<TileEntity> pred)
-	{
-		TileEntity te = world.getTileEntity(pos);
-		
-		if (te == null)
-			return LazyOptional.empty();
-		
-		if (!pred.test(te))
-			return LazyOptional.empty();
-		
-		return te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, faceOfBlockPos);
-	}
-	
-	public static void ejectItemstack(World world, BlockPos from_pos, @Nullable Direction output_dir, ItemStack stack)
+	public static void ejectItemstack(Level world, BlockPos from_pos, @Nullable Direction output_dir, ItemStack stack)
 	{
 		// if there is room in front of the shunt, eject items there
 		double x,y,z,xVel,yVel,zVel, xOff, yOff, zOff;
-		BlockPos output_pos;
+		BlockPos outputPos;
 		if (output_dir != null)
 		{
-			output_pos = from_pos.offset(output_dir);
-			xOff = output_dir.getXOffset();
-			yOff = output_dir.getYOffset();
-			zOff = output_dir.getZOffset();
+			outputPos = from_pos.relative(output_dir);
+			xOff = output_dir.getStepX();
+			yOff = output_dir.getStepY();
+			zOff = output_dir.getStepZ();
 		}
 		else
 		{
-			output_pos = from_pos;
+			outputPos = from_pos;
 			xOff = 0D;
 			yOff = 0D;
 			zOff = 0D;
 		}
-		if (!world.getBlockState(output_pos).isSolid())
+		if (!world.getBlockState(outputPos).isCollisionShapeFullBlock(world, outputPos))
 		{
 			x = from_pos.getX() + 0.5D + xOff*0.75D;
 			y = from_pos.getY() + 0.25D + yOff*0.75D;
@@ -121,9 +65,9 @@ public class WorldHelper
 			zVel = 0D;
 		}
 		ItemEntity itementity = new ItemEntity(world, x, y, z, stack);
-        itementity.setDefaultPickupDelay();
-        itementity.setMotion(xVel,yVel,zVel);
-        world.addEntity(itementity);
+        itementity.setDefaultPickUpDelay();
+        itementity.setDeltaMovement(xVel,yVel,zVel);
+        world.addFreshEntity(itementity);
 	}
 
 	// inserts as much of the item as we can into a given handler
@@ -158,24 +102,23 @@ public class WorldHelper
 			.anyMatch(stack -> stack.getCount() > 0 && doesCallerWantItem.test(stack));
 	}
 
-	@SuppressWarnings("resource")
-	public static Direction getBlockFacingForPlacement(BlockItemUseContext context)
+	public static Direction getBlockFacingForPlacement(BlockPlaceContext context)
 	{
 		// if sprint is being held (i.e. ctrl by default), facing is based on the face of the block that was clicked on
 		// otherwise, facing is based on the look vector of the player
 		// holding sneak reverses the facing of the placement to the opposite face
 		boolean isSprintKeyHeld;
-		if (context.getWorld().isRemote)	// client thread
+		if (context.getLevel().isClientSide())	// client thread
 		{
-			isSprintKeyHeld = ClientProxy.INSTANCE.map(client -> client.getWasSprinting()).orElse(false);
+			isSprintKeyHeld = ClientProxy.getWasSprinting();
 		}
 		else	// server thread
 		{
-			isSprintKeyHeld = PlayerData.getSprinting(context.getPlayer().getUniqueID());
+			isSprintKeyHeld = PlayerData.getSprinting(context.getPlayer().getUUID());
 		}
 				
-		Direction placeDir = isSprintKeyHeld ? context.getFace().getOpposite() : context.getNearestLookingDirection();
-		placeDir = context.hasSecondaryUseForPlayer() ? placeDir : placeDir.getOpposite();	// is player sneaking
+		Direction placeDir = isSprintKeyHeld ? context.getClickedFace().getOpposite() : context.getNearestLookingDirection();
+		placeDir = context.isSecondaryUseActive() ? placeDir : placeDir.getOpposite();	// is player sneaking
 		return placeDir;		
 	}
 }

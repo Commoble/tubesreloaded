@@ -1,16 +1,17 @@
 package commoble.tubesreloaded.client;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
 
-public class StandardSizeContainerScreenFactory<ContainerType extends Container> implements ScreenManager.IScreenFactory<ContainerType, ContainerScreen<ContainerType>>
+public class StandardSizeContainerScreenFactory<ContainerType extends AbstractContainerMenu> implements MenuScreens.ScreenConstructor<ContainerType, AbstractContainerScreen<ContainerType>>
 {
 	// location of GUI texture
 	private final ResourceLocation texture;
@@ -22,45 +23,46 @@ public class StandardSizeContainerScreenFactory<ContainerType extends Container>
 		this.windowTitleTranslationKey = windowTitleTranslationKey;
 	}
 	
-	public static <ContainerType extends Container> StandardSizeContainerScreenFactory<ContainerType> of(ResourceLocation texture, String translationKey)
+	public static <ContainerType extends AbstractContainerMenu> StandardSizeContainerScreenFactory<ContainerType> of(ResourceLocation texture, String translationKey)
 	{
 		return new StandardSizeContainerScreenFactory<>(texture, translationKey);
 	}
 
 	@Override
-	public ContainerScreen<ContainerType> create(ContainerType container, PlayerInventory inventory, ITextComponent name)
+	public AbstractContainerScreen<ContainerType> create(ContainerType container, Inventory inventory, Component name)
 	{
 		return new StandardSizeContainerScreen<ContainerType>(container, inventory, name, this.texture, this.windowTitleTranslationKey);
 	}
 	
-	static class StandardSizeContainerScreen<ContainerType extends Container> extends ContainerScreen<ContainerType>
+	static class StandardSizeContainerScreen<ContainerType extends AbstractContainerMenu> extends AbstractContainerScreen<ContainerType>
 	{
 		private final ResourceLocation texture;
 		
-		public StandardSizeContainerScreen(ContainerType screenContainer, PlayerInventory inv, ITextComponent titleIn, ResourceLocation texture, String windowTitleTranslationKey)
+		public StandardSizeContainerScreen(ContainerType screenContainer, Inventory inv, Component titleIn, ResourceLocation texture, String windowTitleTranslationKey)
 		{
 			super(screenContainer, inv, titleIn);
-			this.xSize = 176;
-			this.ySize = 166;
+			this.imageWidth = 176;
+			this.imageHeight = 166;
 			this.texture = texture;
 		}
 
 		@Override
-		public void render(MatrixStack matrix, int x, int y, float partialTicks)
+		public void render(PoseStack matrix, int x, int y, float partialTicks)
 		{
 			this.renderBackground(matrix);
 			super.render(matrix, x, y, partialTicks);
-			this.renderHoveredTooltip(matrix, x, y);
+			this.renderTooltip(matrix, x, y);
 		}
 		
 		@Override
-		protected void drawGuiContainerBackgroundLayer(MatrixStack matrix, float partialTicks, int mouseX, int mouseY)
+		protected void renderBg(PoseStack matrix, float partialTicks, int mouseX, int mouseY)
 		{
-			RenderSystem.color4f(1F, 1F, 1F, 1F);
-			this.minecraft.getTextureManager().bindTexture(this.texture);
-			int xStart = (this.width - this.xSize) / 2;
-			int yStart = (this.height - this.ySize) / 2;
-			this.blit(matrix, xStart,  yStart, 0, 0, this.xSize, this.ySize);
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderTexture(0, this.texture);
+			int xStart = (this.width - this.imageWidth) / 2;
+			int yStart = (this.height - this.imageHeight) / 2;
+			this.blit(matrix, xStart,  yStart, 0, 0, this.imageWidth, this.imageHeight);
 		}
 	}
 }

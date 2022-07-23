@@ -1,10 +1,10 @@
 package commoble.tubesreloaded.routing;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -54,9 +54,9 @@ public class Endpoint
 	 * @param stack The stack to attempt to insert
 	 * @return true or false as described above
 	 */
-	public boolean canInsertItem(World world, ItemStack stack)
+	public boolean canInsertItem(Level world, ItemStack stack)
 	{
-		TileEntity te = world.getTileEntity(this.pos);
+		BlockEntity te = world.getBlockEntity(this.pos);
 		
 		if (te == null) return false;
 		

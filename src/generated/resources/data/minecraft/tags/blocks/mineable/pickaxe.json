@@ -1,0 +1,13 @@
+{
+  "values": [
+    "tubesreloaded:distributor",
+    "tubesreloaded:extractor",
+    "tubesreloaded:filter",
+    "tubesreloaded:loader",
+    "tubesreloaded:osmosis_filter",
+    "tubesreloaded:redstone_tube",
+    "tubesreloaded:shunt",
+    "tubesreloaded:tube",
+    "#tubesreloaded:colored_tubes"
+  ]
+}

@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.IntArrayNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Rotation;
+import com.mojang.math.OctahedralGroup;
+
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntArrayTag;
+import net.minecraft.world.item.ItemStack;
 
 /** Wrapper for the itemstacks being routed for the tubes
  * Tracks an itemstack as well as which tubes the stack has been through
@@ -54,42 +55,27 @@ public class ItemInTubeWrapper
 		}
 	}
 	
-	/**
-	 * Creates a copy of this wrapper but with the move list rotated
-	 * @param rotation rotation
-	 * @return rotated copy
-	 */
-	public ItemInTubeWrapper rotate(Rotation rotation)
+	public static ItemInTubeWrapper readFromNBT(CompoundTag compound, OctahedralGroup group)
 	{
-		LinkedList<Direction> newMoveList = new LinkedList<>();
-		this.remainingMoves.forEach(dir -> newMoveList.add(rotation.rotate(dir)));
-		ItemInTubeWrapper wrapper = new ItemInTubeWrapper(this.stack.copy(), newMoveList, this.maximumDurationInTube);
-		wrapper.ticksElapsed = this.ticksElapsed;
-		wrapper.freshlyInserted = this.freshlyInserted;
-		return wrapper;
-	}
-	
-	public static ItemInTubeWrapper readFromNBT(CompoundNBT compound)
-	{
-		ItemStack stack = ItemStack.read(compound);
+		ItemStack stack = ItemStack.of(compound);
 		int[] moveBuffer = compound.getIntArray(MOVES_REMAINING_TAG);
 		int ticksElapsed = compound.getInt(TICKS_REMAINING_TAG);
 		int maxDuration = compound.getInt(TICKS_DURATION_TAG);
 		boolean isFreshlyInserted = compound.getBoolean(IS_FRESHLY_INSERTED);
 
-		ItemInTubeWrapper wrapper = new ItemInTubeWrapper(stack, decompressMoveList(moveBuffer), maxDuration);
+		ItemInTubeWrapper wrapper = new ItemInTubeWrapper(stack, decompressMoveList(moveBuffer, group), maxDuration);
 		wrapper.ticksElapsed = ticksElapsed;
 		wrapper.freshlyInserted = isFreshlyInserted;
 		return wrapper;
 	}
 	
-	public CompoundNBT writeToNBT(CompoundNBT compound)
+	public CompoundTag writeToNBT(CompoundTag compound, OctahedralGroup group)
 	{
-		compound.put(MOVES_REMAINING_TAG, compressMoveList(this.remainingMoves));
+		compound.put(MOVES_REMAINING_TAG, compressMoveList(this.remainingMoves, group));
 		compound.putInt(TICKS_REMAINING_TAG, this.ticksElapsed);
 		compound.putInt(TICKS_DURATION_TAG, this.maximumDurationInTube);
 		compound.putBoolean(IS_FRESHLY_INSERTED, this.freshlyInserted);
-		this.stack.write(compound);
+		this.stack.save(compound);
 		
 		return compound;
 	}
@@ -97,22 +83,25 @@ public class ItemInTubeWrapper
 	// compress the move list into an intarray NBT
 	// where the intarray is of the form (dir0, count0, dir1, count1, . . . dirN, countN)
 	// i.e. consisting of pairs of Direction indexes and how many times to move in that direction
-	public static IntArrayNBT compressMoveList(Queue<Direction> moves)
+	// group is the orientation of the tube (which may have been rotated by a structure piece or similar)
+	// we need to "normalize" the moves to an unrotated state
+	public static IntArrayTag compressMoveList(Queue<Direction> moves, OctahedralGroup group)
 	{
 		if (moves == null || moves.isEmpty())
-			return new IntArrayNBT(new int[0]);
+			return new IntArrayTag(new int[0]);
 		
+		OctahedralGroup normalizer = group.inverse();
 		int moveIndex = 0;
 		ArrayList<Integer> buffer = new ArrayList<Integer>();
 		Direction currentMove = moves.peek();
-		buffer.add(currentMove.getIndex());
+		buffer.add(normalizer.rotate(currentMove).ordinal());
 		buffer.add(0);
 		
 		for (Direction dir : moves)
 		{
 			if (!dir.equals(currentMove))
 			{
-				buffer.add(dir.getIndex());
+				buffer.add(normalizer.rotate(dir).ordinal());
 				buffer.add(1);
 				currentMove = dir;
 				moveIndex += 2;
@@ -123,12 +112,15 @@ public class ItemInTubeWrapper
 			}
 		}
 		
-		IntArrayNBT nbt = new IntArrayNBT(buffer);
+		IntArrayTag nbt = new IntArrayTag(buffer);
 
 		return nbt;
 	}
 	
-	public static Queue<Direction> decompressMoveList(int[] buffer)
+	// group is the orientation of the tube (if it's been rotated by structures etc)
+	// data has previously been "normalized" to the unrotated orientation
+	// now we want to denormalize it
+	public static Queue<Direction> decompressMoveList(int[] buffer, OctahedralGroup group)
 	{
 		Queue<Direction> moves = new LinkedList<Direction>();
 		int size = buffer.length;
@@ -141,7 +133,7 @@ public class ItemInTubeWrapper
 		
 		for (int i=0; i<pairCount; i++)
 		{
-			Direction dir = Direction.byIndex(buffer[i*2]);
+			Direction dir = group.rotate(Direction.from3DDataValue(buffer[i*2]));
 			int moveCount = buffer[i*2+1];
 			for (int count=0; count<moveCount; count++)
 			{

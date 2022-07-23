@@ -2,10 +2,12 @@ package commoble.tubesreloaded.util;
 
 import javax.annotation.Nullable;
 
-import commoble.tubesreloaded.blocks.tube.TubeTileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import com.mojang.math.OctahedralGroup;
+
+import commoble.tubesreloaded.blocks.tube.TubeBlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
 
 public class PosHelper
 {
@@ -17,11 +19,15 @@ public class PosHelper
 	 * @return
 	 */
 	@Nullable
-	public static Direction getTravelDirectionFromTo(World world, BlockPos startPos, BlockPos nextPos)
+	public static Direction getTravelDirectionFromTo(Level world, BlockPos startPos, BlockPos nextPos)
 	{
-		return TubeTileEntity.getTubeTEAt(world, startPos)
-			.flatMap(tube -> tube.getDirectionOfRemoteConnection(nextPos))
-			.orElse(getTravelDirectionBetweenAdjacentPositions(startPos, nextPos));
+		if (world.getBlockEntity(startPos) instanceof TubeBlockEntity startTube)
+		{
+			Direction dir = startTube.getDirectionOfRemoteConnection(nextPos);
+			if (dir != null)
+				return dir;
+		}
+		return getTravelDirectionBetweenAdjacentPositions(startPos, nextPos);
 	}
 	
 	@Nullable
@@ -29,11 +35,50 @@ public class PosHelper
 	{
 		for (Direction face : Direction.values())
 		{
-			if (startPos.offset(face).equals(nextPos))
+			if (startPos.relative(face).equals(nextPos))
 			{
 				return face;
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * 
+	 * @param pos BlockPos to rotate about the origin
+	 * @param group OctahedralGroup to rotate the pos with
+	 * @return BlockPos rotated by the group
+	 */
+	public static BlockPos transform(BlockPos pos, OctahedralGroup group)
+	{
+		// averts most of the logic in most cases
+		if (group == OctahedralGroup.IDENTITY)
+		{
+			return pos;
+		}
+		
+		BlockPos newPos = new BlockPos(0,0,0);
+		int x = pos.getX();
+		int y = pos.getY();
+		int z = pos.getZ();
+		if (x != 0)
+		{
+			Direction oldDirX = x > 0 ? Direction.EAST : Direction.WEST;
+			Direction newDirX = group.rotate(oldDirX);
+			newPos = newPos.relative(newDirX, Math.abs(x));
+		}
+		if (y != 0)
+		{
+			Direction oldDirY = y > 0 ? Direction.UP : Direction.DOWN;
+			Direction newDirY = group.rotate(oldDirY);
+			newPos = newPos.relative(newDirY, Math.abs(y));
+		}
+		if (z != 0)
+		{
+			Direction oldDirZ = z > 0 ? Direction.SOUTH : Direction.NORTH;
+			Direction newDirZ = group.rotate(oldDirZ);
+			newPos = newPos.relative(newDirZ, Math.abs(z));
+		}
+		return newPos;
 	}
 }

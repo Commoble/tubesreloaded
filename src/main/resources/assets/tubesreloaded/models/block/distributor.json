@@ -1,5 +1,6 @@
 {
     "parent": "block/block",
+    "render_type": "cutout",
     "textures": {
         "overlay": "tubesreloaded:block/distributor",
         "wood": "minecraft:block/oak_planks",

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "G": {
+      "tag": "forge:fence_gates"
+    },
+    "c": {
+      "tag": "forge:cobblestone"
+    },
+    "s": {
+      "item": "tubesreloaded:shunt"
+    }
+  },
+  "pattern": [
+    "csc",
+    "sGs",
+    "csc"
+  ],
+  "result": {
+    "item": "tubesreloaded:distributor"
+  }
+}

@@ -1,5 +1,5 @@
 {
-	"credit": "Made with Blockbench",
+	"render_type": "translucent",
 	"textures": {
 		"slime": "block/slime_block"
 	},
@@ -9,11 +9,11 @@
 			"from": [2, 2, 0],
 			"to": [14, 14, 16],
 			"faces": {
+				"north": {"uv": [2, 2, 14, 14], "texture": "#slime"},
 				"east": {"uv": [0, 2, 16, 14], "texture": "#slime"},
-				"south": {"uv": [2, 2, 14, 14], "texture": "#slime"},
 				"west": {"uv": [0, 2, 16, 14], "texture": "#slime"},
-				"up": {"uv": [2, 0, 14, 16], "texture": "#slime"},
-				"down": {"uv": [2, 16, 14, 0], "texture": "#slime"}
+				"up": {"uv": [2, 0, 14, 16], "rotation": 180, "texture": "#slime"},
+				"down": {"uv": [2, 16, 14, 0], "rotation": 180, "texture": "#slime"}
 			}
 		}
 	],

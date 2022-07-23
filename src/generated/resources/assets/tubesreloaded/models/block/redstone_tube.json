@@ -1,0 +1,7 @@
+{
+  "parent": "tubesreloaded:block/tube",
+  "render_type": "minecraft:solid",
+  "textures": {
+    "all": "tubesreloaded:block/redstone_tube"
+  }
+}

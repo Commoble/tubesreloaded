@@ -3,48 +3,48 @@ package commoble.tubesreloaded.blocks.tube;
 import java.util.function.Supplier;
 
 import commoble.tubesreloaded.client.ClientPacketHandlers;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.NetworkEvent;
 
 public class TubeBreakPacket
 {
-	public final Vector3d start;
-	public final Vector3d end;
+	public final Vec3 start;
+	public final Vec3 end;
 	
-	public TubeBreakPacket(Vector3d start, Vector3d end)
+	public TubeBreakPacket(Vec3 start, Vec3 end)
 	{
 		this.start = start;
 		this.end = end;
 	}
 	
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
-		CompoundNBT nbt = new CompoundNBT();
+		CompoundTag nbt = new CompoundTag();
 		nbt.putDouble("startX", this.start.x);
 		nbt.putDouble("startY", this.start.y);
 		nbt.putDouble("startZ", this.start.z);
 		nbt.putDouble("endX", this.end.x);
 		nbt.putDouble("endY", this.end.y);
 		nbt.putDouble("endZ", this.end.z);
-		buffer.writeCompoundTag(nbt);
+		buffer.writeNbt(nbt);
 	}
 	
-	public static TubeBreakPacket read(PacketBuffer buffer)
+	public static TubeBreakPacket read(FriendlyByteBuf buffer)
 	{
-		CompoundNBT nbt = buffer.readCompoundTag();
+		CompoundTag nbt = buffer.readNbt();
 		if (nbt == null)
 		{
-			return new TubeBreakPacket(Vector3d.ZERO, Vector3d.ZERO);
+			return new TubeBreakPacket(Vec3.ZERO, Vec3.ZERO);
 		}
 		else
 		{
-			Vector3d start = new Vector3d(
+			Vec3 start = new Vec3(
 				nbt.getDouble("startX"),
 				nbt.getDouble("startY"),
 				nbt.getDouble("startZ"));
-			Vector3d end = new Vector3d(
+			Vec3 end = new Vec3(
 				nbt.getDouble("endX"),
 				nbt.getDouble("endY"),
 				nbt.getDouble("endZ"));
@@ -56,7 +56,7 @@ public class TubeBreakPacket
 	public void handle(Supplier<NetworkEvent.Context> contextGetter)
 	{
 		NetworkEvent.Context context = contextGetter.get();
-		context.enqueueWork(() -> ClientPacketHandlers.onWireBreakPacket(context, this));
+		context.enqueueWork(() -> ClientPacketHandlers.onTubeBreakPacket(context, this));
 		context.setPacketHandled(true);
 	}
 }

@@ -1,0 +1,5 @@
+// 1.19	2022-07-18T17:28:09.7826354	Tags for minecraft:block
+ea5a870bd6b329c91f80c13b15e3bc2251a86294 data/minecraft/tags/blocks/mineable/pickaxe.json
+7722d76142c5de0db680f4bc5372b142ccc598e2 data/tubesreloaded/tags/blocks/colored_tubes.json
+fa94dcb8951af770114a36a3d714e151413e1453 data/tubesreloaded/tags/blocks/rotatable_by_pliers.json
+e13c8da358a87960332a62d112cecfdc93753303 data/tubesreloaded/tags/blocks/tubes.json

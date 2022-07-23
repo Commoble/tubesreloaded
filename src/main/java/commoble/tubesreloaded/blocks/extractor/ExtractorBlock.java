@@ -1,30 +1,28 @@
 package commoble.tubesreloaded.blocks.extractor;
 
 import commoble.tubesreloaded.util.WorldHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.DirectionalBlock;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DirectionalBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
-
-import net.minecraft.block.AbstractBlock.Properties;
 
 public class ExtractorBlock extends Block
 {
@@ -37,54 +35,54 @@ public class ExtractorBlock extends Block
 	public ExtractorBlock(Properties properties)
 	{
 		super(properties);
-		this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.DOWN).with(POWERED, false));
+		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.DOWN).setValue(POWERED, false));
 		this.shapes = this.makeShapes();
 	}
 
 	@Override
-	public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
+	public void neighborChanged(BlockState thisState, Level level, BlockPos thisPos, Block neighborBlock, BlockPos neighborPos, boolean isMoving)
 	{
-		if (!worldIn.isRemote)
+		if (!level.isClientSide())
 		{
-			boolean isReceivingPower = worldIn.isBlockPowered(pos);
-			boolean isStatePowered = state.get(POWERED);
+			boolean isReceivingPower = level.hasNeighborSignal(thisPos);
+			boolean isStatePowered = thisState.getValue(POWERED);
 			if (isReceivingPower != isStatePowered)
 			{
 				if (isReceivingPower)
 				{
-					this.transferItem(state, pos, worldIn);
-					worldIn.playSound(null, pos, SoundEvents.BLOCK_PISTON_CONTRACT, SoundCategory.BLOCKS, 0.3F, worldIn.rand.nextFloat() * 0.1F + 0.8F);
+					this.transferItem(thisState, thisPos, level);
+					level.playSound(null, thisPos, SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 0.3F, level.random.nextFloat() * 0.1F + 0.8F);
 				}
 				else
 				{
-					worldIn.playSound(null, pos, SoundEvents.BLOCK_PISTON_EXTEND, SoundCategory.BLOCKS, 0.1F, worldIn.rand.nextFloat() * 0.1F + 0.9F);
+					level.playSound(null, thisPos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.1F, level.random.nextFloat() * 0.1F + 0.9F);
 				}
-				worldIn.setBlockState(pos, state.with(POWERED, Boolean.valueOf(isReceivingPower)), 2);
+				level.setBlock(thisPos, thisState.setValue(POWERED, Boolean.valueOf(isReceivingPower)), 2);
 			}
 
 		}
 	}
 	
-	private void transferItem(BlockState state, BlockPos pos, World world)
+	private void transferItem(BlockState state, BlockPos pos, Level level)
 	{
-		Direction output_dir = state.get(FACING);
-		BlockPos output_pos = pos.offset(output_dir);
-		Direction input_dir = output_dir.getOpposite();
-		BlockPos input_pos = pos.offset(input_dir);
+		Direction outputDir = state.getValue(FACING);
+		BlockPos outputPos = pos.relative(outputDir);
+		Direction inputDir = outputDir.getOpposite();
+		BlockPos inputPos = pos.relative(inputDir);
 
-		LazyOptional<IItemHandler> inputCap = WorldHelper.getTEItemHandlerAt(world, input_pos, output_dir);
+		LazyOptional<IItemHandler> inputCap = WorldHelper.getItemHandlerAt(level, inputPos, outputDir);
 		if (inputCap.isPresent())
 		{
-			LazyOptional<IItemHandler> outputCap = WorldHelper.getTEItemHandlerAt(world, output_pos, input_dir);
+			LazyOptional<IItemHandler> outputCap = WorldHelper.getItemHandlerAt(level, outputPos, inputDir);
 			
 			// if the input handler exists and either the output handler exists or we have room to eject the item
-			if (outputCap.isPresent() || !world.getBlockState(output_pos).isOpaqueCube(world, output_pos))
+			if (outputCap.isPresent() || !level.getBlockState(outputPos).isCollisionShapeFullBlock(level, outputPos))
 			{
 				ItemStack stack = inputCap.map(inputHandler -> this.extractNextStack(inputHandler)).orElse(ItemStack.EMPTY);
 				if (stack.getCount() > 0)
 				{
 					ItemStack remaining = outputCap.map(outputHandler -> this.putStackInHandler(stack, outputHandler)).orElse(stack.copy());
-					WorldHelper.ejectItemstack(world, pos, output_dir, remaining);
+					WorldHelper.ejectItemstack(level, pos, outputDir, remaining);
 				}
 			}
 		}
@@ -121,22 +119,23 @@ public class ExtractorBlock extends Block
 
 	//// facing and blockstate boilerplate
 
-	public BlockState getStateForPlacement(BlockItemUseContext context)
+	public BlockState getStateForPlacement(BlockPlaceContext context)
 	{
-		return this.getDefaultState().with(FACING, WorldHelper.getBlockFacingForPlacement(context).getOpposite());
+		return this.defaultBlockState().setValue(FACING, WorldHelper.getBlockFacingForPlacement(context).getOpposite());
 	}
 
 	public BlockState rotate(BlockState state, Rotation rot)
 	{
-		return state.with(FACING, rot.rotate(state.get(FACING)));
+		return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
 	}
 
+	@Deprecated
 	public BlockState mirror(BlockState state, Mirror mirrorIn)
 	{
-		return state.rotate(mirrorIn.toRotation(state.get(FACING)));
+		return state.rotate(mirrorIn.getRotation(state.getValue(FACING)));
 	}
 
-	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
 	{
 		builder.add(FACING, POWERED);
 	}
@@ -144,26 +143,14 @@ public class ExtractorBlock extends Block
 	// model shapes
 
 	@Override
-	public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos)
-	{
-		return state.getShape(worldIn, pos);
-	}
-
-	@Override
-	public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
-	{
-		return this.getShape(state, worldIn, pos, context);
-	}
-
-	@Override
-	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context)
 	{
 		return this.shapes[this.getShapeIndex(state)];
 	}
 
 	public int getShapeIndex(BlockState state)
 	{
-		return state.get(FACING).getIndex();
+		return state.getValue(FACING).ordinal();
 	}
 
 	protected VoxelShape[] makeShapes()
@@ -202,13 +189,13 @@ public class ExtractorBlock extends Block
 			double output_z_min = SOUTH ? 12D : NORTH ? 0D : 6D;
 			double output_z_max = SOUTH ? 16D : NORTH ? 4D : 10D;
 
-			VoxelShape input = Block.makeCuboidShape(input_x_min, input_y_min, input_z_min, input_x_max, input_y_max,
+			VoxelShape input = Block.box(input_x_min, input_y_min, input_z_min, input_x_max, input_y_max,
 					input_z_max);
-			VoxelShape mid = Block.makeCuboidShape(mid_x_min, mid_y_min, mid_z_min, mid_x_max, mid_y_max, mid_z_max);
-			VoxelShape output = Block.makeCuboidShape(output_x_min, output_y_min, output_z_min, output_x_max,
+			VoxelShape mid = Block.box(mid_x_min, mid_y_min, mid_z_min, mid_x_max, mid_y_max, mid_z_max);
+			VoxelShape output = Block.box(output_x_min, output_y_min, output_z_min, output_x_max,
 					output_y_max, output_z_max);
 
-			shapes[face] = VoxelShapes.or(input, mid, output);
+			shapes[face] = Shapes.or(input, mid, output);
 		}
 
 		return shapes;

@@ -2,40 +2,40 @@ package commoble.tubesreloaded.blocks.loader;
 
 import java.util.Set;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class LoaderSlot extends Slot
 {
-	public LoaderSlot(LoaderContainer container, int index, int xPosition, int yPosition)
+	public LoaderSlot(LoaderMenu container, int index, int xPosition, int yPosition)
 	{
 		super(new LoaderInventory(container), index, xPosition, yPosition);
 	}
 
-	static class LoaderInventory implements IInventory
+	static class LoaderInventory implements Container
 	{
-		private LoaderContainer container;
+		private LoaderMenu container;
 
-		public LoaderInventory(LoaderContainer container)
+		public LoaderInventory(LoaderMenu container)
 		{
 			this.container = container;
 		}
 
 		@Override
-		public void clear()
+		public void clearContent()
 		{
 			// NOPE
 		}
-
+		
 		@Override
-		public int getSizeInventory()
+		public int getContainerSize()
 		{
 			return 1;
 		}
@@ -47,27 +47,27 @@ public class LoaderSlot extends Slot
 		}
 
 		@Override
-		public ItemStack getStackInSlot(int index)
+		public ItemStack getItem(int index)
 		{
 			return ItemStack.EMPTY;
 		}
 
 		@Override
-		public ItemStack decrStackSize(int index, int count)
+		public ItemStack removeItem(int index, int count)
 		{
 			return ItemStack.EMPTY;
 		}
 
 		@Override
-		public ItemStack removeStackFromSlot(int index)
+		public ItemStack removeItemNoUpdate(int index)
 		{
 			return ItemStack.EMPTY;
 		}
 
 		@Override
-		public void setInventorySlotContents(int index, ItemStack stack)
+		public void setItem(int index, ItemStack stack)
 		{
-			World world = this.container.player.world;
+			Level world = this.container.player.level;
 			BlockPos pos = this.container.pos;
 			BlockState state = world.getBlockState(pos);
 			Block block = state.getBlock();
@@ -79,25 +79,25 @@ public class LoaderSlot extends Slot
 		}
 
 		@Override
-		public void markDirty()
+		public void setChanged()
 		{
 			// NOPE
 		}
 
 		@Override
-		public boolean isUsableByPlayer(PlayerEntity player)
+		public boolean stillValid(Player player)
 		{
 			return true;
 		}
 
 		@Override
-		public int count(Item itemIn)
+		public int countItem(Item itemIn)
 		{
 			return 0;
 		}
 
 		@Override
-		public boolean hasAny(Set<Item> set)
+		public boolean hasAnyOf(Set<Item> set)
 		{
 			return false;
 		}

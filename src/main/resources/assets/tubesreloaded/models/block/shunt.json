@@ -1,5 +1,6 @@
 {
 	"credit": "Made with Blockbench",
+    "render_type": "cutout",
 	"textures": {
 		"cobblestone": "minecraft:block/cobblestone",
 		"front": "tubesreloaded:block/shunt_output",

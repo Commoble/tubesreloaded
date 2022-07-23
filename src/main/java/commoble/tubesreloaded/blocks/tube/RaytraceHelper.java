@@ -9,45 +9,43 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import commoble.tubesreloaded.util.NestedBoundingBox;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.RayTraceContext.BlockMode;
-import net.minecraft.util.math.RayTraceContext.FluidMode;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class RaytraceHelper
 {
-	public static Vector3d[] getInterpolatedDifferences(Vector3d vector)
+	public static Vec3[] getInterpolatedDifferences(Vec3 vector)
 	{
 		int points = 17; // 16 segments
-		Vector3d[] list = new Vector3d[points];
+		Vec3[] list = new Vec3[points];
 
-		double dx = vector.getX();
-		double dy = vector.getY();
-		double dz = vector.getZ();
+		double dx = vector.x();
+		double dy = vector.y();
+		double dz = vector.z();
 
 		for (int point = 0; point < points; point++)
 		{
 			double startLerp = getFractionalLerp(point, points - 1);
-			list[point] = new Vector3d(startLerp * dx, startLerp * dy, startLerp * dz);
+			list[point] = new Vec3(startLerp * dx, startLerp * dy, startLerp * dz);
 		}
 
 		return list;
 	}
 
-	public static Vector3d[] getInterpolatedPoints(Vector3d lower, Vector3d upper)
+	public static Vec3[] getInterpolatedPoints(Vec3 lower, Vec3 upper)
 	{
-		Vector3d diff = upper.subtract(lower);
-		Vector3d[] diffs = getInterpolatedDifferences(diff);
-		Vector3d[] points = new Vector3d[diffs.length];
+		Vec3 diff = upper.subtract(lower);
+		Vec3[] diffs = getInterpolatedDifferences(diff);
+		Vec3[] points = new Vec3[diffs.length];
 		for (int i = 0; i < points.length; i++)
 		{
 			points[i] = lower.add(diffs[i]);
@@ -66,10 +64,10 @@ public class RaytraceHelper
 	 * Any tubes in this list that this tube is connected to is also connected to this tube, and this connection has been
 	 * verified to not intersect the placed block, so we don't need to check again.
 	 * @param connections the remote connections of the given tube
-	 * @return A Vector3d of the intersecting hit, or null if there was no intersecting hit
+	 * @return A Vec3 of the intersecting hit, or null if there was no intersecting hit
 	 */
 	@Nullable
-	public static Vector3d doesBlockStateIntersectTubeConnections(BlockPos tubePos, BlockPos placePos, IBlockReader raytraceWorld, @Nonnull BlockState placeState, Set<BlockPos> checkedTubePositions, Map<Direction, RemoteConnection> connections)
+	public static Vec3 doesBlockStateIntersectTubeConnections(BlockPos tubePos, BlockPos placePos, BlockGetter raytraceWorld, @Nonnull BlockState placeState, Set<BlockPos> checkedTubePositions, Map<Direction, RemoteConnection> connections)
 	{
 		for (Map.Entry<Direction, RemoteConnection> entry : connections.entrySet())
 		{
@@ -79,7 +77,7 @@ public class RaytraceHelper
 			{
 				Direction fromSide = entry.getKey();
 				Direction toSide = connection.toSide;
-				Vector3d hit = doesBlockStateIntersectConnection(tubePos, fromSide, pos, toSide, placePos, placeState, connection.getBox(), raytraceWorld);
+				Vec3 hit = doesBlockStateIntersectConnection(tubePos, fromSide, pos, toSide, placePos, placeState, connection.getBox(), raytraceWorld);
 				if (hit != null)
 				{
 					return hit;
@@ -90,16 +88,16 @@ public class RaytraceHelper
 	}
 	
 	@Nullable
-	public static Vector3d doesBlockStateIntersectConnection(BlockPos startPos, Direction startSide, BlockPos endPos, Direction endSide, BlockPos placePos, @Nonnull BlockState placeState, NestedBoundingBox box, IBlockReader world)
+	public static Vec3 doesBlockStateIntersectConnection(BlockPos startPos, Direction startSide, BlockPos endPos, Direction endSide, BlockPos placePos, @Nonnull BlockState placeState, NestedBoundingBox box, BlockGetter world)
 	{
 		VoxelShape shape = placeState.getCollisionShape(world, placePos);
-		for (AxisAlignedBB aabb : shape.toBoundingBoxList())
+		for (AABB aabb : shape.toAabbs())
 		{
-			if (box.intersects(aabb.offset(placePos)))
+			if (box.intersects(aabb.move(placePos)))
 			{
 				// if we confirm the AABB intersects, do a raytrace as well
-				Vector3d startVec = RaytraceHelper.getTubeSideCenter(startPos, startSide);
-				Vector3d endVec = RaytraceHelper.getTubeSideCenter(endPos, endSide);
+				Vec3 startVec = RaytraceHelper.getTubeSideCenter(startPos, startSide);
+				Vec3 endVec = RaytraceHelper.getTubeSideCenter(endPos, endSide);
 				return RaytraceHelper.getTubeRaytraceHit(startVec, endVec, world);
 			}
 		}
@@ -112,29 +110,29 @@ public class RaytraceHelper
 	}
 	
 	/** Returns the vector representing the center of the side of a tube block **/
-	public static Vector3d getTubeSideCenter(BlockPos pos, Direction side)
+	public static Vec3 getTubeSideCenter(BlockPos pos, Direction side)
 	{
-		Vector3d center = TubeTileEntity.getCenter(pos);
+		Vec3 center = Vec3.atCenterOf(pos);
 		double offsetFromCenter = 4D/16D;
-		double xOff = side.getXOffset() * offsetFromCenter;
-		double yOff = side.getYOffset() * offsetFromCenter;
-		double zOff = side.getZOffset() * offsetFromCenter;
+		double xOff = side.getStepX() * offsetFromCenter;
+		double yOff = side.getStepY() * offsetFromCenter;
+		double zOff = side.getStepZ() * offsetFromCenter;
 		return center.add(xOff, yOff, zOff);
 	}
 
 	@Nullable
-	public static Vector3d getTubeRaytraceHit(Vector3d startVec, Vector3d endVec, IBlockReader world)
+	public static Vec3 getTubeRaytraceHit(Vec3 startVec, Vec3 endVec, BlockGetter world)
 	{
-		Vector3d[] points = getInterpolatedPoints(startVec, endVec);
+		Vec3[] points = getInterpolatedPoints(startVec, endVec);
 		int pointCount = points.length;
 		int rayTraceCount = pointCount-1;
 		for (int i=0; i<rayTraceCount; i++)
 		{
-			RayTraceContext context = new RayTraceContext(points[i], points[i+1], BlockMode.COLLIDER, FluidMode.NONE, null);
-			BlockRayTraceResult result = rayTraceBlocks(world, context);
-			if (result.getType() != RayTraceResult.Type.MISS)
+			ClipContext context = new ClipContext(points[i], points[i+1], ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null);
+			BlockHitResult result = rayTraceBlocks(world, context);
+			if (result.getType() != HitResult.Type.MISS)
 			{
-				return result.getHitVec();
+				return result.getLocation();
 			}
 		}
 		
@@ -144,42 +142,42 @@ public class RaytraceHelper
 
 	// vanilla raytracer requires a non-null entity when the context is constructed
 	// we don't need an entity though
-	public static BlockRayTraceResult rayTraceBlocks(IBlockReader world, RayTraceContext context)
+	public static BlockHitResult rayTraceBlocks(BlockGetter world, ClipContext context)
 	{
 		return doRayTrace(context, (rayTraceContext, pos) ->
 		{
 			BlockState state = world.getBlockState(pos);
-			Vector3d startVec = rayTraceContext.getStartVec();
-			Vector3d endVec = rayTraceContext.getEndVec();
+			Vec3 startVec = rayTraceContext.getFrom();
+			Vec3 endVec = rayTraceContext.getTo();
 			VoxelShape shape = rayTraceContext.getBlockShape(state, world, pos);
-			BlockRayTraceResult result = world.rayTraceBlocks(startVec, endVec, pos, shape, state);
+			BlockHitResult result = world.clipWithInteractionOverride(startVec, endVec, pos, shape, state);
 			return result;
 		}, (rayTraceContext) -> {
-			Vector3d difference = rayTraceContext.getStartVec().subtract(rayTraceContext.getEndVec());
-			return BlockRayTraceResult.createMiss(rayTraceContext.getEndVec(), Direction.getFacingFromVector(difference.x, difference.y, difference.z), new BlockPos(rayTraceContext.getEndVec()));
+			Vec3 difference = rayTraceContext.getFrom().subtract(rayTraceContext.getTo());
+			return BlockHitResult.miss(rayTraceContext.getTo(), Direction.getNearest(difference.x, difference.y, difference.z), new BlockPos(rayTraceContext.getTo()));
 		});
 	}
 
-	static <T> T doRayTrace(RayTraceContext context, BiFunction<RayTraceContext, BlockPos, T> rayTracer, Function<RayTraceContext, T> missFactory)
+	static <T> T doRayTrace(ClipContext context, BiFunction<ClipContext, BlockPos, T> rayTracer, Function<ClipContext, T> missFactory)
 	{
-		Vector3d start = context.getStartVec();
-		Vector3d end = context.getEndVec();
+		Vec3 start = context.getFrom();
+		Vec3 end = context.getTo();
 		if (start.equals(end))
 		{
 			return missFactory.apply(context);
 		}
 		else
 		{
-			double endX = MathHelper.lerp(-1.0E-7D, end.x, start.x);
-			double endY = MathHelper.lerp(-1.0E-7D, end.y, start.y);
-			double endZ = MathHelper.lerp(-1.0E-7D, end.z, start.z);
-			double startX = MathHelper.lerp(-1.0E-7D, start.x, end.x);
-			double startY = MathHelper.lerp(-1.0E-7D, start.y, end.y);
-			double startZ = MathHelper.lerp(-1.0E-7D, start.z, end.z);
-			int startXInt = MathHelper.floor(startX);
-			int startYInt = MathHelper.floor(startY);
-			int startZInt = MathHelper.floor(startZ);
-			BlockPos.Mutable mutaPos = new BlockPos.Mutable(startXInt, startYInt, startZInt);
+			double endX = Mth.lerp(-1.0E-7D, end.x, start.x);
+			double endY = Mth.lerp(-1.0E-7D, end.y, start.y);
+			double endZ = Mth.lerp(-1.0E-7D, end.z, start.z);
+			double startX = Mth.lerp(-1.0E-7D, start.x, end.x);
+			double startY = Mth.lerp(-1.0E-7D, start.y, end.y);
+			double startZ = Mth.lerp(-1.0E-7D, start.z, end.z);
+			int startXInt = Mth.floor(startX);
+			int startYInt = Mth.floor(startY);
+			int startZInt = Mth.floor(startZ);
+			BlockPos.MutableBlockPos mutaPos = new BlockPos.MutableBlockPos(startXInt, startYInt, startZInt);
 			T result = rayTracer.apply(context, mutaPos);
 			if (result != null)
 			{
@@ -190,15 +188,15 @@ public class RaytraceHelper
 				double dx = endX - startX;
 				double dy = endY - startY;
 				double dz = endZ - startZ;
-				int xSign = MathHelper.signum(dx);
-				int ySign = MathHelper.signum(dy);
-				int zSign = MathHelper.signum(dz);
+				int xSign = Mth.sign(dx);
+				int ySign = Mth.sign(dy);
+				int zSign = Mth.sign(dz);
 				double reciprocalX = xSign == 0 ? Double.MAX_VALUE : xSign / dx;
 				double reciprocalY = ySign == 0 ? Double.MAX_VALUE : ySign / dy;
 				double reciprocalZ = zSign == 0 ? Double.MAX_VALUE : zSign / dz;
-				double calcX = reciprocalX * (xSign > 0 ? 1.0D - MathHelper.frac(startX) : MathHelper.frac(startX));
-				double calcY = reciprocalY * (ySign > 0 ? 1.0D - MathHelper.frac(startY) : MathHelper.frac(startY));
-				double calcZ = reciprocalZ * (zSign > 0 ? 1.0D - MathHelper.frac(startZ) : MathHelper.frac(startZ));
+				double calcX = reciprocalX * (xSign > 0 ? 1.0D - Mth.frac(startX) : Mth.frac(startX));
+				double calcY = reciprocalY * (ySign > 0 ? 1.0D - Mth.frac(startY) : Mth.frac(startY));
+				double calcZ = reciprocalZ * (zSign > 0 ? 1.0D - Mth.frac(startZ) : Mth.frac(startZ));
 
 				while (calcX <= 1.0D || calcY <= 1.0D || calcZ <= 1.0D)
 				{
@@ -226,7 +224,7 @@ public class RaytraceHelper
 						calcZ += reciprocalZ;
 					}
 
-					T fallbackResult = rayTracer.apply(context, mutaPos.setPos(startXInt, startYInt, startZInt));
+					T fallbackResult = rayTracer.apply(context, mutaPos.set(startXInt, startYInt, startZInt));
 					if (fallbackResult != null)
 					{
 						return fallbackResult;

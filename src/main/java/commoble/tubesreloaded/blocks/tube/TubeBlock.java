@@ -1,6 +1,7 @@
 package commoble.tubesreloaded.blocks.tube;
 
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -8,272 +9,249 @@ import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.math.OctahedralGroup;
 
+import commoble.tubesreloaded.TubesReloaded;
 import commoble.tubesreloaded.blocks.extractor.ExtractorBlock;
 import commoble.tubesreloaded.blocks.filter.FilterBlock;
 import commoble.tubesreloaded.blocks.loader.LoaderBlock;
-import commoble.tubesreloaded.registry.TileEntityRegistrar;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.IBucketPickupHandler;
-import net.minecraft.block.ILiquidContainer;
-import net.minecraft.block.SixWayBlock;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.pathfinding.PathType;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.PipeBlock;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.items.CapabilityItemHandler;
 
-public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidContainer
+public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBlock
 {
 	public static final Direction[] FACING_VALUES = Direction.values();
 
-	public static final BooleanProperty DOWN = SixWayBlock.DOWN;
-	public static final BooleanProperty UP = SixWayBlock.UP;
-	public static final BooleanProperty NORTH = SixWayBlock.NORTH;
-	public static final BooleanProperty SOUTH = SixWayBlock.SOUTH;
-	public static final BooleanProperty WEST = SixWayBlock.WEST;
-	public static final BooleanProperty EAST = SixWayBlock.EAST;
+	public static final BooleanProperty DOWN = PipeBlock.DOWN;
+	public static final BooleanProperty UP = PipeBlock.UP;
+	public static final BooleanProperty NORTH = PipeBlock.NORTH;
+	public static final BooleanProperty SOUTH = PipeBlock.SOUTH;
+	public static final BooleanProperty WEST = PipeBlock.WEST;
+	public static final BooleanProperty EAST = PipeBlock.EAST;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+	// group is for rotation+mirror due to structures
+	// there are eight possible orientations from the rotations and mirrors
+	// (this is fewer than the twelve we'd get if we used seperate properties for rotation and mirror)
+	public static final OctahedralGroup[] TUBE_GROUPS = {
+		OctahedralGroup.IDENTITY,
+		OctahedralGroup.ROT_180_FACE_XZ,
+		OctahedralGroup.ROT_90_Y_NEG,
+		OctahedralGroup.ROT_90_Y_POS,
+		OctahedralGroup.INVERT_X,
+		OctahedralGroup.INVERT_Z,
+		OctahedralGroup.SWAP_XZ,
+		OctahedralGroup.SWAP_NEG_XZ
+	};
+	public static final EnumProperty<OctahedralGroup> GROUP = EnumProperty.create("group", OctahedralGroup.class, TUBE_GROUPS);
 
-	protected final VoxelShape[] shapes;
-	
+	public static final VoxelShape[] SHAPES = makeShapes();
+
+	private static final BooleanProperty[] DIRECTION_PROPERTIES = {DOWN, UP, NORTH, SOUTH, WEST, EAST};
+	public static BooleanProperty getPropertyForDirection(Direction dir)
+	{
+		return DIRECTION_PROPERTIES[dir.ordinal()];
+	}
+
 	/** Texture location for rendering long tubes **/
 	public final ResourceLocation textureLocation;
 
 	public TubeBlock(ResourceLocation textureLocation, Properties properties)
 	{
-		super(properties);this.setDefaultState(this.stateContainer.getBaseState()
-				.with(NORTH, Boolean.valueOf(false))
-				.with(EAST, Boolean.valueOf(false))
-				.with(SOUTH, Boolean.valueOf(false))
-				.with(WEST, Boolean.valueOf(false))
-				.with(DOWN, Boolean.valueOf(false))
-				.with(UP, Boolean.valueOf(false))
-				.with(WATERLOGGED, Boolean.valueOf(false)));
-		this.shapes = this.makeShapes();
+		super(properties);
+		this.registerDefaultState(this.stateDefinition.any()
+			.setValue(NORTH, false)
+			.setValue(EAST, false)
+			.setValue(SOUTH, false)
+			.setValue(WEST, false)
+			.setValue(DOWN, false)
+			.setValue(UP, false)
+			.setValue(WATERLOGGED, false)
+			.setValue(GROUP, OctahedralGroup.IDENTITY));
 		this.textureLocation = textureLocation;
+	}
+
+	@Override
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+	{
+		builder.add(DOWN, UP, NORTH, SOUTH, WEST, EAST, WATERLOGGED, GROUP);
 	}
 
 	/// basic block properties
 
 	@Override
-	public boolean allowsMovement(BlockState state, IBlockReader worldIn, BlockPos pos, PathType type)
+	public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type)
 	{
 		return false;
-	}
-
-	@Override
-	public boolean hasTileEntity(BlockState state)
-	{
-		return true;
-	}
-
-	@Override
-	public TileEntity createTileEntity(BlockState state, IBlockReader world)
-	{
-		return TileEntityRegistrar.TUBE.create();
 	}
 
 	// block behaviour
 	@Override
 	@Deprecated
-	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean isMoving)
+	public void onPlace(BlockState newState, Level level, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
-		this.updateTubeSet(world, pos, Set<BlockPos>::add);
-		super.onBlockAdded(state, world, pos, oldState, isMoving);
+		this.updateTubeSet(level, pos, Set<BlockPos>::add);
+		super.onPlace(newState, level, pos, oldState, isMoving);
 	}
 
 	@Override
 	@Deprecated
-	public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
+	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
 	{
-		if (state.getBlock() == newState.getBlock())
+		this.updateTubeSet(level, pos, Set<BlockPos>::remove);
+		BlockEntity te = level.getBlockEntity(pos);
+		if (te instanceof TubeBlockEntity tube && !state.is(newState.getBlock()))
 		{
-			// only thing super.onReplaced does is remove the tile entity
-			// if the block stays the same, we specifically do NOT remove the tile entity
-			// so don't do anything here
+			tube.dropItems();
+			tube.clearRemoteConnections();
 		}
-		else
-		{
-			TileEntity te = world.getTileEntity(pos);
-			if (te instanceof TubeTileEntity)
-			{
-				TubeTileEntity tube = (TubeTileEntity)te;
-				tube.dropItems();
-			}
-			this.updateTubeSet(world, pos, Set<BlockPos>::remove);
-			super.onReplaced(state, world, pos, newState, isMoving);
-		}
+		super.onRemove(state, level, pos, newState, isMoving);
 	}
-	
-	public void updateTubeSet(World world, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
+
+	public void updateTubeSet(Level level, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
 	{
-		Chunk chunk = world.getChunkAt(pos);
+		LevelChunk chunk = level.getChunkAt(pos);
 		if (chunk != null)
 		{
-			chunk.getCapability(TubesInChunkCapability.INSTANCE)
-				.ifPresent(tubes -> {
-					Set<BlockPos> set = tubes.getPositions();
-					consumer.accept(set, pos);
-					tubes.setPositions(set);
-				});
+			chunk.getCapability(TubesInChunk.CAPABILITY).ifPresent(tubes -> {
+				Set<BlockPos> set = tubes.getPositions();
+				consumer.accept(set, pos);
+				tubes.setPositions(set);
+			});
 		}
 	}
 
 	/**
-	 * Called when a neighboring block was changed and marks that this state should
-	 * perform any checks during a neighbor change. Cases may include when redstone
-	 * power is updated, cactus blocks popping off due to a neighboring solid block,
-	 * etc.
+	 * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor change. Cases may include when redstone power is updated,
+	 * cactus blocks popping off due to a neighboring solid block, etc.
 	 */
 	@Override
 	@Deprecated
-	public void neighborChanged(BlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos,
-			boolean wat)
+	public void neighborChanged(BlockState state, Level level, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
 	{
-		if (!world.isRemote)
+		if (!level.isClientSide && level.getBlockEntity(pos) instanceof TubeBlockEntity tube)
 		{
-			TubeTileEntity.getTubeTEAt(world, pos).ifPresent(te -> te.onPossibleNetworkUpdateRequired());
+			tube.onPossibleNetworkUpdateRequired();
 		}
-		super.neighborChanged(state, world, pos, blockIn, fromPos, wat);
+		super.neighborChanged(state, level, pos, blockIn, fromPos, isMoving);
 	}
 
 	/**
-	 * Called by ItemBlocks after a block is set in the world, to allow post-place
-	 * logic
+	 * Called by ItemBlocks after a block is set in the world, to allow post-place logic
 	 */
 	@Override
-	public void onBlockPlacedBy(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer,
-			ItemStack stack)
+	public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack)
 	{
-		if (!world.isRemote)
+		if (!world.isClientSide && world.getBlockEntity(pos) instanceof TubeBlockEntity te)
 		{
-			TubeTileEntity.getTubeTEAt(world, pos).ifPresent(te -> te.onPossibleNetworkUpdateRequired());
+			te.onPossibleNetworkUpdateRequired();
 		}
-		super.onBlockPlacedBy(world, pos, state, placer, stack);
+		super.setPlacedBy(world, pos, state, placer, stack);
 	}
 
 	/// connections and states
 
 	@Override
-	public BlockState getStateForPlacement(BlockItemUseContext context)
+	public BlockState getStateForPlacement(BlockPlaceContext context)
 	{
-		IBlockReader world = context.getWorld();
-		BlockPos pos = context.getPos();
-		FluidState fluidstate = context.getWorld().getFluidState(context.getPos());
-		return super.getStateForPlacement(context)
-			.with(DOWN, this.canConnectTo(world, pos, Direction.DOWN))
-			.with(UP, this.canConnectTo(world, pos, Direction.UP))
-			.with(NORTH, this.canConnectTo(world, pos, Direction.NORTH))
-			.with(SOUTH, this.canConnectTo(world, pos, Direction.SOUTH))
-			.with(WEST, this.canConnectTo(world, pos, Direction.WEST))
-			.with(EAST, this.canConnectTo(world, pos, Direction.EAST))
-			.with(WATERLOGGED, Boolean.valueOf(fluidstate.getFluid() == Fluids.WATER));
+		BlockGetter world = context.getLevel();
+		BlockPos pos = context.getClickedPos();
+		FluidState fluidstate = world.getFluidState(pos);
+		return super.getStateForPlacement(context).setValue(DOWN, this.canConnectTo(world, pos, Direction.DOWN)).setValue(UP, this.canConnectTo(world, pos, Direction.UP))
+			.setValue(NORTH, this.canConnectTo(world, pos, Direction.NORTH)).setValue(SOUTH, this.canConnectTo(world, pos, Direction.SOUTH))
+			.setValue(WEST, this.canConnectTo(world, pos, Direction.WEST)).setValue(EAST, this.canConnectTo(world, pos, Direction.EAST))
+			.setValue(WATERLOGGED, Boolean.valueOf(fluidstate.getType() == Fluids.WATER));
 	}
 
-	protected boolean canConnectTo(IBlockReader world, BlockPos pos, Direction face)
+	protected boolean canConnectTo(BlockGetter level, BlockPos pos, Direction face)
 	{
-		BlockPos newPos = pos.offset(face);
-		BlockState state = world.getBlockState(newPos);
+		BlockPos newPos = pos.relative(face);
+		BlockState state = level.getBlockState(newPos);
 		Block newBlock = state.getBlock();
-		if (newBlock instanceof TubeBlock && world instanceof World)
+		BlockEntity blockEntity = level.getBlockEntity(newPos);
+		if (newBlock instanceof TubeBlock tube && blockEntity instanceof TubeBlockEntity tubeEntity)
 		{
-			return this.isTubeCompatible((TubeBlock) newBlock) &&
-				TubeTileEntity.getTubeTEAt((World)world, newPos)
-					.map(tube -> !tube.hasRemoteConnection(face.getOpposite()))
-					.orElse(false);
+			return this.isTubeCompatible(tube) && !tubeEntity.hasRemoteConnection(face.getOpposite());
 		}
-		
-		if (TubeTileEntity.getTubeTEAt((World)world, pos)
-				.map(tube -> tube.hasRemoteConnection(face))
-				.orElse(false))
-		{
-			return false;
-		}
-		
-		if (newBlock instanceof LoaderBlock && state.get(LoaderBlock.FACING).equals(face.getOpposite()))
-			return true;	// todo make this configurable for arbitrary blocks instead of hardcoded
-		
-		if (newBlock instanceof ExtractorBlock && state.get(ExtractorBlock.FACING).equals(face.getOpposite()))
-			return true;
-		
-		if (newBlock instanceof FilterBlock && state.get(FilterBlock.FACING).equals(face.getOpposite()))
+
+		if (newBlock instanceof LoaderBlock && state.getValue(LoaderBlock.FACING).equals(face.getOpposite()))
+			return true; // todo make this configurable for arbitrary blocks instead of hardcoded
+
+		if (newBlock instanceof ExtractorBlock && state.getValue(ExtractorBlock.FACING).equals(face.getOpposite()))
 			return true;
 
-		TileEntity te = world.getTileEntity(newPos);
+		if (newBlock instanceof FilterBlock && state.getValue(FilterBlock.FACING).equals(face.getOpposite()))
+			return true;
 
-		if (te == null)
+		if (blockEntity == null)
 			return false;
 
-		if (te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite()).isPresent())
+		if (blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite()).isPresent())
 		{
 			return true;
 		}
 		return false;
 	}
-	
+
 	public boolean isTubeCompatible(TubeBlock tube)
 	{
 		return true;
 	}
-	
-	/**
-	 * 
-	 * @param state
-	 * @param face
-	 * @return TRUE if the block is a tube block and is connected on the given side, false otherwise
-	 */
-	public static boolean hasAdjacentConnection(BlockState state, Direction face)
-	{
-		return state.getBlock() instanceof TubeBlock && state.get(SixWayBlock.FACING_TO_PROPERTY_MAP.get(face));
-	}
-	
+
 	/**
 	 * 
 	 * @param state
 	 * @return TRUE if the state is a tube block with a valid TileEntity and has neither an adjacent connection or remote connection on the given side, FALSE otherwise
 	 */
-	public static boolean hasOpenConnection(World world, BlockPos pos, BlockState state, Direction face)
+	public static boolean hasOpenConnection(Level level, BlockPos pos, BlockState state, Direction face)
 	{
-		if (state.getBlock() instanceof TubeBlock)
+		if (state.getBlock() instanceof TubeBlock tubeBlock)
 		{
-			return !hasAdjacentConnection(state, face) &&
-				TubeTileEntity.getTubeTEAt(world, pos).map(te -> !te.hasRemoteConnection(face))
-					.orElse(false);
+			return !tubeBlock.hasConnectionOnSide(state, face) && level.getBlockEntity(pos) instanceof TubeBlockEntity tube && !tube.hasRemoteConnection(face);
 		}
 		else
 		{
 			return false;
 		}
 	}
-	
+
 	public static Set<Direction> getConnectedDirections(BlockState state)
 	{
 		Block block = state.getBlock();
 		Set<Direction> dirs = new HashSet<Direction>();
-		if (block instanceof TubeBlock)
+		if (block instanceof TubeBlock tubeBlock)
 		{
 			for (Direction dir : Direction.values())
 			{
-				if (state.get(SixWayBlock.FACING_TO_PROPERTY_MAP.get(dir)))
+				if (tubeBlock.hasConnectionOnSide(state, dir))
 				{
 					dirs.add(dir);
 				}
@@ -281,47 +259,33 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		}
 		return dirs;
 	}
-	
-	public static Collection<RemoteConnection> getRemoteConnections(World world, BlockPos pos)
-	{
-		return TubeTileEntity.getTubeTEAt(world, pos)
-			.map(te -> te.getRemoteConnections().values())
-			.orElse(ImmutableList.of());
-	}
 
-	@Override
-	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
+	public static Collection<RemoteConnection> getRemoteConnections(Level level, BlockPos pos)
 	{
-		builder.add(DOWN, UP, NORTH, SOUTH, WEST, EAST, WATERLOGGED);
+		return level.getBlockEntity(pos) instanceof TubeBlockEntity tube ? tube.getRemoteConnections().values() : ImmutableList.of();
 	}
 
 	/**
-	 * Update the provided state given the provided neighbor facing and neighbor
-	 * state, returning a new state. For example, fences make their connections to
-	 * the passed in state if possible, and wet concrete powder immediately returns
-	 * its solidified counterpart. Note that this method should ideally consider
-	 * only the specific face passed in.
+	 * Update the provided state given the provided neighbor facing and neighbor state, returning a new state. For example, fences make their connections to the passed in state if
+	 * possible, and wet concrete powder immediately returns its solidified counterpart. Note that this method should ideally consider only the specific face passed in.
 	 *
 	 * @param facingState
-	 *            The state that is currently at the position offset of the provided
-	 *            face to the stateIn at currentPos
+	 *            The state that is currently at the position offset of the provided face to the stateIn at currentPos
 	 */
 	@Override
-	public BlockState updatePostPlacement(BlockState stateIn, Direction facing, BlockState facingState, IWorld worldIn,
-			BlockPos currentPos, BlockPos facingPos)
+	public BlockState updateShape(BlockState stateIn, Direction facing, BlockState facingState, LevelAccessor level, BlockPos currentPos, BlockPos facingPos)
 	{
-		if (stateIn.get(WATERLOGGED))
+		if (stateIn.getValue(WATERLOGGED))
 		{
-			worldIn.getPendingFluidTicks().scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickRate(worldIn));
+			level.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
 		}
 
-		return stateIn.with(SixWayBlock.FACING_TO_PROPERTY_MAP.get(facing),
-				Boolean.valueOf(this.canConnectTo(worldIn, currentPos, facing)));
+		return stateIn.setValue(PipeBlock.PROPERTY_BY_DIRECTION.get(facing), Boolean.valueOf(this.canConnectTo(level, currentPos, facing)));
 	}
 
 	/// model shapes
 
-	protected VoxelShape[] makeShapes()
+	public static VoxelShape[] makeShapes()
 	{
 		final double MIN_VOXEL = 0D;
 		final double ONE_QUARTER = 4D;
@@ -329,28 +293,21 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 		final double SIX_SIXTEENTHS = 6D;
 		final double TEN_SIXTEENTHS = 10D;
 		final double MAX_VOXEL = 16D;
-		
+
 		// 6 different state flags = 2^6 = 64 different state models (waterlogging
 		// doesn't affect model)
 		VoxelShape[] shapes = new VoxelShape[64];
 
 		// define the shapes for the piping core and the dunswe pipe segments
 		// reminder: north = negative
-		VoxelShape core = Block.makeCuboidShape(ONE_QUARTER, ONE_QUARTER, ONE_QUARTER, THREE_QUARTERS, THREE_QUARTERS,
-				THREE_QUARTERS);
+		VoxelShape core = Block.box(ONE_QUARTER, ONE_QUARTER, ONE_QUARTER, THREE_QUARTERS, THREE_QUARTERS, THREE_QUARTERS);
 
-		VoxelShape down = Block.makeCuboidShape(SIX_SIXTEENTHS, MIN_VOXEL, SIX_SIXTEENTHS, TEN_SIXTEENTHS,
-				THREE_QUARTERS, TEN_SIXTEENTHS);
-		VoxelShape up = Block.makeCuboidShape(SIX_SIXTEENTHS, THREE_QUARTERS, SIX_SIXTEENTHS, TEN_SIXTEENTHS, MAX_VOXEL,
-				TEN_SIXTEENTHS);
-		VoxelShape north = Block.makeCuboidShape(SIX_SIXTEENTHS, SIX_SIXTEENTHS, MIN_VOXEL, TEN_SIXTEENTHS,
-				TEN_SIXTEENTHS, ONE_QUARTER);
-		VoxelShape south = Block.makeCuboidShape(SIX_SIXTEENTHS, SIX_SIXTEENTHS, THREE_QUARTERS, TEN_SIXTEENTHS,
-				TEN_SIXTEENTHS, MAX_VOXEL);
-		VoxelShape west = Block.makeCuboidShape(MIN_VOXEL, SIX_SIXTEENTHS, SIX_SIXTEENTHS, THREE_QUARTERS,
-				TEN_SIXTEENTHS, TEN_SIXTEENTHS);
-		VoxelShape east = Block.makeCuboidShape(THREE_QUARTERS, SIX_SIXTEENTHS, SIX_SIXTEENTHS, MAX_VOXEL,
-				TEN_SIXTEENTHS, TEN_SIXTEENTHS);
+		VoxelShape down = Block.box(SIX_SIXTEENTHS, MIN_VOXEL, SIX_SIXTEENTHS, TEN_SIXTEENTHS, THREE_QUARTERS, TEN_SIXTEENTHS);
+		VoxelShape up = Block.box(SIX_SIXTEENTHS, THREE_QUARTERS, SIX_SIXTEENTHS, TEN_SIXTEENTHS, MAX_VOXEL, TEN_SIXTEENTHS);
+		VoxelShape north = Block.box(SIX_SIXTEENTHS, SIX_SIXTEENTHS, MIN_VOXEL, TEN_SIXTEENTHS, TEN_SIXTEENTHS, ONE_QUARTER);
+		VoxelShape south = Block.box(SIX_SIXTEENTHS, SIX_SIXTEENTHS, THREE_QUARTERS, TEN_SIXTEENTHS, TEN_SIXTEENTHS, MAX_VOXEL);
+		VoxelShape west = Block.box(MIN_VOXEL, SIX_SIXTEENTHS, SIX_SIXTEENTHS, THREE_QUARTERS, TEN_SIXTEENTHS, TEN_SIXTEENTHS);
+		VoxelShape east = Block.box(THREE_QUARTERS, SIX_SIXTEENTHS, SIX_SIXTEENTHS, MAX_VOXEL, TEN_SIXTEENTHS, TEN_SIXTEENTHS);
 
 		VoxelShape[] dunswe = { down, up, north, south, west, east };
 
@@ -364,7 +321,7 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 			{
 				if ((i & (1 << j)) != 0)
 				{
-					shapes[i] = VoxelShapes.or(shapes[i], dunswe[j]);
+					shapes[i] = Shapes.or(shapes[i], dunswe[j]);
 				}
 			}
 		}
@@ -373,21 +330,14 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	}
 
 	@Override
-	public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos)
+	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context)
 	{
-		return state.getShape(worldIn, pos);
+		return SHAPES[this.getShapeIndex(state)];
 	}
 
-	@Override
-	public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+	public boolean hasConnectionOnSide(BlockState tubeState, Direction side)
 	{
-		return this.getShape(state, worldIn, pos, context);
-	}
-
-	@Override
-	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
-	{
-		return this.shapes[this.getShapeIndex(state)];
+		return tubeState.getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(side));
 	}
 
 	public int getShapeIndex(BlockState state)
@@ -396,7 +346,7 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 
 		for (int j = 0; j < FACING_VALUES.length; ++j)
 		{
-			if (state.get(SixWayBlock.FACING_TO_PROPERTY_MAP.get(FACING_VALUES[j])))
+			if (this.hasConnectionOnSide(state, FACING_VALUES[j]))
 			{
 				index |= 1 << j;
 			}
@@ -408,49 +358,77 @@ public class TubeBlock extends Block implements IBucketPickupHandler, ILiquidCon
 	/// watterloggy stuff
 
 	@Override
-	public boolean canContainFluid(IBlockReader worldIn, BlockPos pos, BlockState state, Fluid fluidIn)
-	{
-		return !state.get(WATERLOGGED) && fluidIn == Fluids.WATER;
-	}
-
-	@Override
-	public boolean receiveFluid(IWorld worldIn, BlockPos pos, BlockState state, FluidState fluidStateIn)
-	{
-		if (!state.get(WATERLOGGED) && fluidStateIn.getFluid() == Fluids.WATER)
-		{
-			if (!worldIn.isRemote())
-			{
-				worldIn.setBlockState(pos, state.with(WATERLOGGED, Boolean.valueOf(true)), 3);
-				worldIn.getPendingFluidTicks().scheduleTick(pos, fluidStateIn.getFluid(),
-						fluidStateIn.getFluid().getTickRate(worldIn));
-			}
-
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	@Override
-	public Fluid pickupFluid(IWorld worldIn, BlockPos pos, BlockState state)
-	{
-		if (state.get(WATERLOGGED))
-		{
-			worldIn.setBlockState(pos, state.with(WATERLOGGED, Boolean.valueOf(false)), 3);
-			return Fluids.WATER;
-		}
-		else
-		{
-			return Fluids.EMPTY;
-		}
-	}
-
-	@Override
+	@Deprecated
 	public FluidState getFluidState(BlockState state)
 	{
-		return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(state);
+		return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
 	}
 
+	// entityblock stuff
+
+	@Override
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+	{
+		return TubesReloaded.get().tubeEntity.get().create(pos, state);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
+	{
+		return type == TubesReloaded.get().tubeEntity.get() ? (BlockEntityTicker<T>) TubeBlockEntity.TICKER : EntityBlock.super.getTicker(level, state, type);
+	}
+
+	@Override
+	public BlockState rotate(BlockState state, Rotation rotation)
+	{
+		BlockState newState = state;
+		// get rotated versions of the six directional boolean states and then set them
+		Set<Direction> newDirections = EnumSet.noneOf(Direction.class);
+		for (int i=0; i<4; i++)
+		{
+			Direction dir = Direction.from2DDataValue(i);
+			BooleanProperty prop = getPropertyForDirection(dir);
+			Direction rotatedDir = rotation.rotate(dir);
+			if (state.getValue(prop))
+			{
+				newDirections.add(rotatedDir);
+			}
+		}
+		for (int i=0; i<4; i++)
+		{
+			Direction dir = Direction.from2DDataValue(i);
+			BooleanProperty prop = getPropertyForDirection(dir);
+			newState = newState.setValue(prop, newDirections.contains(dir));
+		}
+		
+		return newState.setValue(GROUP, rotation.rotation().compose(state.getValue(GROUP)));
+	}
+
+	@Override
+	public BlockState mirror(BlockState state, Mirror mirror)
+	{
+		// get rotated versions of the six directional boolean states and then set them
+		BlockState newState = state;
+		Set<Direction> newDirections = EnumSet.noneOf(Direction.class);
+		for (int i=0; i<4; i++)
+		{
+			Direction dir = Direction.from2DDataValue(i);
+			BooleanProperty prop = getPropertyForDirection(dir);
+			Direction mirroredDir = mirror.mirror(dir);
+			if (state.getValue(prop))
+			{
+				newDirections.add(mirroredDir);
+			}
+		}
+		for (int i=0; i<4; i++)
+		{
+			Direction dir = Direction.from2DDataValue(i);
+			BooleanProperty prop = getPropertyForDirection(dir);
+			newState = newState.setValue(prop, newDirections.contains(dir));
+		}
+		
+		return newState.setValue(GROUP, mirror.rotation().compose(state.getValue(GROUP)));
+	}
+	
 }

@@ -1,29 +1,22 @@
 package commoble.tubesreloaded.blocks.distributor;
 
-import commoble.tubesreloaded.registry.TileEntityRegistrar;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.IBlockReader;
+import commoble.tubesreloaded.TubesReloaded;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
-public class DistributorBlock extends Block
+public class DistributorBlock extends Block implements EntityBlock
 {
 	public DistributorBlock(Properties properties)
 	{
 		super(properties);
 	}
-	
-	@Override
-	public boolean hasTileEntity(BlockState state)
-	{
-		return true;
-	}
 
 	@Override
-	public TileEntity createTileEntity(BlockState state, IBlockReader world)
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return TileEntityRegistrar.DISTRIBUTOR.create();
+		return TubesReloaded.get().distributorEntity.get().create(pos, state);
 	}
 }

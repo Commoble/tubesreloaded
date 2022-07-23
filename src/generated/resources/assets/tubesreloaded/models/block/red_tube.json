@@ -1,0 +1,6 @@
+{
+  "parent": "tubesreloaded:block/tube",
+  "textures": {
+    "all": "tubesreloaded:block/red_tube"
+  }
+}

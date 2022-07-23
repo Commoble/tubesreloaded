@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "G": {
+      "tag": "forge:glass/gray"
+    },
+    "i": {
+      "tag": "forge:ingots/gold"
+    }
+  },
+  "pattern": [
+    "iGi"
+  ],
+  "result": {
+    "count": 8,
+    "item": "tubesreloaded:gray_tube"
+  }
+}

@@ -1,13 +1,13 @@
 package commoble.tubesreloaded.blocks.filter;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 
 public class FilterStorageItemHandler implements IItemHandler
 {
-	protected FilterTileEntity filter;
+	protected FilterBlockEntity filter;
 	
-	public FilterStorageItemHandler(FilterTileEntity filter)
+	public FilterStorageItemHandler(FilterBlockEntity filter)
 	{
 		this.filter = filter;
 	}

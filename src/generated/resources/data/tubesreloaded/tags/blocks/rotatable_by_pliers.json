@@ -1,0 +1,9 @@
+{
+  "values": [
+    "tubesreloaded:extractor",
+    "tubesreloaded:filter",
+    "tubesreloaded:loader",
+    "tubesreloaded:osmosis_filter",
+    "tubesreloaded:shunt"
+  ]
+}

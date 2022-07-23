@@ -1,8 +1,0 @@
-{
-	"parent": "tubesreloaded:block/tube_extension_north",
-	"textures":
-	{
-		"all": "tubesreloaded:block/yellow_tube",
-		"particle": "tubesreloaded:block/yellow_tube"
-	}
-}

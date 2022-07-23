@@ -1,24 +1,21 @@
 package commoble.tubesreloaded.blocks.filter;
 
 import commoble.tubesreloaded.util.WorldHelper;
-import net.minecraft.block.Block;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 
 public class FilterShuntingItemHandler implements IItemHandler
 {
-	public FilterTileEntity filter;
+	private final FilterBlockEntity filter;
+	private boolean shunting = false; // true while retreiving insertion result from neighbor, averts infinite loops
 	
 	// inventory of the block we may be sending items to
 	private LazyOptional<IItemHandler> targetInventory = LazyOptional.empty();
 	
-	public FilterShuntingItemHandler (FilterTileEntity filter)
+	public FilterShuntingItemHandler (FilterBlockEntity filter)
 	{
 		this.filter = filter;
 	}
@@ -39,7 +36,7 @@ public class FilterShuntingItemHandler implements IItemHandler
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
 	{
-		if (!this.isItemValid(slot, stack))
+		if (this.shunting || !this.isItemValid(slot, stack))
 		{
 			return stack.copy();
 		}
@@ -47,29 +44,30 @@ public class FilterShuntingItemHandler implements IItemHandler
 		if (!simulate) // actually inserting an item
 		{
 			// attempt to insert item
-			BlockPos pos = this.filter.getPos();
-			Direction output_dir = this.filter.getBlockState().get(FilterBlock.FACING);
-			BlockPos output_pos = pos.offset(output_dir);
-			ItemStack remaining = this.getOutputOptional(output_pos,output_dir)
-					.map(handler -> WorldHelper.disperseItemToHandler(stack, handler))
-					.orElse(stack.copy());
+			BlockPos pos = this.filter.getBlockPos();
+			Direction outputDir = this.filter.getBlockState().getValue(FilterBlock.FACING);
+			BlockPos outputPos = pos.relative(outputDir);
+			
+			this.shunting = true;
+			ItemStack remaining = this.getOutputOptional(outputPos,outputDir)
+				.map(handler -> WorldHelper.disperseItemToHandler(stack, handler))
+				.orElse(stack.copy());
+			this.shunting = false;
 			
 			if (remaining.getCount() > 0) // we have remaining items
 			{
-				WorldHelper.ejectItemstack(this.filter.getWorld(), pos, output_dir, remaining);
+				WorldHelper.ejectItemstack(this.filter.getLevel(), pos, outputDir, remaining);
 			}
 		}
 		
 		return ItemStack.EMPTY;
 	}
 	
-	private LazyOptional<IItemHandler> getOutputOptional(BlockPos output_pos, Direction output_dir)
+	private LazyOptional<IItemHandler> getOutputOptional(BlockPos outputPos, Direction outputDir)
 	{
 		if (!this.targetInventory.isPresent())
 		{
-			// if the block we are attempting to insert the item into is a shuntlike block, do not insert
-			ITag<Block> shuntTag = BlockTags.getCollection().get(new ResourceLocation("tubesreloaded", "shunts"));
-			this.targetInventory = WorldHelper.getTEItemHandlerAtIf(this.filter.getWorld(), output_pos, output_dir.getOpposite(), te -> !shuntTag.contains((te.getBlockState().getBlock())));
+			this.targetInventory = WorldHelper.getItemHandlerAt(this.filter.getLevel(), outputPos, outputDir.getOpposite());
 		}
 		return this.targetInventory;
 	}

@@ -5,18 +5,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import commoble.tubesreloaded.blocks.tube.TubeBlock;
-import commoble.tubesreloaded.blocks.tube.TubeTileEntity;
+import commoble.tubesreloaded.blocks.tube.TubeBlockEntity;
 import commoble.tubesreloaded.util.PosHelper;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Used by the routing network to determine the routes to all endpoints from a given tube in the network
@@ -30,7 +31,7 @@ public class FastestRoutesSolver
 	 * @param startPos
 	 * @return
 	 */
-	public static List<Route> generateRoutes(RoutingNetwork network, World world, BlockPos startPos)
+	public static List<Route> generateRoutes(RoutingNetwork network, Level world, BlockPos startPos)
 	{
 		// currently uses Djikstra's algorithm
 		// this necessitates that all positions are looked at to guarantee the shortest paths are found
@@ -70,13 +71,16 @@ public class FastestRoutesSolver
 			// remove it from the queue
 			// TODO handle support for noneuclidean tubes
 			BlockState state = world.getBlockState(node.pos);
-			Optional<TubeTileEntity> tube = TubeTileEntity.getTubeTEAt(world, node.pos);
-			Set<Direction> dirs = tube.map(te -> te.getAllConnectedDirections())
-				.orElse(TubeBlock.getConnectedDirections(state));
+			@Nullable TubeBlockEntity tube = world.getBlockEntity(node.pos) instanceof TubeBlockEntity tubeTe ? tubeTe : null;
+			Set<Direction> dirs = tube == null
+				? TubeBlock.getConnectedDirections(state)
+				: tube.getAllConnectedDirections();
 
 			for (Direction face : dirs)
 			{
-				BlockPos checkPos = tube.map(te -> te.getConnectedPos(face)).orElse(node.pos.offset(face));
+				BlockPos checkPos = tube == null
+					? node.pos.relative(face)
+					: tube.getConnectedPos(face);
 				Endpoint maybeEndpoint = new Endpoint(checkPos, face.getOpposite());
 				
 				
@@ -147,7 +151,7 @@ public class FastestRoutesSolver
 		return routes;
 	}
 	
-	private static LinkedList<Direction> getSequenceOfMoves(World world, Endpoint endpoint, BlockPos startPos, LinkedList<Direction> returnList, HashMap<BlockPos, BlockPos> tubePrevs, HashMap<Endpoint, BlockPos> endpointPrevs)
+	private static LinkedList<Direction> getSequenceOfMoves(Level world, Endpoint endpoint, BlockPos startPos, LinkedList<Direction> returnList, HashMap<BlockPos, BlockPos> tubePrevs, HashMap<Endpoint, BlockPos> endpointPrevs)
 	{
 		if (!endpointPrevs.containsKey(endpoint))
 		{
@@ -167,7 +171,7 @@ public class FastestRoutesSolver
 	}
 	
 	// recursively assemble the sequence of moves required to get to a given position from the startPos
-	private static LinkedList<Direction> getSequenceOfMoves(World world, BlockPos pos, BlockPos startPos, LinkedList<Direction> returnList, HashMap<BlockPos, BlockPos> prevs)
+	private static LinkedList<Direction> getSequenceOfMoves(Level world, BlockPos pos, BlockPos startPos, LinkedList<Direction> returnList, HashMap<BlockPos, BlockPos> prevs)
 	{
 		
 		if (!prevs.containsKey(pos))

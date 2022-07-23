@@ -1,15 +1,15 @@
 package commoble.tubesreloaded.blocks.tube;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
 import net.minecraftforge.items.ItemStackHandler;
 
 public class TubeInventoryHandler extends ItemStackHandler
 {
-	private final TubeTileEntity tube;
+	private final TubeBlockEntity tube;
 	private final Direction face;	// face of the tube an item is being inserted into (there shall be one handler for each side)
 
-	public TubeInventoryHandler(TubeTileEntity tube, Direction face)
+	public TubeInventoryHandler(TubeBlockEntity tube, Direction face)
 	{
 		super(1);
 		this.tube = tube;
@@ -30,7 +30,7 @@ public class TubeInventoryHandler extends ItemStackHandler
 		}
 		if (!simulate)
 		{
-			this.tube.markDirty();
+			this.tube.setChanged();
 		}
 		return this.tube.enqueueItemStack(stack.copy(), this.face, simulate);
 	}
