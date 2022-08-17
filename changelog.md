@@ -1,3 +1,7 @@
+## 2.0.0.1
+* Updated to forge 43.1.0 for 1.19.2
+* Removed debug logspam on block place that was accidentally left in
+
 ## 2.0.0.0
 * Updated to 1.19. This is a breaking change and blockentities in old worlds generally will not preserve their data.
 

@@ -316,7 +316,6 @@ public class TubesReloaded
 		// we need to check world side because physical clients can have server worlds
 		if (event.getUsePhase() == UsePhase.POST_BLOCK && stack.getItem() instanceof BlockItem blockItem)
 		{
-			System.out.println(OctahedralGroup.IDENTITY.compose(OctahedralGroup.INVERT_Z).compose(OctahedralGroup.ROT_90_Y_NEG));
 			Level level = useContext.getLevel();
 			BlockPlaceContext placeContext = new BlockPlaceContext(useContext);
 			BlockPos placePos = placeContext.getClickedPos(); // getClickedPos is a misnomer, this is the position the block is placed at
