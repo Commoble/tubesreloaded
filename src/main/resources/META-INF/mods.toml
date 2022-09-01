@@ -51,3 +51,9 @@ Adds tubes to minecraft
     versionRange="[1.19.2,1.20)"
     ordering="NONE"
     side="BOTH"
+[[dependencies.tubesreloaded]]
+    modId="useitemonblockevent"
+    mandatory=true
+    versionRange="[1.0.0.1,)"
+    ordering="NONE"
+    side="BOTH"
