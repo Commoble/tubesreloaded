@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "building",
   "key": {
     "G": {
       "tag": "forge:glass/magenta"
@@ -14,5 +15,6 @@
   "result": {
     "count": 2,
     "item": "tubesreloaded:magenta_tube"
-  }
+  },
+  "show_notification": true
 }

@@ -1,3 +1,10 @@
+## 3.0.0.0
+* Updated to minecraft 1.20.1 (requires forge 47.0.3 or higher)
+* The useitemonblockevent mod is now bundled with tubes reloaded via forge jar-in-jar (instead of being required to download it separately)
+
+## 2.0.0.2
+* Correctly fail modloading when useitemonblockevent isn't present and notify user that it's missing
+
 ## 2.0.0.1
 * Updated to forge 43.1.0 for 1.19.2
 * Removed debug logspam on block place that was accidentally left in

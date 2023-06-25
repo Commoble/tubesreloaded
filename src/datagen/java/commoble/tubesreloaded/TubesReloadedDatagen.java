@@ -23,30 +23,31 @@ import commoble.tubesreloaded.blocks.tube.RedstoneTubeBlock;
 import commoble.tubesreloaded.blocks.tube.TubeBlock;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.DataGenerator.Target;
+import net.minecraft.data.PackOutput.Target;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.loot.LootDataType;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.data.LanguageProvider;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 @EventBusSubscriber(modid=TubesReloaded.MODID, bus=Bus.MOD)
@@ -56,18 +57,17 @@ public class TubesReloadedDatagen
 	public static void onGatherData(GatherDataEvent event)
 	{
 		DataGenerator dataGenerator = event.getGenerator();
+		var holders = event.getLookupProvider();
 		
 		TubesReloaded mod = TubesReloaded.get();
 		Map<ResourceLocation, BlockStateFile> blockStates = new HashMap<>();
 		Map<ResourceLocation, SimpleModel> models = new HashMap<>();
 		Provider<FinishedRecipe> recipes = Provider.create(event, Target.DATA_PACK, "recipes", FinishedRecipe::serializeRecipe);
-		Provider<LootTable> lootTables = Provider.create(event, Target.DATA_PACK, "loot_tables", LootTables::serialize);
-		@SuppressWarnings("deprecation")
-		TagProvider<Block> blockTags = TagProvider.create(event, Registry.BLOCK);
-		@SuppressWarnings("deprecation")
-		TagProvider<Item> itemTags = TagProvider.create(event, Registry.ITEM);
+		Provider<LootTable> lootTables = Provider.create(event, Target.DATA_PACK, "loot_tables", LootDataType.TABLE.parser()::toJsonTree);
+		TagProvider<Block> blockTags = TagProvider.create(event, Registries.BLOCK, holders);
+		TagProvider<Item> itemTags = TagProvider.create(event, Registries.ITEM, holders);
 		
-		LanguageProvider lang = new LanguageProvider(dataGenerator, TubesReloaded.MODID, "en_us")
+		LanguageProvider lang = new LanguageProvider(dataGenerator.getPackOutput(), TubesReloaded.MODID, "en_us")
 		{
 			@Override
 			protected void addTranslations()
@@ -141,64 +141,64 @@ public class TubesReloadedDatagen
 		{
 			Item item = regObj.get().asItem();
 			doItem.apply(regObj.get().asItem(), blockItemModel)
-				.recipe(recipes, RecipeHelpers.shaped(formatId(regObj.getId(), "%s_from_gold"), item, 8, List.of("iGi"), Map.of(
+				.recipe(recipes, RecipeHelpers.shaped(formatId(regObj.getId(), "%s_from_gold"), item, 8, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 					'i', Ingredient.of(Tags.Items.INGOTS_GOLD),
-					'G', Ingredient.of(TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation("forge", "glass/"+dyeColor.getName()))))))
-				.recipe(recipes, RecipeHelpers.shaped(formatId(regObj.getId(), "%s_from_copper"), item, 2, List.of("iGi"), Map.of(
+					'G', Ingredient.of(TagKey.create(Registries.ITEM, new ResourceLocation("forge", "glass/"+dyeColor.getName()))))))
+				.recipe(recipes, RecipeHelpers.shaped(formatId(regObj.getId(), "%s_from_copper"), item, 2, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 					'i', Ingredient.of(Tags.Items.INGOTS_COPPER),
-					'G', Ingredient.of(TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation("forge", "glass/"+dyeColor.getName()))))))
+					'G', Ingredient.of(TagKey.create(Registries.ITEM, new ResourceLocation("forge", "glass/"+dyeColor.getName()))))))
 				.tags(itemTags, TubesReloaded.Tags.Items.COLORED_TUBES);
 		});
 		doItem.apply(mod.distributorBlock.get().asItem(), blockItemModel)
-			.recipe(recipes, RecipeHelpers.shaped(mod.distributorBlock.getId(), mod.distributorBlock.get().asItem(), 1,
+			.recipe(recipes, RecipeHelpers.shaped(mod.distributorBlock.getId(), mod.distributorBlock.get().asItem(), 1, CraftingBookCategory.BUILDING,
 				List.of("csc", "sGs", "csc"),
 				Map.of(
 					'c', Ingredient.of(Tags.Items.COBBLESTONE),
 					's', Ingredient.of(mod.shuntBlock.get().asItem()),
 					'G', Ingredient.of(Tags.Items.FENCE_GATES))));
 		doItem.apply(mod.extractorBlock.get().asItem(), blockItemModel)
-			.recipe(recipes, RecipeHelpers.shaped(mod.extractorBlock.getId(), mod.extractorBlock.get().asItem(), 1,
+			.recipe(recipes, RecipeHelpers.shaped(mod.extractorBlock.getId(), mod.extractorBlock.get().asItem(), 1, CraftingBookCategory.BUILDING,
 				List.of("h", "p", "s"),
 				Map.of(
 					'h', Ingredient.of(Items.HOPPER),
 					'p', Ingredient.of(Items.PISTON),
 					's', Ingredient.of(mod.shuntBlock.get().asItem()))));
 		doItem.apply(mod.filterBlock.get().asItem(), blockItemModel)
-			.recipe(recipes, RecipeHelpers.shapeless(mod.filterBlock.getId(), mod.filterBlock.get().asItem(), 1, List.of(
+			.recipe(recipes, RecipeHelpers.shapeless(mod.filterBlock.getId(), mod.filterBlock.get().asItem(), 1, CraftingBookCategory.BUILDING, List.of(
 				Ingredient.of(mod.shuntBlock.get().asItem()),
 				Ingredient.of(Items.ITEM_FRAME))));
 		doItem.apply(mod.loaderBlock.get().asItem(), blockItemModel)
-			.recipe(recipes, RecipeHelpers.shaped(mod.loaderBlock.getId(), mod.loaderBlock.get().asItem(), 1,
+			.recipe(recipes, RecipeHelpers.shaped(mod.loaderBlock.getId(), mod.loaderBlock.get().asItem(), 1, CraftingBookCategory.BUILDING,
 				List.of("sss", "P S", "sss"),
 				Map.of(
 					's', Ingredient.of(Tags.Items.COBBLESTONE),
 					'S', Ingredient.of(mod.shuntBlock.get().asItem()),
 					'P', Ingredient.of(Items.PISTON))));
 		ItemDataHelper.create(mod.osmosisFilterBlock.get().asItem()) // model isn't generated
-			.recipe(recipes, RecipeHelpers.shaped(mod.osmosisFilterBlock.getId(), mod.osmosisFilterBlock.get().asItem(), 1,
+			.recipe(recipes, RecipeHelpers.shaped(mod.osmosisFilterBlock.getId(), mod.osmosisFilterBlock.get().asItem(), 1, CraftingBookCategory.BUILDING,
 				List.of("f", "s", "h"),
 				Map.of(
 					'f', Ingredient.of(mod.filterBlock.get().asItem()),
 					's', Ingredient.of(Tags.Items.SLIMEBALLS),
 					'h', Ingredient.of(Items.HOPPER))));
 		doItem.apply(mod.redstoneTubeBlock.get().asItem(), blockItemModel)
-			.recipe(recipes, RecipeHelpers.shaped(mod.redstoneTubeBlock.getId(), mod.redstoneTubeBlock.get().asItem(), 1,
+			.recipe(recipes, RecipeHelpers.shaped(mod.redstoneTubeBlock.getId(), mod.redstoneTubeBlock.get().asItem(), 1, CraftingBookCategory.BUILDING,
 				List.of(" r ", "rtr", " r "),
 				Map.of(
 					'r', Ingredient.of(Tags.Items.DUSTS_REDSTONE),
 					't', Ingredient.of(TubesReloaded.Tags.Items.TUBES))));
 		doItem.apply(mod.shuntBlock.get().asItem(), blockItemModel)
-			.recipe(recipes, RecipeHelpers.shaped(mod.shuntBlock.getId(), mod.shuntBlock.get().asItem(), 1,
+			.recipe(recipes, RecipeHelpers.shaped(mod.shuntBlock.getId(), mod.shuntBlock.get().asItem(), 1, CraftingBookCategory.BUILDING,
 				List.of(" t ", "tst", " t "),
 				Map.of(
 					's', Ingredient.of(Tags.Items.COBBLESTONE),
 					't', Ingredient.of(TubesReloaded.Tags.Items.TUBES))))
 			.tags(itemTags, TubesReloaded.Tags.Items.TUBES);
 		doItem.apply(mod.tubeBlock.get().asItem(), blockItemModel)
-			.recipe(recipes, RecipeHelpers.shaped(formatId(mod.tubeBlock.getId(), "%s_from_gold"), mod.tubeBlock.get().asItem(), 8, List.of("iGi"), Map.of(
+			.recipe(recipes, RecipeHelpers.shaped(formatId(mod.tubeBlock.getId(), "%s_from_gold"), mod.tubeBlock.get().asItem(), 8, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 				'i', Ingredient.of(Tags.Items.INGOTS_GOLD),
 				'G', Ingredient.of(Tags.Items.GLASS_COLORLESS))))
-			.recipe(recipes, RecipeHelpers.shaped(formatId(mod.tubeBlock.getId(), "%s_from_copper"), mod.tubeBlock.get().asItem(), 2, List.of("iGi"), Map.of(
+			.recipe(recipes, RecipeHelpers.shaped(formatId(mod.tubeBlock.getId(), "%s_from_copper"), mod.tubeBlock.get().asItem(), 2, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 				'i', Ingredient.of(Tags.Items.INGOTS_COPPER),
 				'G', Ingredient.of(Tags.Items.GLASS_COLORLESS))))
 			.tags(itemTags, TubesReloaded.Tags.Items.TUBES);
@@ -206,7 +206,7 @@ public class TubesReloadedDatagen
 		// non-block items
 		ItemDataHelper.create(mod.tubingPliers.get(), models, SimpleModel.create(new ResourceLocation("item/handheld"), SimpleModel.RenderTypes.CUTOUT)
 				.addTexture("layer0", formatId(mod.tubingPliers.getId(), "item/%s")))
-			.recipe(recipes, RecipeHelpers.shaped(mod.tubingPliers.getId(), mod.tubingPliers.get().asItem(), 1,
+			.recipe(recipes, RecipeHelpers.shaped(mod.tubingPliers.getId(), mod.tubingPliers.get().asItem(), 1, CraftingBookCategory.MISC,
 				List.of("  I", "It ", " I "),
 				Map.of(
 					'I', Ingredient.of(Tags.Items.INGOTS_IRON),

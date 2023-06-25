@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "building",
   "key": {
     "h": {
       "item": "minecraft:hopper"
@@ -18,5 +19,6 @@
   ],
   "result": {
     "item": "tubesreloaded:extractor"
-  }
+  },
+  "show_notification": true
 }

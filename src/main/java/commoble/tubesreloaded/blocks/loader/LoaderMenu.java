@@ -47,7 +47,7 @@ public class LoaderMenu extends AbstractContainerMenu
 	@Override
 	public boolean stillValid(Player playerIn)
 	{
-		return AbstractContainerMenu.stillValid(ContainerLevelAccess.create(playerIn.level, this.pos), playerIn, TubesReloaded.get().loaderBlock.get());
+		return AbstractContainerMenu.stillValid(ContainerLevelAccess.create(playerIn.level(), this.pos), playerIn, TubesReloaded.get().loaderBlock.get());
 	}
 
 	/**

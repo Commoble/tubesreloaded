@@ -35,8 +35,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.network.PacketDistributor;
 
@@ -396,7 +396,7 @@ public class TubeBlockEntity extends BlockEntity
 			{
 				if (nextBlockEntity != null)	// te exists but is not a tube
 				{
-					ItemStack remaining = nextBlockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite()).map(handler -> WorldHelper.disperseItemToHandler(wrapper.stack, handler)).orElse(wrapper.stack.copy());
+					ItemStack remaining = nextBlockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, dir.getOpposite()).map(handler -> WorldHelper.disperseItemToHandler(wrapper.stack, handler)).orElse(wrapper.stack.copy());
 	
 					if (!remaining.isEmpty())	// target inventory filled up unexpectedly
 					{
@@ -428,7 +428,7 @@ public class TubeBlockEntity extends BlockEntity
 	@Nonnull
 	public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side)
 	{
-		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && side != null)
+		if (cap == ForgeCapabilities.ITEM_HANDLER && side != null)
 		{
 			return this.handlerOptionals[side.ordinal()].cast();	// T is <IItemHandler> here, which our handler implements
 		}
@@ -501,7 +501,7 @@ public class TubeBlockEntity extends BlockEntity
 			if (te != null && !(te instanceof TubeBlockEntity))
 			{
 				// if a nearby inventory that is not a tube exists
-				LazyOptional<IItemHandler> cap = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,
+				LazyOptional<IItemHandler> cap = te.getCapability(ForgeCapabilities.ITEM_HANDLER,
 						face.getOpposite());
 				IItemHandler handler = cap.orElse(null);
 				if (handler != null)

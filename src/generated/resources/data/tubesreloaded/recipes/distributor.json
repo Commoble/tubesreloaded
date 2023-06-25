@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "building",
   "key": {
     "G": {
       "tag": "forge:fence_gates"
@@ -18,5 +19,6 @@
   ],
   "result": {
     "item": "tubesreloaded:distributor"
-  }
+  },
+  "show_notification": true
 }

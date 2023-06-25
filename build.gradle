@@ -26,6 +26,20 @@ archivesBaseName = "${modid}-${mc_version}"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+// the jarjar stuff
+jarJar.enable()
+tasks.jarJar.configure {
+	classifier '' // we only publish one jar so we make jarjar 
+}
+
+reobf {
+    jarJar { }
+}
+
+// this replaces jar.finalizedBy('reobfJar') in the standard forge mod buildscript
+tasks.build.dependsOn tasks.jarJar
+jar.finalizedBy('reobfJarJar')
+
 sourceSets
 {
 	main
@@ -115,7 +129,6 @@ minecraft {
 
 repositories {
 	maven { url "https://cubicinterpolation.net/maven/" }
-	maven { url "https://cursemaven.com" }
 }
 
 configurations {
@@ -125,17 +138,15 @@ configurations {
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
     
-	implementation fg.deobf("commoble.databuddy:${databuddy_group}:${databuddy_version}:config")
-	shade fg.deobf("commoble.databuddy:${databuddy_group}:${databuddy_version}:config")
-	implementation fg.deobf("commoble.databuddy:${databuddy_group}:${databuddy_version}:datagen")
-	shade fg.deobf("commoble.databuddy:${databuddy_group}:${databuddy_version}:datagen")
-	
-	implementation fg.deobf("commoble.useitemonblockevent:${useitemonblockevent_group}:${useitemonblockevent_version}")
-	
+	implementation fg.deobf("commoble.databuddy:databuddy-${databuddy_mc_version}:${databuddy_version}")
+	jarJar(group: "commoble.databuddy", name: "databuddy-${databuddy_mc_version}", version: "[${databuddy_version}, ${databuddy_next_version})")
+	implementation fg.deobf("commoble.useitemonblockevent:useitemonblockevent-${useitemonblockevent_mc_version}:${useitemonblockevent_version}")
+	jarJar(group: "commoble.useitemonblockevent", name: "useitemonblockevent-${useitemonblockevent_mc_version}", version: "[${useitemonblockevent_version}, ${useitemonblockevent_next_version})")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
+	classifier 'slim'
     manifest {
         attributes([
             "Specification-Title": "${modid}",
@@ -148,20 +159,6 @@ jar {
         ])
     }
 }
-
-shadowJar {
-	classifier = ''
-	configurations = [project.configurations.shade]
-	relocate 'commoble.databuddy', "${project.group}.shadow.commoble.databuddy"
-}
-
-reobf {
-    shadowJar { }
-}
-
-// this replaces jar.finalizedBy('reobfJar') in the standard forge mod buildscript
-tasks.build.dependsOn reobfShadowJar
-jar.finalizedBy('reobfShadowJar')
 
 publishing {
     publications {

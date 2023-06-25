@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "building",
   "key": {
     "s": {
       "tag": "forge:cobblestone"
@@ -15,5 +16,6 @@
   ],
   "result": {
     "item": "tubesreloaded:shunt"
-  }
+  },
+  "show_notification": true
 }

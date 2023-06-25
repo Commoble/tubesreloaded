@@ -22,7 +22,7 @@ public class ClientPacketHandlers
 		{
 			Vec3[] points = RaytraceHelper.getInterpolatedPoints(packet.start, packet.end);
 			ParticleEngine manager = mc.particleEngine;
-			BlockState state = level.getBlockState(new BlockPos(packet.start));
+			BlockState state = level.getBlockState(BlockPos.containing(packet.start));
 			
 			for (Vec3 point : points)
 			{

@@ -4,6 +4,7 @@ import java.util.Map;
 
 import commoble.databuddy.datagen.BlockStateFile;
 import commoble.databuddy.datagen.SimpleModel;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -36,12 +37,13 @@ public record BlockDataHelper(Block block)
 		return this;
 	}
 	
+	@SuppressWarnings("deprecation")
 	@SafeVarargs
 	public final BlockDataHelper tags(TagProvider<Block> tagProvider, TagKey<Block>... tags)
 	{
 		for (TagKey<Block> tag : tags)
 		{
-			tagProvider.tag(tag).add(this.block);
+			tagProvider.tag(tag).add(BuiltInRegistries.BLOCK.getResourceKey(block).get());
 		}
 		return this;
 	}

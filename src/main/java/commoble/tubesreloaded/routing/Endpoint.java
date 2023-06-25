@@ -1,12 +1,12 @@
 package commoble.tubesreloaded.routing;
 
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 public class Endpoint
@@ -60,7 +60,7 @@ public class Endpoint
 		
 		if (te == null) return false;
 		
-		LazyOptional<IItemHandler> optionalHandler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, this.face);
+		LazyOptional<IItemHandler> optionalHandler = te.getCapability(ForgeCapabilities.ITEM_HANDLER, this.face);
 		return optionalHandler.map(handler -> canInsertItem(handler, stack)).orElse(false);
 	}
 	

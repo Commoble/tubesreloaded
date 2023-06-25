@@ -3,6 +3,7 @@ package commoble.tubesreloaded;
 import java.util.Map;
 
 import commoble.databuddy.datagen.SimpleModel;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -40,12 +41,13 @@ public record ItemDataHelper(Item item)
 		return this;
 	}
 	
+	@SuppressWarnings("deprecation")
 	@SafeVarargs
 	public final ItemDataHelper tags(TagProvider<Item> tagProvider, TagKey<Item>... tags)
 	{
 		for (TagKey<Item> tagKey : tags)
 		{
-			tagProvider.tag(tagKey).add(this.item);
+			tagProvider.tag(tagKey).add(BuiltInRegistries.ITEM.getResourceKey(item).get());
 		}
 		return this;
 	}

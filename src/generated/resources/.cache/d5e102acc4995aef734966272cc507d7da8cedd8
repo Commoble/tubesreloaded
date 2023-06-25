@@ -1,4 +1,4 @@
-// 1.19	2022-07-18T17:28:09.7826354	Tags for minecraft:block
+// 1.20.1	2023-06-25T14:59:58.2393844	Tags for minecraft:block mod id minecraft
 ea5a870bd6b329c91f80c13b15e3bc2251a86294 data/minecraft/tags/blocks/mineable/pickaxe.json
 7722d76142c5de0db680f4bc5372b142ccc598e2 data/tubesreloaded/tags/blocks/colored_tubes.json
 fa94dcb8951af770114a36a3d714e151413e1453 data/tubesreloaded/tags/blocks/rotatable_by_pliers.json

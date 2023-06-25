@@ -14,8 +14,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 public class WorldHelper
@@ -24,7 +24,7 @@ public class WorldHelper
 	{
 		BlockEntity te = world.getBlockEntity(pos);
 		
-		return te != null ? te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, faceOfBlockPos) : LazyOptional.empty();
+		return te != null ? te.getCapability(ForgeCapabilities.ITEM_HANDLER, faceOfBlockPos) : LazyOptional.empty();
 	}
 	
 	public static void ejectItemstack(Level world, BlockPos from_pos, @Nullable Direction output_dir, ItemStack stack)

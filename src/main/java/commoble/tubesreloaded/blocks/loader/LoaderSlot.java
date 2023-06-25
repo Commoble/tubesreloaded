@@ -67,7 +67,7 @@ public class LoaderSlot extends Slot
 		@Override
 		public void setItem(int index, ItemStack stack)
 		{
-			Level world = this.container.player.level;
+			Level world = this.container.player.level();
 			BlockPos pos = this.container.pos;
 			BlockState state = world.getBlockState(pos);
 			Block block = state.getBlock();

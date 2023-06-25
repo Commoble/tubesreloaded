@@ -17,7 +17,6 @@ import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -35,6 +34,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -137,7 +137,7 @@ public class TubeBlockEntityRenderer implements BlockEntityRenderer<TubeBlockEnt
 			remoteScale = (float)getItemRenderScale(tube, nextMove, lerpFactor);
 		}
 
-		itemRenderer.blitOffset -= 50F;
+//		itemRenderer.blitOffset -= 50F;
 		for (int currentModelIndex = 0; currentModelIndex < renderedItemCount; ++currentModelIndex)
 		{
 			matrix.pushPose();
@@ -157,10 +157,10 @@ public class TubeBlockEntityRenderer implements BlockEntityRenderer<TubeBlockEnt
 			float scale = remoteScale * 0.5F;
 			matrix.scale(scale, scale, scale);
 			
-			itemRenderer.renderStatic(itemstack, ItemTransforms.TransformType.GROUND, intA, OverlayTexture.NO_OVERLAY, matrix, buffer, renderSeed);
+			itemRenderer.renderStatic(itemstack, ItemDisplayContext.GROUND, intA, OverlayTexture.NO_OVERLAY, matrix, buffer, tube.getLevel(), renderSeed);
 			matrix.popPose();
 		}
-		itemRenderer.blitOffset += 50F;
+//		itemRenderer.blitOffset += 50F;
 
 		matrix.popPose();
 	}

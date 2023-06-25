@@ -1,15 +1,12 @@
 package commoble.tubesreloaded.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.network.chat.Component;
 
 public class StandardSizeContainerScreenFactory<ContainerType extends AbstractContainerMenu> implements MenuScreens.ScreenConstructor<ContainerType, AbstractContainerScreen<ContainerType>>
 {
@@ -47,22 +44,19 @@ public class StandardSizeContainerScreenFactory<ContainerType extends AbstractCo
 		}
 
 		@Override
-		public void render(PoseStack matrix, int x, int y, float partialTicks)
+		public void render(GuiGraphics graphics, int x, int y, float partialTicks)
 		{
-			this.renderBackground(matrix);
-			super.render(matrix, x, y, partialTicks);
-			this.renderTooltip(matrix, x, y);
+			this.renderBackground(graphics);
+			super.render(graphics, x, y, partialTicks);
+			this.renderTooltip(graphics, x, y);
 		}
 		
 		@Override
-		protected void renderBg(PoseStack matrix, float partialTicks, int mouseX, int mouseY)
+		protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
 		{
-			RenderSystem.setShader(GameRenderer::getPositionTexShader);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-			RenderSystem.setShaderTexture(0, this.texture);
 			int xStart = (this.width - this.imageWidth) / 2;
 			int yStart = (this.height - this.imageHeight) / 2;
-			this.blit(matrix, xStart,  yStart, 0, 0, this.imageWidth, this.imageHeight);
+			graphics.blit(this.texture, xStart,  yStart, 0, 0, this.imageWidth, this.imageHeight);
 		}
 	}
 }

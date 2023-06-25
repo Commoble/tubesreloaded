@@ -1,20 +1,20 @@
 package commoble.tubesreloaded.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
 
 import commoble.tubesreloaded.blocks.filter.FilterBlock;
 import commoble.tubesreloaded.blocks.filter.FilterBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 public class FilterTileEntityRenderer implements BlockEntityRenderer<FilterBlockEntity>
 {
@@ -27,11 +27,11 @@ public class FilterTileEntityRenderer implements BlockEntityRenderer<FilterBlock
 	{
 		if (filter.filterStack.getCount() > 0)
 		{
-			this.renderItem(filter.filterStack, filter.getBlockState().getValue(FilterBlock.FACING), matrix, buffer, intA, (int)filter.getBlockPos().asLong());
+			this.renderItem(filter.getLevel(), filter.filterStack, filter.getBlockState().getValue(FilterBlock.FACING), matrix, buffer, intA, (int)filter.getBlockPos().asLong());
 		}
 	}
 
-	private void renderItem(ItemStack stack, Direction facing, PoseStack matrix, MultiBufferSource buffer, int intA, int renderSeed)
+	private void renderItem(Level level, ItemStack stack, Direction facing, PoseStack matrix, MultiBufferSource buffer, int intA, int renderSeed)
 	{
 		ItemRenderer renderer = Minecraft.getInstance().getItemRenderer();
 
@@ -41,10 +41,10 @@ public class FilterTileEntityRenderer implements BlockEntityRenderer<FilterBlock
 		matrix.scale(0.9F, 0.9F, 0.9F);
 		if (facing.getAxis() == Axis.X)
 		{
-			matrix.mulPose(Vector3f.YP.rotationDegrees(90F));	// rotate 90 degrees about y-axis
+			matrix.mulPose(com.mojang.math.Axis.YP.rotationDegrees(90F));	// rotate 90 degrees about y-axis
 		}
 
-		renderer.renderStatic(stack, ItemTransforms.TransformType.FIXED, intA, OverlayTexture.NO_OVERLAY, matrix, buffer, renderSeed);
+		renderer.renderStatic(stack, ItemDisplayContext.FIXED, intA, OverlayTexture.NO_OVERLAY, matrix, buffer, level, renderSeed);
 		
 		
 

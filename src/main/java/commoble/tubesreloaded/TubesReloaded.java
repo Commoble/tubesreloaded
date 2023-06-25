@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.OctahedralGroup;
 
 import commoble.databuddy.config.ConfigHelper;
 import commoble.tubesreloaded.blocks.distributor.DistributorBlock;
@@ -44,7 +43,10 @@ import commoble.useitemonblockevent.api.UseItemOnBlockEvent.UsePhase;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -55,9 +57,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -70,9 +74,9 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
@@ -88,8 +92,6 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryObject;
 
 //The value here should match an entry in the META-INF/mods.toml file
@@ -102,14 +104,14 @@ public class TubesReloaded
 	{
 		public static class Blocks
 		{
-			public static final TagKey<Block> COLORED_TUBES = TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(MODID, "colored_tubes"));
-			public static final TagKey<Block> TUBES = TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(MODID, "tubes"));
-			public static final TagKey<Block> ROTATABLE_BY_PLIERS = TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(MODID, "rotatable_by_pliers"));
+			public static final TagKey<Block> COLORED_TUBES = TagKey.create(Registries.BLOCK, new ResourceLocation(MODID, "colored_tubes"));
+			public static final TagKey<Block> TUBES = TagKey.create(Registries.BLOCK, new ResourceLocation(MODID, "tubes"));
+			public static final TagKey<Block> ROTATABLE_BY_PLIERS = TagKey.create(Registries.BLOCK, new ResourceLocation(MODID, "rotatable_by_pliers"));
 		}
 		public static class Items
 		{
-			public static final TagKey<Item> COLORED_TUBES = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(MODID, "colored_tubes"));
-			public static final TagKey<Item> TUBES = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(MODID, "tubes"));
+			public static final TagKey<Item> COLORED_TUBES = TagKey.create(Registries.ITEM, new ResourceLocation(MODID, "colored_tubes"));
+			public static final TagKey<Item> TUBES = TagKey.create(Registries.ITEM, new ResourceLocation(MODID, "tubes"));
 		}
 	}
 
@@ -136,7 +138,7 @@ public class TubesReloaded
 	public final RegistryObject<ShuntBlock> shuntBlock;
 	public final RegistryObject<TubeBlock> tubeBlock;
 	
-	public final RegistryObject<BlockItem> tubeItem;
+	public final RegistryObject<CreativeModeTab> tab;
 	
 	public final RegistryObject<TubingPliersItem> tubingPliers;
 
@@ -149,15 +151,6 @@ public class TubesReloaded
 
 	public final RegistryObject<MenuType<FilterMenu>> filterMenu;
 	public final RegistryObject<MenuType<LoaderMenu>> loaderMenu;
-	
-	// creative tab for the stuff
-	public static final CreativeModeTab TAB = new CreativeModeTab(TubesReloaded.MODID) {
-		@Override
-		public ItemStack makeIcon()
-		{
-			return new ItemStack(TubesReloaded.get().tubeItem.get());
-		}
-	};
 
 	public TubesReloaded()
 	{
@@ -169,35 +162,60 @@ public class TubesReloaded
 		this.serverConfig = ConfigHelper.register(ModConfig.Type.SERVER, ServerConfig::create);
 		
 		// register registry objects
-		final DeferredRegister<Block> blocks = makeDeferredRegister(modBus, ForgeRegistries.BLOCKS);
-		final DeferredRegister<Item> items = makeDeferredRegister(modBus, ForgeRegistries.ITEMS);
-		final DeferredRegister<BlockEntityType<?>> blockEntities = makeDeferredRegister(modBus, ForgeRegistries.BLOCK_ENTITY_TYPES);
-		final DeferredRegister<MenuType<?>> containers = makeDeferredRegister(modBus, ForgeRegistries.MENU_TYPES);
+		final DeferredRegister<Block> blocks = makeDeferredRegister(modBus, Registries.BLOCK);
+		final DeferredRegister<Item> items = makeDeferredRegister(modBus, Registries.ITEM);
+		final DeferredRegister<CreativeModeTab> tabs = makeDeferredRegister(modBus, Registries.CREATIVE_MODE_TAB);
+		final DeferredRegister<BlockEntityType<?>> blockEntities = makeDeferredRegister(modBus, Registries.BLOCK_ENTITY_TYPE);
+		final DeferredRegister<MenuType<?>> containers = makeDeferredRegister(modBus, Registries.MENU);
 
 		// blocks and blockitems
-		final Material tubeMaterial = (new Material.Builder(MaterialColor.CLAY)).build();
 		List<RegistryObject<? extends TubeBlock>> tubeBlocksWithTubeBlockEntity = new ArrayList<>();
 		
 		Pair<RegistryObject<TubeBlock>,RegistryObject<BlockItem>> tubeBlockAndItem = registerBlockAndItem(blocks, items, Names.TUBE,
-			() -> new TubeBlock(new ResourceLocation("tubesreloaded:block/tube"), BlockBehaviour.Properties.of(Material.GLASS, MaterialColor.TERRACOTTA_YELLOW).strength(0.4F).sound(SoundType.METAL)),
-			block -> new BlockItem(block, new Item.Properties().tab(TAB)));
+			() -> new TubeBlock(new ResourceLocation("tubesreloaded:block/tube"), BlockBehaviour.Properties.of()
+				.instrument(NoteBlockInstrument.DIDGERIDOO)
+				.mapColor(MapColor.TERRACOTTA_YELLOW)
+				.strength(0.4F)
+				.sound(SoundType.METAL)),
+			block -> new BlockItem(block, new Item.Properties()));
 		this.tubeBlock = tubeBlockAndItem.getFirst();		
 		this.shuntBlock = registerBlockAndStandardItem(blocks, items, Names.SHUNT,
-			() -> new ShuntBlock(BlockBehaviour.Properties.of(tubeMaterial).strength(2F, 6F).sound(SoundType.METAL)));
+			() -> new ShuntBlock(BlockBehaviour.Properties.of()
+				.mapColor(MapColor.TERRACOTTA_YELLOW)
+				.strength(2F, 6F)
+				.sound(SoundType.METAL)));
 		this.loaderBlock = registerBlockAndStandardItem(blocks, items, Names.LOADER,
-			() -> new LoaderBlock(BlockBehaviour.Properties.of(tubeMaterial).strength(2F, 6F).sound(SoundType.METAL)));
+			() -> new LoaderBlock(BlockBehaviour.Properties.of()
+				.mapColor(MapColor.STONE)
+				.strength(2F, 6F)
+				.sound(SoundType.METAL)));
 		this.redstoneTubeBlock = registerBlockAndStandardItem(blocks, items, Names.REDSTONE_TUBE,
-			() -> new RedstoneTubeBlock(new ResourceLocation("tubesreloaded:block/tube"), BlockBehaviour.Properties.of(Material.GLASS, MaterialColor.GOLD).strength(0.4F).sound(SoundType.METAL)));
+			() -> new RedstoneTubeBlock(new ResourceLocation("tubesreloaded:block/tube"), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.GOLD)
+				.strength(0.4F)
+				.sound(SoundType.METAL)));
 		this.extractorBlock = registerBlockAndStandardItem(blocks, items, Names.EXTRACTOR,
-			() -> new ExtractorBlock(BlockBehaviour.Properties.of(tubeMaterial).strength(2F, 6F).sound(SoundType.METAL)));
+			() -> new ExtractorBlock(BlockBehaviour.Properties.of()
+				.mapColor(MapColor.TERRACOTTA_YELLOW)
+				.strength(2F, 6F)
+				.sound(SoundType.METAL)));
 		this.filterBlock = registerBlockAndStandardItem(blocks, items, Names.FILTER,
-			() -> new FilterBlock(BlockBehaviour.Properties.of(tubeMaterial).strength(2F, 6F).sound(SoundType.METAL)));
+			() -> new FilterBlock(BlockBehaviour.Properties.of()
+				.mapColor(MapColor.TERRACOTTA_YELLOW)
+				.strength(2F, 6F)
+				.sound(SoundType.METAL)));
 		this.osmosisFilterBlock = registerBlockAndStandardItem(blocks, items, Names.OSMOSIS_FILTER,
-			() -> new OsmosisFilterBlock(BlockBehaviour.Properties.of(tubeMaterial).strength(2F, 6F).sound(SoundType.METAL)));
+			() -> new OsmosisFilterBlock(BlockBehaviour.Properties.of()
+				.mapColor(MapColor.GRASS)
+				.strength(2F, 6F)
+				.sound(SoundType.METAL)));
 		this.osmosisSlimeBlock = blocks.register(Names.OSMOSIS_SLIME,
-			() -> new OsmosisSlimeBlock(BlockBehaviour.Properties.of(tubeMaterial)));
+			() -> new OsmosisSlimeBlock(BlockBehaviour.Properties.of()));
 		this.distributorBlock = registerBlockAndStandardItem(blocks, items, Names.DISTRIBUTOR,
-			() -> new DistributorBlock(BlockBehaviour.Properties.of(tubeMaterial).strength(2F, 6F).sound(SoundType.METAL)));
+			() -> new DistributorBlock(BlockBehaviour.Properties.of()
+				.mapColor(MapColor.WOOD)
+				.strength(2F, 6F)
+				.sound(SoundType.METAL)));
 		this.coloredTubeBlocks = new EnumMap<>(DyeColor.class);
 		for (DyeColor color : DyeColor.values())
 		{
@@ -206,7 +224,9 @@ public class TubesReloaded
 				() -> new ColoredTubeBlock(
 					new ResourceLocation(TubesReloaded.MODID, "block/" + name),
 					color,
-					BlockBehaviour.Properties.of(Material.GLASS)
+					BlockBehaviour.Properties.of()
+						.mapColor(color)
+						.instrument(NoteBlockInstrument.DIDGERIDOO)
 						.strength(0.4F)
 						.sound(SoundType.METAL)));
 			this.coloredTubeBlocks.put(color, block);
@@ -214,11 +234,15 @@ public class TubesReloaded
 		}
 		tubeBlocksWithTubeBlockEntity.add(this.tubeBlock);
 		
-		// extra blockitems
-		this.tubeItem = tubeBlockAndItem.getSecond();
+		this.tab = tabs.register(MODID, () -> CreativeModeTab.builder()
+			.icon(() -> new ItemStack(this.tubeBlock.get().asItem()))
+			.title(Component.translatable("itemGroup.tubesreloaded"))
+			.withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
+			.displayItems((parameters, output) -> output.acceptAll(items.getEntries().stream().map(rob -> new ItemStack(rob.get())).toList()))
+			.build());
 		
 		// notblock items
-		this.tubingPliers = items.register(Names.TUBING_PLIERS, () -> new TubingPliersItem(new Item.Properties().tab(TAB).durability(128)));
+		this.tubingPliers = items.register(Names.TUBING_PLIERS, () -> new TubingPliersItem(new Item.Properties().durability(128)));
 		
 		// blockentity types
 		this.tubeEntity = blockEntities.register(Names.TUBE,
@@ -240,8 +264,8 @@ public class TubesReloaded
 			() -> BlockEntityType.Builder.of(DistributorBlockEntity::new, distributorBlock.get()).build(null));
 		
 		// menu types
-		this.loaderMenu = containers.register(Names.LOADER, () -> new MenuType<>(LoaderMenu::new));
-		this.filterMenu = containers.register(Names.FILTER, () -> new MenuType<>(FilterMenu::createClientMenu));
+		this.loaderMenu = containers.register(Names.LOADER, () -> new MenuType<>(LoaderMenu::new, FeatureFlags.VANILLA_SET));
+		this.filterMenu = containers.register(Names.FILTER, () -> new MenuType<>(FilterMenu::createClientMenu, FeatureFlags.VANILLA_SET));
 		
 		// subscribe events
 		modBus.addListener(this::onCommonSetup);
@@ -378,7 +402,7 @@ public class TubesReloaded
 	
 	// registry helper methods
 	
-	private static <T> DeferredRegister<T> makeDeferredRegister(IEventBus modBus, IForgeRegistry<T> registry)
+	private static <T> DeferredRegister<T> makeDeferredRegister(IEventBus modBus, ResourceKey<Registry<T>> registry)
 	{
 		DeferredRegister<T> register = DeferredRegister.create(registry, MODID);
 		register.register(modBus);
@@ -404,7 +428,7 @@ public class TubesReloaded
 		Supplier<BLOCK> blockFactory)
 	{
 		return registerBlockAndItem(blocks,items,name,blockFactory,
-				block -> new BlockItem(block, new Item.Properties().tab(TAB)))
+				block -> new BlockItem(block, new Item.Properties()))
 			.getFirst();
 	}
 }

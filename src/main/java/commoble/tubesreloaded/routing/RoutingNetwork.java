@@ -15,8 +15,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 public class RoutingNetwork
@@ -118,7 +118,7 @@ public class RoutingNetwork
 				(
 						te instanceof TubeBlockEntity
 						||
-						te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face).isPresent()
+						te.getCapability(ForgeCapabilities.ITEM_HANDLER, face).isPresent()
 				)
 			);
 		
@@ -188,7 +188,7 @@ public class RoutingNetwork
 				// if the te has an item handler on this face, add an endpoint (representing that face) to the network
 				if (network.tubes.contains(endPos.relative(face)))
 				{
-					LazyOptional<IItemHandler> possibleHandler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face);
+					LazyOptional<IItemHandler> possibleHandler = te.getCapability(ForgeCapabilities.ITEM_HANDLER, face);
 					possibleHandler.ifPresent(handler -> network.endpoints.add(new Endpoint(endPos, face)));
 				}
 			}

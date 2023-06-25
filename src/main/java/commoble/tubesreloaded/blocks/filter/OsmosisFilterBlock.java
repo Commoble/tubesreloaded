@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 
 public class OsmosisFilterBlock extends FilterBlock
 {
@@ -80,7 +80,7 @@ public class OsmosisFilterBlock extends FilterBlock
 				{
 					BlockEntity neighborBe = level.getBlockEntity(pos.relative(inputDirection));
 					boolean canExtractItems = neighborBe != null
-						&& neighborBe.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, outputDirection)
+						&& neighborBe.getCapability(ForgeCapabilities.ITEM_HANDLER, outputDirection)
 							.map(handler -> WorldHelper.doesItemHandlerHaveAnyExtractableItems(handler, filter::canItemPassThroughFilter))
 							.orElse(false);
 					

@@ -45,7 +45,7 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 
 public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBlock
 {
@@ -214,7 +214,7 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 		if (blockEntity == null)
 			return false;
 
-		if (blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face.getOpposite()).isPresent())
+		if (blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, face.getOpposite()).isPresent())
 		{
 			return true;
 		}

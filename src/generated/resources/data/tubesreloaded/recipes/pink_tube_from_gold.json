@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "building",
   "key": {
     "G": {
       "tag": "forge:glass/pink"
@@ -14,5 +15,6 @@
   "result": {
     "count": 8,
     "item": "tubesreloaded:pink_tube"
-  }
+  },
+  "show_notification": true
 }

@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "building",
   "key": {
     "G": {
       "tag": "forge:glass/white"
@@ -14,5 +15,6 @@
   "result": {
     "count": 8,
     "item": "tubesreloaded:white_tube"
-  }
+  },
+  "show_notification": true
 }
