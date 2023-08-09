@@ -3,6 +3,7 @@
     "tubesreloaded:distributor",
     "tubesreloaded:extractor",
     "tubesreloaded:filter",
+    "tubesreloaded:multifilter",
     "tubesreloaded:loader",
     "tubesreloaded:osmosis_filter",
     "tubesreloaded:redstone_tube",

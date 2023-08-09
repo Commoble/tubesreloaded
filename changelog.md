@@ -1,3 +1,6 @@
+## 3.1.0.0
+* Added Multifilters, which can filter up to 27 different items and receive input from tubes/hoppers/etc on all five non-output sides. Unlike normal filters, their internal contents cannot be changed except via the GUI, and they will not accept items while their filter is empty.
+
 ## 3.0.0.0
 * Updated to minecraft 1.20.1 (requires forge 47.0.3 or higher)
 * The useitemonblockevent mod is now bundled with tubes reloaded via forge jar-in-jar (instead of being required to download it separately)

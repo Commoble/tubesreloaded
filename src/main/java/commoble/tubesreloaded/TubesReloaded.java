@@ -19,6 +19,9 @@ import commoble.tubesreloaded.blocks.extractor.ExtractorBlock;
 import commoble.tubesreloaded.blocks.filter.FilterBlock;
 import commoble.tubesreloaded.blocks.filter.FilterBlockEntity;
 import commoble.tubesreloaded.blocks.filter.FilterMenu;
+import commoble.tubesreloaded.blocks.filter.MultiFilterBlock;
+import commoble.tubesreloaded.blocks.filter.MultiFilterBlockEntity;
+import commoble.tubesreloaded.blocks.filter.MultiFilterMenu;
 import commoble.tubesreloaded.blocks.filter.OsmosisFilterBlock;
 import commoble.tubesreloaded.blocks.filter.OsmosisFilterBlockEntity;
 import commoble.tubesreloaded.blocks.filter.OsmosisSlimeBlock;
@@ -131,6 +134,7 @@ public class TubesReloaded
 	public final RegistryObject<DistributorBlock> distributorBlock;
 	public final RegistryObject<ExtractorBlock> extractorBlock;
 	public final RegistryObject<FilterBlock> filterBlock;
+	public final RegistryObject<MultiFilterBlock> multiFilterBlock;
 	public final RegistryObject<LoaderBlock> loaderBlock;
 	public final RegistryObject<OsmosisFilterBlock> osmosisFilterBlock;
 	public final RegistryObject<OsmosisSlimeBlock> osmosisSlimeBlock;
@@ -144,12 +148,14 @@ public class TubesReloaded
 
 	public final RegistryObject<BlockEntityType<DistributorBlockEntity>> distributorEntity;
 	public final RegistryObject<BlockEntityType<FilterBlockEntity>> filterEntity;
+	public final RegistryObject<BlockEntityType<MultiFilterBlockEntity>> multiFilterEntity;
 	public final RegistryObject<BlockEntityType<OsmosisFilterBlockEntity>> osmosisFilterEntity;
 	public final RegistryObject<BlockEntityType<RedstoneTubeBlockEntity>> redstoneTubeEntity;
 	public final RegistryObject<BlockEntityType<ShuntBlockEntity>> shuntEntity;
 	public final RegistryObject<BlockEntityType<TubeBlockEntity>> tubeEntity;
 
 	public final RegistryObject<MenuType<FilterMenu>> filterMenu;
+	public final RegistryObject<MenuType<MultiFilterMenu>> multiFilterMenu;
 	public final RegistryObject<MenuType<LoaderMenu>> loaderMenu;
 
 	public TubesReloaded()
@@ -202,6 +208,11 @@ public class TubesReloaded
 		this.filterBlock = registerBlockAndStandardItem(blocks, items, Names.FILTER,
 			() -> new FilterBlock(BlockBehaviour.Properties.of()
 				.mapColor(MapColor.TERRACOTTA_YELLOW)
+				.strength(2F, 6F)
+				.sound(SoundType.METAL)));
+		this.multiFilterBlock = registerBlockAndStandardItem(blocks, items, Names.MULTIFILTER,
+			() -> new MultiFilterBlock(BlockBehaviour.Properties.of()
+				.mapColor(MapColor.STONE)
 				.strength(2F, 6F)
 				.sound(SoundType.METAL)));
 		this.osmosisFilterBlock = registerBlockAndStandardItem(blocks, items, Names.OSMOSIS_FILTER,
@@ -258,6 +269,8 @@ public class TubesReloaded
 			() -> BlockEntityType.Builder.of(RedstoneTubeBlockEntity::new, redstoneTubeBlock.get()).build(null));
 		this.filterEntity = blockEntities.register(Names.FILTER,
 			() -> BlockEntityType.Builder.of(FilterBlockEntity::new, filterBlock.get()).build(null));
+		this.multiFilterEntity = blockEntities.register(Names.MULTIFILTER,
+			() -> BlockEntityType.Builder.of(MultiFilterBlockEntity::new, multiFilterBlock.get()).build(null));
 		this.osmosisFilterEntity = blockEntities.register(Names.OSMOSIS_FILTER,
 			() -> BlockEntityType.Builder.of(OsmosisFilterBlockEntity::new, osmosisFilterBlock.get()).build(null));
 		this.distributorEntity = blockEntities.register(Names.DISTRIBUTOR,
@@ -266,6 +279,7 @@ public class TubesReloaded
 		// menu types
 		this.loaderMenu = containers.register(Names.LOADER, () -> new MenuType<>(LoaderMenu::new, FeatureFlags.VANILLA_SET));
 		this.filterMenu = containers.register(Names.FILTER, () -> new MenuType<>(FilterMenu::createClientMenu, FeatureFlags.VANILLA_SET));
+		this.multiFilterMenu = containers.register(Names.MULTIFILTER, () -> new MenuType<>(MultiFilterMenu::clientMenu, FeatureFlags.VANILLA_SET));
 		
 		// subscribe events
 		modBus.addListener(this::onCommonSetup);

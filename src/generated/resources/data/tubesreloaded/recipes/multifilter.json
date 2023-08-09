@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": {
+      "tag": "forge:chests"
+    },
+    "f": {
+      "item": "tubesreloaded:filter"
+    },
+    "i": {
+      "tag": "forge:ingots/iron"
+    }
+  },
+  "pattern": [
+    "ifi",
+    "fCf",
+    "ifi"
+  ],
+  "result": {
+    "item": "tubesreloaded:multifilter"
+  },
+  "show_notification": true
+}

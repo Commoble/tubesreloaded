@@ -13,7 +13,6 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
@@ -21,10 +20,8 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 
-public class FilterBlockEntity extends BlockEntity
+public class FilterBlockEntity extends AbstractFilterBlockEntity
 {
-	public static final String INV_KEY = "inventory";
-	
 	public ItemStack filterStack = ItemStack.EMPTY;
 	public FilterShuntingItemHandler shuntingHandler = new FilterShuntingItemHandler(this);
 	public FilterStorageItemHandler storageHandler = new FilterStorageItemHandler(this);
@@ -49,6 +46,7 @@ public class FilterBlockEntity extends BlockEntity
 		super.invalidateCaps();
 	}
 	
+	@Override
 	public boolean canItemPassThroughFilter(ItemStack stack)
 	{
 		if (stack.getCount() <= 0)

@@ -111,6 +111,9 @@ public class TubesReloadedDatagen
 		doBlock.apply(mod.filterBlock.get(), sixWayBlockState, simpleBlockLoot)
 			.tags(blockTags, BlockTags.MINEABLE_WITH_PICKAXE, TubesReloaded.Tags.Blocks.ROTATABLE_BY_PLIERS)
 			.localize(lang, "Filter");
+		doBlock.apply(mod.multiFilterBlock.get(), sixWayBlockState, simpleBlockLoot)
+			.tags(blockTags, BlockTags.MINEABLE_WITH_PICKAXE, TubesReloaded.Tags.Blocks.ROTATABLE_BY_PLIERS)
+			.localize(lang, "Multifilter");
 		doBlock.apply(mod.loaderBlock.get(), sixWayBlockState, simpleBlockLoot)
 			.tags(blockTags, BlockTags.MINEABLE_WITH_PICKAXE, TubesReloaded.Tags.Blocks.ROTATABLE_BY_PLIERS)
 			.localize(lang, "Loader");
@@ -167,6 +170,13 @@ public class TubesReloadedDatagen
 			.recipe(recipes, RecipeHelpers.shapeless(mod.filterBlock.getId(), mod.filterBlock.get().asItem(), 1, CraftingBookCategory.BUILDING, List.of(
 				Ingredient.of(mod.shuntBlock.get().asItem()),
 				Ingredient.of(Items.ITEM_FRAME))));
+		doItem.apply(mod.multiFilterBlock.get().asItem(), blockItemModel)
+			.recipe(recipes, RecipeHelpers.shaped(mod.multiFilterBlock.getId(), mod.multiFilterBlock.get().asItem(), 1, CraftingBookCategory.BUILDING,
+				List.of("ifi", "fCf", "ifi"),
+				Map.of(
+					'i', Ingredient.of(Tags.Items.INGOTS_IRON),
+					'f', Ingredient.of(mod.filterBlock.get().asItem()),
+					'C', Ingredient.of(Tags.Items.CHESTS))));
 		doItem.apply(mod.loaderBlock.get().asItem(), blockItemModel)
 			.recipe(recipes, RecipeHelpers.shaped(mod.loaderBlock.getId(), mod.loaderBlock.get().asItem(), 1, CraftingBookCategory.BUILDING,
 				List.of("sss", "P S", "sss"),

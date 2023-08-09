@@ -2,6 +2,7 @@
   "values": [
     "tubesreloaded:extractor",
     "tubesreloaded:filter",
+    "tubesreloaded:multifilter",
     "tubesreloaded:loader",
     "tubesreloaded:osmosis_filter",
     "tubesreloaded:shunt"

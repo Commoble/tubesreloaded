@@ -38,6 +38,8 @@ public class ClientEvents
 			new ResourceLocation(TubesReloaded.MODID, "textures/gui/loader.png"), TubesReloaded.get().loaderBlock.get().getDescriptionId()));
 		MenuScreens.register(TubesReloaded.get().filterMenu.get(), StandardSizeContainerScreenFactory.of(
 			new ResourceLocation(TubesReloaded.MODID, "textures/gui/filter.png"), TubesReloaded.get().filterBlock.get().getDescriptionId()));
+		MenuScreens.register(TubesReloaded.get().multiFilterMenu.get(), StandardSizeContainerScreenFactory.of(
+			new ResourceLocation("textures/gui/container/shulker_box.png"), TubesReloaded.get().multiFilterBlock.get().getDescriptionId()));
 	}
 	
 	private static void onRegisterRenderers(RegisterRenderers event)

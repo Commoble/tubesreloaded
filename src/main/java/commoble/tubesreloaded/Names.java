@@ -14,6 +14,7 @@ public class Names
 	public static final String REDSTONE_TUBE = "redstone_tube";
 	public static final String EXTRACTOR = "extractor";
 	public static final String FILTER = "filter";
+	public static final String MULTIFILTER = "multifilter";
 	public static final String OSMOSIS_FILTER = "osmosis_filter";
 	public static final String OSMOSIS_SLIME = "osmosis_slime";
 	public static final String DISTRIBUTOR = "distributor";

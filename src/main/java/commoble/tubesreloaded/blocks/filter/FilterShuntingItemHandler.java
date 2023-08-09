@@ -4,18 +4,19 @@ import commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 
 public class FilterShuntingItemHandler implements IItemHandler
 {
-	private final FilterBlockEntity filter;
+	private final AbstractFilterBlockEntity filter;
 	private boolean shunting = false; // true while retreiving insertion result from neighbor, averts infinite loops
 	
 	// inventory of the block we may be sending items to
 	private LazyOptional<IItemHandler> targetInventory = LazyOptional.empty();
 	
-	public FilterShuntingItemHandler (FilterBlockEntity filter)
+	public FilterShuntingItemHandler (AbstractFilterBlockEntity filter)
 	{
 		this.filter = filter;
 	}
@@ -36,6 +37,9 @@ public class FilterShuntingItemHandler implements IItemHandler
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
 	{
+		if (!this.filter.getBlockState().hasProperty(DirectionalBlock.FACING))
+			return stack;
+		
 		if (this.shunting || !this.isItemValid(slot, stack))
 		{
 			return stack.copy();
@@ -45,7 +49,7 @@ public class FilterShuntingItemHandler implements IItemHandler
 		{
 			// attempt to insert item
 			BlockPos pos = this.filter.getBlockPos();
-			Direction outputDir = this.filter.getBlockState().getValue(FilterBlock.FACING);
+			Direction outputDir = this.filter.getBlockState().getValue(DirectionalBlock.FACING);
 			BlockPos outputPos = pos.relative(outputDir);
 			
 			this.shunting = true;

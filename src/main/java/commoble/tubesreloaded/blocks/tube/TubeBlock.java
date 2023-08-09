@@ -13,7 +13,7 @@ import com.mojang.math.OctahedralGroup;
 
 import commoble.tubesreloaded.TubesReloaded;
 import commoble.tubesreloaded.blocks.extractor.ExtractorBlock;
-import commoble.tubesreloaded.blocks.filter.FilterBlock;
+import commoble.tubesreloaded.blocks.filter.AbstractFilterBlock;
 import commoble.tubesreloaded.blocks.loader.LoaderBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -208,7 +208,7 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 		if (newBlock instanceof ExtractorBlock && state.getValue(ExtractorBlock.FACING).equals(face.getOpposite()))
 			return true;
 
-		if (newBlock instanceof FilterBlock && state.getValue(FilterBlock.FACING).equals(face.getOpposite()))
+		if (newBlock instanceof AbstractFilterBlock && state.getValue(AbstractFilterBlock.FACING).equals(face.getOpposite()))
 			return true;
 
 		if (blockEntity == null)
