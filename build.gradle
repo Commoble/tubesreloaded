@@ -40,7 +40,7 @@ minecraft {
 runs {
 	configureEach {
 		systemProperty 'forge.logging.console.level', 'debug'
-		modSources.addAll project.sourceSets.main
+		modSources project.sourceSets.main
 	}
 
 	client {
