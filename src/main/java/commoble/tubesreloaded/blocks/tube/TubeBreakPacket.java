@@ -1,15 +1,18 @@
 package commoble.tubesreloaded.blocks.tube;
 
-import java.util.function.Supplier;
-
+import commoble.tubesreloaded.TubesReloaded;
 import commoble.tubesreloaded.client.ClientPacketHandlers;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 
-public class TubeBreakPacket
+public class TubeBreakPacket implements CustomPacketPayload
 {
+	public static final ResourceLocation ID = new ResourceLocation(TubesReloaded.MODID, "tube_break");
+	
 	public final Vec3 start;
 	public final Vec3 end;
 	
@@ -53,10 +56,14 @@ public class TubeBreakPacket
 		}
 	}
 	
-	public void handle(Supplier<NetworkEvent.Context> contextGetter)
+	public void handle(PlayPayloadContext context)
 	{
-		NetworkEvent.Context context = contextGetter.get();
-		context.enqueueWork(() -> ClientPacketHandlers.onTubeBreakPacket(context, this));
-		context.setPacketHandled(true);
+		context.workHandler().execute(() -> ClientPacketHandlers.onTubeBreakPacket(context, this));
+	}
+
+	@Override
+	public ResourceLocation id()
+	{
+		return ID;
 	}
 }

@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
 
 public class MultiFilterBlock extends AbstractFilterBlock implements EntityBlock
 {
@@ -42,10 +41,7 @@ public class MultiFilterBlock extends AbstractFilterBlock implements EntityBlock
 			BlockEntity blockEntity = level.getBlockEntity(pos);
 			if (blockEntity instanceof MultiFilterBlockEntity filter)
 			{
-				NetworkHooks.openScreen(
-					serverPlayer,
-					new SimpleMenuProvider(MultiFilterMenu.serverMenu(filter), Component.translatable(this.getDescriptionId()))
-				);
+				serverPlayer.openMenu(new SimpleMenuProvider(MultiFilterMenu.serverMenu(filter), Component.translatable(this.getDescriptionId())));
 			}
 		}
 		

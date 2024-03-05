@@ -19,6 +19,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class RaytraceHelper
@@ -128,7 +129,7 @@ public class RaytraceHelper
 		int rayTraceCount = pointCount-1;
 		for (int i=0; i<rayTraceCount; i++)
 		{
-			ClipContext context = new ClipContext(points[i], points[i+1], ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null);
+			ClipContext context = new ClipContext(points[i], points[i+1], ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
 			BlockHitResult result = rayTraceBlocks(world, context);
 			if (result.getType() != HitResult.Type.MISS)
 			{

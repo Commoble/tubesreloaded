@@ -57,3 +57,6 @@ Adds tubes to minecraft
     versionRange="[1.0.0.2,)"
     ordering="NONE"
     side="BOTH"
+
+[[accessTransformers]]
+	file="META-INF/accesstransformer.cfg"

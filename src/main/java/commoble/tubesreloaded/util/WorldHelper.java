@@ -13,20 +13,10 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public class WorldHelper
-{	
-	public static LazyOptional<IItemHandler> getItemHandlerAt(Level world, BlockPos pos, Direction faceOfBlockPos)
-	{
-		BlockEntity te = world.getBlockEntity(pos);
-		
-		return te != null ? te.getCapability(ForgeCapabilities.ITEM_HANDLER, faceOfBlockPos) : LazyOptional.empty();
-	}
-	
+{
 	public static void ejectItemstack(Level world, BlockPos from_pos, @Nullable Direction output_dir, ItemStack stack)
 	{
 		// if there is room in front of the shunt, eject items there

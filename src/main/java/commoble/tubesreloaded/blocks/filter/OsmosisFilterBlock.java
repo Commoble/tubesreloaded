@@ -18,7 +18,8 @@ import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public class OsmosisFilterBlock extends FilterBlock
 {
@@ -78,11 +79,9 @@ public class OsmosisFilterBlock extends FilterBlock
 				
 				if (!checkedItemsThisTick)
 				{
-					BlockEntity neighborBe = level.getBlockEntity(pos.relative(inputDirection));
-					boolean canExtractItems = neighborBe != null
-						&& neighborBe.getCapability(ForgeCapabilities.ITEM_HANDLER, outputDirection)
-							.map(handler -> WorldHelper.doesItemHandlerHaveAnyExtractableItems(handler, filter::canItemPassThroughFilter))
-							.orElse(false);
+					IItemHandler neighborHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos.relative(inputDirection), outputDirection);
+					boolean canExtractItems = neighborHandler != null
+						&& WorldHelper.doesItemHandlerHaveAnyExtractableItems(neighborHandler, filter::canItemPassThroughFilter);
 					
 					if (active && (hasRedstoneSignal || !canExtractItems))
 					{

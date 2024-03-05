@@ -3,33 +3,23 @@ package commoble.tubesreloaded.blocks.tube;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 
 import commoble.tubesreloaded.ClientProxy;
 import commoble.tubesreloaded.TubesReloaded;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.PacketDistributor;
 
-public class TubesInChunk implements ICapabilityProvider, INBTSerializable<CompoundTag>
+public class TubesInChunk
 {
-	public static final Capability<TubesInChunk> CAPABILITY = CapabilityManager.get(new CapabilityToken<>(){});
-	
 	/** This codec serializes a list-like element **/
 	public static final Codec<Set<BlockPos>> TUBE_SET_CODEC = BlockPos.CODEC.listOf().xmap(HashSet::new, ArrayList::new);
 	/** half-codec that can be used in other places **/
@@ -37,55 +27,16 @@ public class TubesInChunk implements ICapabilityProvider, INBTSerializable<Compo
 	/** This codec serializes a maplike element, its results can be cast to CompoundNBT**/
 	public static final Codec<Set<BlockPos>> CODEC = FIELD_CODEC.codec();
 	
-	private final LazyOptional<TubesInChunk> holder = LazyOptional.of(() -> this);
-	
-	/** The positions in this set are world coordinates, not local-to-chunk coordinates **/
-	private Set<BlockPos> positions = new HashSet<>();
-	
-	private final LevelChunk chunk; public LevelChunk getChunk() {return this.chunk;}
-	
-	public TubesInChunk(LevelChunk chunk)
+	public static void updateTubeSet(Level level, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
 	{
-		this.chunk = chunk;
-	}
-	
-	@Override
-	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
-	{
-		if (cap == CAPABILITY)
+		LevelChunk chunk = level.getChunkAt(pos);
+		if (chunk != null)
 		{
-			return CAPABILITY.orEmpty(cap, this.holder);
+			var set = chunk.getData(TubesReloaded.get().tubesInChunkAttachment.get());
+			consumer.accept(set, pos);
+			chunk.setData(TubesReloaded.get().tubesInChunkAttachment.get(), set);
+			PacketDistributor.TRACKING_CHUNK.with(chunk).send(new SyncTubesInChunkPacket(chunk.getPos(), set));
 		}
-		else
-		{
-			return LazyOptional.empty();
-		}
-	}
-
-	public Set<BlockPos> getPositions()
-	{
-		return this.positions;
-	}
-
-	public void setPositions(Set<BlockPos> set)
-	{
-		this.positions = set;
-		TubesReloaded.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(this::getChunk), new SyncTubesInChunkPacket(this.chunk.getPos(), set));
-	}
-
-	@Override
-	public CompoundTag serializeNBT()
-	{
-		return CODEC.encodeStart(NbtOps.INSTANCE, this.getPositions())
-			.result()
-			.map(tag -> tag instanceof CompoundTag compound ? compound : null)
-			.orElseGet(CompoundTag::new);
-	}
-
-	@Override
-	public void deserializeNBT(CompoundTag nbt)
-	{
-		CODEC.decode(NbtOps.INSTANCE, nbt).result().map(Pair::getFirst).ifPresent(this::setPositions);
 	}
 	
 	public static Set<ChunkPos> getRelevantChunkPositionsNearPos(BlockPos pos)
@@ -105,6 +56,11 @@ public class TubesInChunk implements ICapabilityProvider, INBTSerializable<Compo
 		return set;
 	}
 	
+	public static Set<BlockPos> getTubesInChunk(LevelChunk chunk)
+	{
+		return chunk.getData(TubesReloaded.get().tubesInChunkAttachment.get());
+	}
+	
 	/**
 	 * Gets the tubes in the chunk if the chunk is loaded, if called on the client uses the synced tube data
 	 * @param level Level
@@ -119,19 +75,11 @@ public class TubesInChunk implements ICapabilityProvider, INBTSerializable<Compo
 		}
 		else if (level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false) instanceof LevelChunk chunk)
 		{
-			return chunk.getCapability(TubesInChunk.CAPABILITY)
-				.map(TubesInChunk::getPositions)
-				.orElse(Set.of());
+			return getTubesInChunk(chunk);
 		}
 		else
 		{
 			return Set.of();	
 		}
 	}
-	
-	public void onCapabilityInvalidated()
-	{
-		this.holder.invalidate();
-	}
-
 }

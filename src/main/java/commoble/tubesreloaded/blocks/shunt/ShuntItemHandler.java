@@ -5,8 +5,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public class ShuntItemHandler implements IItemHandler
 {
@@ -52,9 +52,10 @@ public class ShuntItemHandler implements IItemHandler
 			{
 				// attempt to insert item
 				this.shunting = true;
-				ItemStack remaining = this.getOutputOptional(outputPos, outputDir)
-						.map(handler -> WorldHelper.disperseItemToHandler(stack, handler))
-						.orElseGet(() -> stack.copy());
+				IItemHandler outputHandler = this.shunt.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, outputPos, outputDir.getOpposite());
+				ItemStack remaining = outputHandler == null
+					? stack.copy()
+					: WorldHelper.disperseItemToHandler(stack, outputHandler);
 				this.shunting = false;
 				
 				if (remaining.getCount() > 0) // we have remaining items
@@ -69,11 +70,6 @@ public class ShuntItemHandler implements IItemHandler
 		}
 		
 		return ItemStack.EMPTY;
-	}
-	
-	private LazyOptional<IItemHandler> getOutputOptional(BlockPos outputPos, Direction outputDir)
-	{
-		return WorldHelper.getItemHandlerAt(this.shunt.getLevel(), outputPos, outputDir.getOpposite());
 	}
 
 	@Override

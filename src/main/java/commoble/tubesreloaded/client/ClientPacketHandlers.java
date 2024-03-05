@@ -9,11 +9,11 @@ import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 
 public class ClientPacketHandlers
 {
-	public static void onTubeBreakPacket(NetworkEvent.Context context, TubeBreakPacket packet)
+	public static void onTubeBreakPacket(PlayPayloadContext context, TubeBreakPacket packet)
 	{
 		Minecraft mc = Minecraft.getInstance();
 		ClientLevel level = mc.level;

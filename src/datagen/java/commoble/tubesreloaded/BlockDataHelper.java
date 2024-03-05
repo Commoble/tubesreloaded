@@ -2,15 +2,14 @@ package commoble.tubesreloaded;
 
 import java.util.Map;
 
-import commoble.databuddy.datagen.BlockStateFile;
-import commoble.databuddy.datagen.SimpleModel;
+import net.commoble.databuddy.datagen.BlockStateFile;
+import net.commoble.databuddy.datagen.SimpleModel;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraftforge.common.data.LanguageProvider;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.data.LanguageProvider;
 
 public record BlockDataHelper(Block block)
 {
@@ -23,7 +22,7 @@ public record BlockDataHelper(Block block)
 	
 	public static BlockDataHelper create(Block block,
 		Map<ResourceLocation, BlockStateFile> blockstates, BlockStateFile blockstate,
-		Provider<LootTable> lootTables, LootTable lootTable)
+		Map<ResourceLocation, LootTable> lootTables, LootTable lootTable)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block);
 		blockstates.put(helper.id(), blockstate);
@@ -37,7 +36,6 @@ public record BlockDataHelper(Block block)
 		return this;
 	}
 	
-	@SuppressWarnings("deprecation")
 	@SafeVarargs
 	public final BlockDataHelper tags(TagProvider<Block> tagProvider, TagKey<Block>... tags)
 	{
@@ -76,12 +74,12 @@ public record BlockDataHelper(Block block)
 	
 	public ResourceLocation id()
 	{
-		return ForgeRegistries.BLOCKS.getKey(this.block);
+		return BuiltInRegistries.BLOCK.getKey(this.block);
 	}
 	
 	public static ResourceLocation blockModel(Block block)
 	{
-		return blockModel(ForgeRegistries.BLOCKS.getKey(block));
+		return blockModel(BuiltInRegistries.BLOCK.getKey(block));
 	}
 	
 	public static ResourceLocation blockModel(ResourceLocation location)

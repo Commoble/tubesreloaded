@@ -1,12 +1,7 @@
 package commoble.tubesreloaded.blocks.distributor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import commoble.tubesreloaded.TubesReloaded;
@@ -16,9 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public class DistributorBlockEntity extends BlockEntity
 {
@@ -29,12 +22,6 @@ public class DistributorBlockEntity extends BlockEntity
 	protected final DistributorItemHandler[] handlers = IntStream.range(0, 6)
 		.mapToObj(i -> new DistributorItemHandler(this, Direction.from3DDataValue(i)))
 		.toArray(DistributorItemHandler[]::new);
-	
-	// optional instances for public use
-	// these will last for the lifetime of the TileEntity and be invalidated when the TE is removed
-	public final List<LazyOptional<DistributorItemHandler>> handlerOptionals = Arrays.stream(this.handlers)
-		.map(handler -> LazyOptional.of(() -> handler))
-		.collect(Collectors.toCollection(ArrayList::new));
 	
 	public Direction nextSide = Direction.DOWN;
 	
@@ -48,29 +35,9 @@ public class DistributorBlockEntity extends BlockEntity
 		this(TubesReloaded.get().distributorEntity.get(), pos, state);
 	}
 	
-	public List<LazyOptional<DistributorItemHandler>> initItemHandlers()
+	public IItemHandler getItemHandler(@Nullable Direction side)
 	{
-		return IntStream.range(0, 6)
-			.mapToObj(i -> LazyOptional.of(() -> new DistributorItemHandler(this, Direction.from3DDataValue(i))))
-			.collect(Collectors.toCollection(ArrayList::new));
-	}
-	
-	@Override
-	public void invalidateCaps()
-	{
-		this.handlerOptionals.forEach(LazyOptional::invalidate);
-		super.invalidateCaps();
-	}
-	
-	@Override
-	@Nonnull
-	public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side)
-	{
-		if (cap == ForgeCapabilities.ITEM_HANDLER)
-		{
-			return this.handlerOptionals.get(side.ordinal()).cast();
-		}
-		return super.getCapability(cap, side);
+		return side == null ? null : this.handlers[side.ordinal()];
 	}
 	
 	@Override

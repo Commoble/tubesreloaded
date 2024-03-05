@@ -1,7 +1,6 @@
 package commoble.tubesreloaded.blocks.tube;
 
 import java.util.Set;
-import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
@@ -10,15 +9,20 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import commoble.tubesreloaded.ClientProxy;
 import commoble.tubesreloaded.MiscCodecs;
+import commoble.tubesreloaded.TubesReloaded;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 
-public class SyncTubesInChunkPacket
+public class SyncTubesInChunkPacket implements CustomPacketPayload
 {
+	public static final ResourceLocation ID = new ResourceLocation(TubesReloaded.MODID, "sync_tubes_in_chunk");
+	
 	public static final Codec<SyncTubesInChunkPacket> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			MiscCodecs.COMPRESSED_CHUNK_POS.fieldOf("chunk").forGetter(SyncTubesInChunkPacket::getChunkPos),
 			TubesInChunk.FIELD_CODEC.forGetter(SyncTubesInChunkPacket::getTubesInChunk)
@@ -35,6 +39,7 @@ public class SyncTubesInChunkPacket
 		this.tubesInChunk = tubesInChunk;
 	}
 	
+	@Override
 	public void write(FriendlyByteBuf buffer)
 	{
 		buffer.writeNbt((CompoundTag)CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag()));
@@ -45,10 +50,14 @@ public class SyncTubesInChunkPacket
 		return CODEC.decode(NbtOps.INSTANCE, buffer.readNbt()).result().map(Pair::getFirst).orElse(BAD_PACKET);
 	}
 	
-	public void handle(Supplier<NetworkEvent.Context> contextGetter)
+	public void handle(PlayPayloadContext context)
 	{
-		NetworkEvent.Context context = contextGetter.get();
-		contextGetter.get().enqueueWork(() -> ClientProxy.updateTubesInChunk(this.chunkPos, this.tubesInChunk));
-		context.setPacketHandled(true);
+		context.workHandler().execute(() -> ClientProxy.updateTubesInChunk(this.chunkPos, this.tubesInChunk));
+	}
+
+	@Override
+	public ResourceLocation id()
+	{
+		return ID;
 	}
 }

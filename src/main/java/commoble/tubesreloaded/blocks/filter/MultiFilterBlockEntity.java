@@ -1,6 +1,5 @@
 package commoble.tubesreloaded.blocks.filter;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import commoble.tubesreloaded.TubesReloaded;
@@ -12,10 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public class MultiFilterBlockEntity extends AbstractFilterBlockEntity
 {
@@ -28,7 +24,6 @@ public class MultiFilterBlockEntity extends AbstractFilterBlockEntity
 		}
 	};
 	public final IItemHandler shuntingHandler = new FilterShuntingItemHandler(this); 
-	public final LazyOptional<IItemHandler> shuntingOptional = LazyOptional.of(() -> this.shuntingHandler);
 	
 	public MultiFilterBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
 	{
@@ -40,25 +35,18 @@ public class MultiFilterBlockEntity extends AbstractFilterBlockEntity
 		this(TubesReloaded.get().multiFilterEntity.get(), pos, state);
 	}
 
-	@Override
-	public void invalidateCaps()
+	@Nullable
+	public IItemHandler getItemHandler(@Nullable Direction side)
 	{
-		this.shuntingOptional.invalidate();
-		super.invalidateCaps();
-	}
-
-	@Override
-	public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side)
-	{
-		if (cap == ForgeCapabilities.ITEM_HANDLER && this.getBlockState().hasProperty(DirectionalBlock.FACING))
+		if (this.getBlockState().hasProperty(DirectionalBlock.FACING))
 		{
 			Direction outputDir = this.getBlockState().getValue(DirectionalBlock.FACING);
 			if (side == outputDir.getOpposite())
 			{
-				return this.shuntingOptional.cast();
+				return this.shuntingHandler;
 			}
 		}
-		return super.getCapability(cap, side);
+		return null;
 	}
 
 	@Override

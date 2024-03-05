@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
 
 /**
  * Itemhandler that acts as a Set of items.

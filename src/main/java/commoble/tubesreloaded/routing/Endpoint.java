@@ -4,10 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public class Endpoint
 {	
@@ -50,18 +48,14 @@ public class Endpoint
 	 * This only simulates the insertion and does not affect the state of
 	 * any itemstacks or inventories
 	 * 
-	 * @param world The world this endpoint lies in
+	 * @param level The world this endpoint lies in
 	 * @param stack The stack to attempt to insert
 	 * @return true or false as described above
 	 */
-	public boolean canInsertItem(Level world, ItemStack stack)
+	public boolean canInsertItem(Level level, ItemStack stack)
 	{
-		BlockEntity te = world.getBlockEntity(this.pos);
-		
-		if (te == null) return false;
-		
-		LazyOptional<IItemHandler> optionalHandler = te.getCapability(ForgeCapabilities.ITEM_HANDLER, this.face);
-		return optionalHandler.map(handler -> canInsertItem(handler, stack)).orElse(false);
+		IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, this.pos, this.face);
+		return handler != null && canInsertItem(handler, stack);
 	}
 	
 	// helper function used for the above method

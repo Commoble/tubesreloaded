@@ -12,7 +12,7 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 public record Provider<T>(String directory, Function<ResourceLocation,Path> pathFunction, Function<T, JsonElement> serializer, Map<ResourceLocation,T> map) implements DataProvider
 {

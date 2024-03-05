@@ -4,8 +4,8 @@ import commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public class DistributorItemHandler implements IItemHandler
 {
@@ -79,9 +79,10 @@ public class DistributorItemHandler implements IItemHandler
 				final ItemStack stackForNextInsertion = remainingStack.copy();
 				
 				this.shunting = true;
-				remainingStack = this.getOutputOptional(outputPos, checkDirection)
-					.map(handler -> WorldHelper.disperseItemToHandler(stackForNextInsertion, handler, simulate))
-					.orElse(remainingStack);
+				IItemHandler outputHandler = this.distributor.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, outputPos, checkDirection.getOpposite());
+				remainingStack = outputHandler == null
+					? remainingStack
+					: WorldHelper.disperseItemToHandler(stackForNextInsertion, outputHandler, simulate);
 				this.shunting = false;
 				
 				if (remainingStack.isEmpty())
@@ -100,11 +101,6 @@ public class DistributorItemHandler implements IItemHandler
 		}
 		
 		return ItemStack.EMPTY;
-	}
-	
-	private LazyOptional<IItemHandler> getOutputOptional(BlockPos outputPos, Direction outputDir)
-	{
-		return WorldHelper.getItemHandlerAt(this.distributor.getLevel(), outputPos, outputDir.getOpposite());
 	}
 
 	@Override

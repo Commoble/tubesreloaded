@@ -3,20 +3,19 @@ package commoble.tubesreloaded.client;
 import commoble.tubesreloaded.ClientProxy;
 import commoble.tubesreloaded.TubesReloaded;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers;
-import net.minecraftforge.event.TickEvent.ClientTickEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.event.TickEvent.ClientTickEvent;
 
 public class ClientEvents
 {
 	public static void subscribeClientEvents(IEventBus modBus, IEventBus forgeBus)
 	{
-		modBus.addListener(ClientEvents::onClientSetup);
+		modBus.addListener(ClientEvents::onRegisterScreens);
 		modBus.addListener(ClientEvents::onRegisterRenderers);
 		
 		forgeBus.addListener(ClientEvents::onClientTick);
@@ -24,21 +23,14 @@ public class ClientEvents
 		forgeBus.addListener(ClientEvents::onClientLogOut);
 	}
 	
-	private static void onClientSetup(FMLClientSetupEvent event)
-	{
-		// run not-thread-safe stuff on the main thread
-		event.enqueueWork(ClientEvents::afterClientSetup);
-	}
-	
-	// run not-thread-safe stuff on the main thread
-	private static void afterClientSetup()
+	private static void onRegisterScreens(RegisterMenuScreensEvent event)
 	{
 		// register screens
-		MenuScreens.register(TubesReloaded.get().loaderMenu.get(), StandardSizeContainerScreenFactory.of(
+		event.register(TubesReloaded.get().loaderMenu.get(), StandardSizeContainerScreenFactory.of(
 			new ResourceLocation(TubesReloaded.MODID, "textures/gui/loader.png"), TubesReloaded.get().loaderBlock.get().getDescriptionId()));
-		MenuScreens.register(TubesReloaded.get().filterMenu.get(), StandardSizeContainerScreenFactory.of(
+		event.register(TubesReloaded.get().filterMenu.get(), StandardSizeContainerScreenFactory.of(
 			new ResourceLocation(TubesReloaded.MODID, "textures/gui/filter.png"), TubesReloaded.get().filterBlock.get().getDescriptionId()));
-		MenuScreens.register(TubesReloaded.get().multiFilterMenu.get(), StandardSizeContainerScreenFactory.of(
+		event.register(TubesReloaded.get().multiFilterMenu.get(), StandardSizeContainerScreenFactory.of(
 			new ResourceLocation("textures/gui/container/shulker_box.png"), TubesReloaded.get().multiFilterBlock.get().getDescriptionId()));
 	}
 	

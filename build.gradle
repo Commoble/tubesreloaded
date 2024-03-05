@@ -1,44 +1,23 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        mavenCentral()
-        maven {url='https://repo.spongepowered.org/repository/maven-public/'}
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-    }
-}
 plugins {
-	// https://github.com/johnrengelman/shadow
-	// this version works on gradle 7.x
-	id 'com.github.johnrengelman.shadow' version '7.1.2'
+	id 'java-library'
+	id 'eclipse'
+	id 'idea'
+	id 'net.neoforged.gradle.userdev' version "7.0.+"
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'java' // java plugin is needed for the shadow plugin to work
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
 
+group = "net.commoble.${modid}"
+base { archivesName="${modid}-${mc_version}" }
 version = "${mod_version}"
-group = "commoble.${modid}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "${modid}-${mc_version}"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 // the jarjar stuff
 jarJar.enable()
 tasks.jarJar.configure {
-	classifier '' // we only publish one jar so we make jarjar 
+	archiveClassifier = '' // we only publish one jar so we make jarjar 
 }
 
-reobf {
-    jarJar { }
-}
-
-// this replaces jar.finalizedBy('reobfJar') in the standard forge mod buildscript
 tasks.build.dependsOn tasks.jarJar
-jar.finalizedBy('reobfJarJar')
 
 sourceSets
 {
@@ -53,100 +32,50 @@ sourceSets
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 minecraft {
-    // The mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   Snapshot are built nightly.
-    // stable_#            Stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not always work.
-    // Simply re-run your setup task after changing the mappings to update your workspace.
-    mappings channel: 'official', version: "${mc_version}"
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
-    
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+  accessTransformers {
+    file('src/main/resources/META-INF/accesstransformer.cfg')
+  }
+}
 
-    // Default run configurations.
-    // These can be tweaked, removed, or duplicated as needed.
-    runs {
-        client {
-            workingDirectory project.file('run')
-			property 'mixin.env.remapRefMap', 'true'
-			property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            property 'forge.logging.console.level', 'debug'
+runs {
+	configureEach {
+		systemProperty 'forge.logging.console.level', 'debug'
+		modSources.addAll project.sourceSets.main
+	}
 
-            mods {
-                tubesreloaded {
-                    source sourceSets.main
-                }
-            }
-        }
+	client {
+		// Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+		systemProperty 'forge.enabledGameTestNamespaces', project.modid
+	}
 
-        server {
-            workingDirectory project.file('run')
-			property 'mixin.env.remapRefMap', 'true'
-			property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            property 'forge.logging.console.level', 'debug'
+	server {
+		systemProperty 'forge.enabledGameTestNamespaces', project.modid
+	}
+	
+	gameTestServer {
+		systemProperty 'forge.enabledGameTestNamespaces', project.modid
+	}
 
-            mods {
-                tubesreloaded {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-			property 'mixin.env.remapRefMap', 'true'
-			property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            args '--mod', 'tubesreloaded', '--all', '--output', file('src/generated/resources/')
-
-            mods {
-                "tubesreloaded" {
-                    source sourceSets.main
-                    source sourceSets.datagen
-                }
-            }
-        }
-
-        // This run config launches GameTestServer and runs all registered gametests, then exits.
-        // By default, the server will crash when no gametests are provided.
-        // The gametest system is also enabled by default for other run configs under the /test command.
-        gameTestServer {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', 'tubesreloaded'
-			property 'mixin.env.remapRefMap', 'true'
-			property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-
-            mods {
-                tubesreloaded {
-                    source sourceSets.main
-                    source sourceSets.gametest
-                }
-            }
-        }
-    }
+	data {
+		programArguments.addAll '--mod', project.modid, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+		modSources.addAll project.sourceSets.datagen
+	}
 }
 
 repositories {
-	maven { url "https://cubicinterpolation.net/maven/" }
-}
-
-configurations {
-	shade
+	maven { url "https://commoble.net/maven/" }
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+	implementation "net.neoforged:neoforge:${neo_version}"
     
-	implementation fg.deobf("commoble.databuddy:databuddy-${databuddy_mc_version}:${databuddy_version}")
-	jarJar(group: "commoble.databuddy", name: "databuddy-${databuddy_mc_version}", version: "[${databuddy_version}, ${databuddy_next_version})")
-	implementation fg.deobf("commoble.useitemonblockevent:useitemonblockevent-${useitemonblockevent_mc_version}:${useitemonblockevent_version}")
-	jarJar(group: "commoble.useitemonblockevent", name: "useitemonblockevent-${useitemonblockevent_mc_version}", version: "[${useitemonblockevent_version}, ${useitemonblockevent_next_version})")
+	implementation "net.commoble.databuddy:databuddy-${databuddy_mc_version}:${databuddy_version}"
+	jarJar(group: "net.commoble.databuddy", name: "databuddy-${databuddy_mc_version}", version: "[${databuddy_version}, ${databuddy_next_version})")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
-	classifier 'slim'
+	archiveClassifier = 'slim'
     manifest {
         attributes([
             "Specification-Title": "${modid}",
@@ -160,15 +89,6 @@ jar {
     }
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact jar
-        }
-    }
-    repositories {
-        maven {
-            url "file:///${project.projectDir}/mcmodsrepo"
-        }
-    }
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }

@@ -21,8 +21,8 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public class ExtractorBlock extends Block
 {
@@ -70,18 +70,18 @@ public class ExtractorBlock extends Block
 		Direction inputDir = outputDir.getOpposite();
 		BlockPos inputPos = pos.relative(inputDir);
 
-		LazyOptional<IItemHandler> inputCap = WorldHelper.getItemHandlerAt(level, inputPos, outputDir);
-		if (inputCap.isPresent())
+		IItemHandler inputHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, inputPos, outputDir);
+		if (inputHandler != null)
 		{
-			LazyOptional<IItemHandler> outputCap = WorldHelper.getItemHandlerAt(level, outputPos, inputDir);
+			IItemHandler outputHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, outputPos, inputDir);
 			
 			// if the input handler exists and either the output handler exists or we have room to eject the item
-			if (outputCap.isPresent() || !level.getBlockState(outputPos).isCollisionShapeFullBlock(level, outputPos))
+			if (outputHandler != null || !level.getBlockState(outputPos).isCollisionShapeFullBlock(level, outputPos))
 			{
-				ItemStack stack = inputCap.map(inputHandler -> this.extractNextStack(inputHandler)).orElse(ItemStack.EMPTY);
+				ItemStack stack = this.extractNextStack(inputHandler);
 				if (stack.getCount() > 0)
 				{
-					ItemStack remaining = outputCap.map(outputHandler -> this.putStackInHandler(stack, outputHandler)).orElse(stack.copy());
+					ItemStack remaining = this.putStackInHandler(stack, outputHandler);
 					WorldHelper.ejectItemstack(level, pos, outputDir, remaining);
 				}
 			}

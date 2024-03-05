@@ -18,7 +18,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.network.NetworkHooks;
 
 public class FilterBlock extends AbstractFilterBlock implements EntityBlock
 {
@@ -37,10 +36,7 @@ public class FilterBlock extends AbstractFilterBlock implements EntityBlock
 			BlockEntity blockEntity = level.getBlockEntity(pos);
 			if (blockEntity instanceof FilterBlockEntity filter)
 			{
-				NetworkHooks.openScreen(
-					serverPlayer,
-					new SimpleMenuProvider(FilterMenu.createServerMenuConstructor(filter), Component.translatable(this.getDescriptionId()))
-				);
+				serverPlayer.openMenu(new SimpleMenuProvider(FilterMenu.createServerMenuConstructor(filter), Component.translatable(this.getDescriptionId())));
 			}
 		}
 		

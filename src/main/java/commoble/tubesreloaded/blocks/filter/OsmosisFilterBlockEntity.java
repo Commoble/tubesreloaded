@@ -5,7 +5,6 @@ import java.util.stream.IntStream;
 import com.mojang.datafixers.util.Pair;
 
 import commoble.tubesreloaded.TubesReloaded;
-import commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -15,7 +14,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public class OsmosisFilterBlockEntity extends FilterBlockEntity
 {
@@ -58,10 +58,9 @@ public class OsmosisFilterBlockEntity extends FilterBlockEntity
 			{
 				Direction filterOutputDirection = this.getBlockState().getValue(FilterBlock.FACING);
 				Direction filterInputDirection = filterOutputDirection.getOpposite();
-				boolean successfulTransfer = WorldHelper.getItemHandlerAt(this.level, this.worldPosition.relative(filterInputDirection), filterOutputDirection)
-					.map(inventory -> this.getFirstValidItem(inventory))
-					.map(stack -> this.attemptExtractionAndReturnSuccess(stack))
-					.orElse(false);
+				IItemHandler extractableHandler = this.level.getCapability(Capabilities.ItemHandler.BLOCK, this.worldPosition.relative(filterInputDirection), filterOutputDirection);
+				boolean successfulTransfer = extractableHandler != null
+					&& this.attemptExtractionAndReturnSuccess(this.getFirstValidItem(extractableHandler));
 				if (!successfulTransfer)
 				{	// set dormant if no items were found
 					this.level.setBlockAndUpdate(this.worldPosition, this.getBlockState().setValue(OsmosisFilterBlock.TRANSFERRING_ITEMS, false));

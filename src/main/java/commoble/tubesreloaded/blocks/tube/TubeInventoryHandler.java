@@ -1,8 +1,8 @@
 package commoble.tubesreloaded.blocks.tube;
 
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.Direction;
-import net.minecraftforge.items.ItemStackHandler;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class TubeInventoryHandler extends ItemStackHandler
 {

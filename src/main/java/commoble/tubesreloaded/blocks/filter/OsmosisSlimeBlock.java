@@ -1,5 +1,8 @@
 package commoble.tubesreloaded.blocks.filter;
 
+import com.mojang.serialization.MapCodec;
+
+import commoble.tubesreloaded.TubesReloaded;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
@@ -59,5 +62,11 @@ public class OsmosisSlimeBlock extends DirectionalBlock
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
 	{
 		builder.add(FACING);
+	}
+
+	@Override
+	protected MapCodec<? extends DirectionalBlock> codec()
+	{
+		return MapCodec.unit((() -> TubesReloaded.get().osmosisSlimeBlock.get()));
 	}
 }

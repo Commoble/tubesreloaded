@@ -15,9 +15,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public class RoutingNetwork
 {
@@ -114,14 +113,10 @@ public class RoutingNetwork
 			return false;
 		
 		BlockEntity te = world.getBlockEntity(pos);
-		return (te != null && 
-				(
-						te instanceof TubeBlockEntity
-						||
-						te.getCapability(ForgeCapabilities.ITEM_HANDLER, face).isPresent()
-				)
-			);
+		if (te instanceof TubeBlockEntity)
+			return true;
 		
+		return world.getCapability(Capabilities.ItemHandler.BLOCK, pos, face) != null;
 	}
 	
 	public int getSize()
@@ -178,18 +173,17 @@ public class RoutingNetwork
 		// we now have a set of tubes and a set of potential endpoints
 		// narrow down the endpoint TEs to useable ones
 		for (BlockPos endPos : potentialEndpoints)
-		{
-			//Endpoint point = Endpoint.createEndpoint(endPos, world, network.tubes);
-			BlockEntity te = world.getBlockEntity(endPos);
-			if (te == null) continue;	// just in case
-			
+		{			
 			for(Direction face : Direction.values())
 			{
 				// if the te has an item handler on this face, add an endpoint (representing that face) to the network
 				if (network.tubes.contains(endPos.relative(face)))
 				{
-					LazyOptional<IItemHandler> possibleHandler = te.getCapability(ForgeCapabilities.ITEM_HANDLER, face);
-					possibleHandler.ifPresent(handler -> network.endpoints.add(new Endpoint(endPos, face)));
+					IItemHandler handler = world.getCapability(Capabilities.ItemHandler.BLOCK, endPos, face);
+					if (handler != null)
+					{
+						network.endpoints.add(new Endpoint(endPos, face));
+					}
 				}
 			}
 		}

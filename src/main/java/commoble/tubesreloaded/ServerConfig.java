@@ -1,8 +1,8 @@
 package commoble.tubesreloaded;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.DoubleValue;
-import net.minecraftforge.common.ForgeConfigSpec.IntValue;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.DoubleValue;
+import net.neoforged.neoforge.common.ModConfigSpec.IntValue;
 
 public record ServerConfig(
 	IntValue softTubeCap,
@@ -13,7 +13,7 @@ public record ServerConfig(
 	DoubleValue maxTubeConnectionRange
 	)
 {	
-	public static ServerConfig create(ForgeConfigSpec.Builder builder)
+	public static ServerConfig create(ModConfigSpec.Builder builder)
 	{
 		builder.push("general");
 		IntValue softTubeCap = builder

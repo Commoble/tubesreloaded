@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableSet;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class ClientProxy
 {
@@ -33,7 +34,7 @@ public class ClientProxy
 	{
 		// mark the capability on the client and send a packet to the server to do the same
 		instance.isHoldingSprint = isSprinting;
-		TubesReloaded.CHANNEL.sendToServer(new IsWasSprintPacket(isSprinting));
+		PacketDistributor.SERVER.noArg().send(new IsWasSprintPacket(isSprinting));
 	}
 	
 	public static void updateTubesInChunk(ChunkPos pos, Set<BlockPos> tubes)

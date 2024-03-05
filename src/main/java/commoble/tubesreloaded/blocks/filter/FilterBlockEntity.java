@@ -1,6 +1,5 @@
 package commoble.tubesreloaded.blocks.filter;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import commoble.tubesreloaded.TubesReloaded;
@@ -15,18 +14,13 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public class FilterBlockEntity extends AbstractFilterBlockEntity
 {
 	public ItemStack filterStack = ItemStack.EMPTY;
 	public FilterShuntingItemHandler shuntingHandler = new FilterShuntingItemHandler(this);
 	public FilterStorageItemHandler storageHandler = new FilterStorageItemHandler(this);
-	private LazyOptional<IItemHandler> shuntingOptional = LazyOptional.of(() -> this.shuntingHandler);
-	private LazyOptional<IItemHandler> storageOptional = LazyOptional.of(() -> this.storageHandler);
 	
 	public FilterBlockEntity(BlockEntityType<?> teType, BlockPos pos, BlockState state)
 	{
@@ -36,14 +30,6 @@ public class FilterBlockEntity extends AbstractFilterBlockEntity
 	public FilterBlockEntity(BlockPos pos, BlockState state)
 	{
 		this(TubesReloaded.get().filterEntity.get(), pos, state);
-	}
-	
-	@Override
-	public void invalidateCaps()
-	{
-		this.shuntingOptional.invalidate();
-		this.storageOptional.invalidate();
-		super.invalidateCaps();
 	}
 	
 	@Override
@@ -60,24 +46,19 @@ public class FilterBlockEntity extends AbstractFilterBlockEntity
 		
 		return this.filterStack.getItem().equals(stack.getItem());
 	}
-	
-	@Override
-	@Nonnull
-	public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side)
+
+	public IItemHandler getItemHandler(@Nullable Direction side)
 	{
-		if (cap == ForgeCapabilities.ITEM_HANDLER)
+		Direction output_dir = this.getBlockState().getValue(ShuntBlock.FACING);
+		if (side == output_dir.getOpposite())
 		{
-			Direction output_dir = this.getBlockState().getValue(ShuntBlock.FACING);
-			if (side == output_dir.getOpposite())
-			{
-				return this.shuntingOptional.cast();
-			}
-			else if (side != output_dir)
-			{
-				return this.storageOptional.cast();
-			}
+			return this.shuntingHandler;
 		}
-		return super.getCapability(cap, side);
+		else if (side != output_dir)
+		{
+			return this.storageHandler;
+		}
+		return null;
 	}
 	
 	public void setFilterStackAndSaveAndSync(ItemStack filterStack)

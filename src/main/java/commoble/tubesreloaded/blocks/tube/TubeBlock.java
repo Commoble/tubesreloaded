@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
@@ -38,14 +37,13 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
 
 public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBlock
 {
@@ -118,7 +116,7 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 	@Deprecated
 	public void onPlace(BlockState newState, Level level, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
-		this.updateTubeSet(level, pos, Set<BlockPos>::add);
+		TubesInChunk.updateTubeSet(level, pos, Set<BlockPos>::add);
 		super.onPlace(newState, level, pos, oldState, isMoving);
 	}
 
@@ -126,7 +124,7 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 	@Deprecated
 	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
 	{
-		this.updateTubeSet(level, pos, Set<BlockPos>::remove);
+		TubesInChunk.updateTubeSet(level, pos, Set<BlockPos>::remove);
 		BlockEntity te = level.getBlockEntity(pos);
 		if (te instanceof TubeBlockEntity tube && !state.is(newState.getBlock()))
 		{
@@ -134,19 +132,6 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 			tube.clearRemoteConnections();
 		}
 		super.onRemove(state, level, pos, newState, isMoving);
-	}
-
-	public void updateTubeSet(Level level, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
-	{
-		LevelChunk chunk = level.getChunkAt(pos);
-		if (chunk != null)
-		{
-			chunk.getCapability(TubesInChunk.CAPABILITY).ifPresent(tubes -> {
-				Set<BlockPos> set = tubes.getPositions();
-				consumer.accept(set, pos);
-				tubes.setPositions(set);
-			});
-		}
 	}
 
 	/**
@@ -211,10 +196,7 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 		if (newBlock instanceof AbstractFilterBlock && state.getValue(AbstractFilterBlock.FACING).equals(face.getOpposite()))
 			return true;
 
-		if (blockEntity == null)
-			return false;
-
-		if (blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, face.getOpposite()).isPresent())
+		if (level instanceof Level l && l.getCapability(Capabilities.ItemHandler.BLOCK, newPos, face.getOpposite()) != null)
 		{
 			return true;
 		}

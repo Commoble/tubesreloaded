@@ -38,6 +38,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class TubeBlockEntityRenderer implements BlockEntityRenderer<TubeBlockEntity>
@@ -394,5 +395,9 @@ public class TubeBlockEntityRenderer implements BlockEntityRenderer<TubeBlockEnt
 		return true;
 	}
 
-
+	@Override
+	public AABB getRenderBoundingBox(TubeBlockEntity te)
+	{
+		return te.renderAABB;
+	}
 }

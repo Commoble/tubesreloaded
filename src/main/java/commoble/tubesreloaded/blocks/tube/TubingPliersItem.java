@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class TubingPliersItem extends Item
 {
@@ -102,7 +102,7 @@ public class TubingPliersItem extends Item
 						stack.removeTagKey(LAST_TUBE_DATA);
 						if (player instanceof ServerPlayer serverPlayer && level instanceof ServerLevel serverLevel)
 						{
-							TubesReloaded.CHANNEL.send(PacketDistributor.PLAYER.with(() -> serverPlayer), new TubeBreakPacket(Vec3.atCenterOf(lastPos), Vec3.atCenterOf(pos)));
+							PacketDistributor.PLAYER.with(serverPlayer).send(new TubeBreakPacket(Vec3.atCenterOf(lastPos), Vec3.atCenterOf(pos)));
 							
 							serverPlayer.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
 						}
@@ -120,7 +120,7 @@ public class TubingPliersItem extends Item
 						stack.removeTagKey(LAST_TUBE_DATA);
 						if (player instanceof ServerPlayer serverPlayer && level instanceof ServerLevel serverLevel)
 						{
-							TubesReloaded.CHANNEL.send(PacketDistributor.PLAYER.with(() -> serverPlayer), new TubeBreakPacket(startVec, endVec));
+							PacketDistributor.PLAYER.with(serverPlayer).send(new TubeBreakPacket(startVec, endVec));
 							serverLevel.sendParticles(serverPlayer, DustParticleOptions.REDSTONE, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
 							
 							serverPlayer.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
@@ -132,7 +132,7 @@ public class TubingPliersItem extends Item
 						stack.removeTagKey(LAST_TUBE_DATA);
 						if (player instanceof ServerPlayer serverPlayer && level instanceof ServerLevel serverLevel)
 						{
-							TubesReloaded.CHANNEL.send(PacketDistributor.PLAYER.with(() -> serverPlayer), new TubeBreakPacket(startVec, endVec));
+							PacketDistributor.PLAYER.with(serverPlayer).send(new TubeBreakPacket(startVec, endVec));
 							serverLevel.sendParticles(serverPlayer, DustParticleOptions.REDSTONE, false, endVec.x, endVec.y, endVec.z, 5, .05, .05, .05, 0);
 							
 							serverPlayer.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
@@ -232,7 +232,7 @@ public class TubingPliersItem extends Item
 		stack.removeTagKey(LAST_TUBE_DATA);
 		if (holder instanceof ServerPlayer serverPlayer)
 		{
-			TubesReloaded.CHANNEL.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
+			PacketDistributor.PLAYER.with(serverPlayer).send(
 				new TubeBreakPacket(
 					Vec3.atCenterOf(connectingPos),
 					new Vec3(holder.getX(), holder.getEyeY(), holder.getZ())));

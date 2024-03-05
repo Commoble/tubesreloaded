@@ -12,7 +12,6 @@ import java.util.function.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 
-import commoble.databuddy.config.ConfigHelper;
 import commoble.tubesreloaded.blocks.distributor.DistributorBlock;
 import commoble.tubesreloaded.blocks.distributor.DistributorBlockEntity;
 import commoble.tubesreloaded.blocks.extractor.ExtractorBlock;
@@ -41,8 +40,7 @@ import commoble.tubesreloaded.blocks.tube.TubesInChunk;
 import commoble.tubesreloaded.blocks.tube.TubingPliersItem;
 import commoble.tubesreloaded.client.ClientEvents;
 import commoble.tubesreloaded.client.FakeWorldForTubeRaytrace;
-import commoble.useitemonblockevent.api.UseItemOnBlockEvent;
-import commoble.useitemonblockevent.api.UseItemOnBlockEvent.UsePhase;
+import net.commoble.databuddy.config.ConfigHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -81,21 +79,22 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.level.ChunkWatchEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
+import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent.UsePhase;
+import net.neoforged.neoforge.event.level.ChunkWatchEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 //The value here should match an entry in the META-INF/mods.toml file
 @Mod(TubesReloaded.MODID)
@@ -117,53 +116,46 @@ public class TubesReloaded
 			public static final TagKey<Item> TUBES = TagKey.create(Registries.ITEM, new ResourceLocation(MODID, "tubes"));
 		}
 	}
-
-	public static final String PROTOCOL_VERSION = "1";
-	public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-		new ResourceLocation(MODID, "main"),
-		() -> PROTOCOL_VERSION,
-		PROTOCOL_VERSION::equals,
-		PROTOCOL_VERSION::equals
-	);
 	
 	private static TubesReloaded INSTANCE;
 
 	private final ServerConfig serverConfig;
 
-	public final Map<DyeColor, RegistryObject<ColoredTubeBlock>> coloredTubeBlocks;
-	public final RegistryObject<DistributorBlock> distributorBlock;
-	public final RegistryObject<ExtractorBlock> extractorBlock;
-	public final RegistryObject<FilterBlock> filterBlock;
-	public final RegistryObject<MultiFilterBlock> multiFilterBlock;
-	public final RegistryObject<LoaderBlock> loaderBlock;
-	public final RegistryObject<OsmosisFilterBlock> osmosisFilterBlock;
-	public final RegistryObject<OsmosisSlimeBlock> osmosisSlimeBlock;
-	public final RegistryObject<RedstoneTubeBlock> redstoneTubeBlock;
-	public final RegistryObject<ShuntBlock> shuntBlock;
-	public final RegistryObject<TubeBlock> tubeBlock;
+	public final Map<DyeColor, DeferredHolder<Block, ColoredTubeBlock>> coloredTubeBlocks;
+	public final DeferredHolder<Block, DistributorBlock> distributorBlock;
+	public final DeferredHolder<Block, ExtractorBlock> extractorBlock;
+	public final DeferredHolder<Block, FilterBlock> filterBlock;
+	public final DeferredHolder<Block, MultiFilterBlock> multiFilterBlock;
+	public final DeferredHolder<Block, LoaderBlock> loaderBlock;
+	public final DeferredHolder<Block, OsmosisFilterBlock> osmosisFilterBlock;
+	public final DeferredHolder<Block, OsmosisSlimeBlock> osmosisSlimeBlock;
+	public final DeferredHolder<Block, RedstoneTubeBlock> redstoneTubeBlock;
+	public final DeferredHolder<Block, ShuntBlock> shuntBlock;
+	public final DeferredHolder<Block, TubeBlock> tubeBlock;
 	
-	public final RegistryObject<CreativeModeTab> tab;
+	public final DeferredHolder<CreativeModeTab, CreativeModeTab> tab;
 	
-	public final RegistryObject<TubingPliersItem> tubingPliers;
+	public final DeferredHolder<Item, TubingPliersItem> tubingPliers;
 
-	public final RegistryObject<BlockEntityType<DistributorBlockEntity>> distributorEntity;
-	public final RegistryObject<BlockEntityType<FilterBlockEntity>> filterEntity;
-	public final RegistryObject<BlockEntityType<MultiFilterBlockEntity>> multiFilterEntity;
-	public final RegistryObject<BlockEntityType<OsmosisFilterBlockEntity>> osmosisFilterEntity;
-	public final RegistryObject<BlockEntityType<RedstoneTubeBlockEntity>> redstoneTubeEntity;
-	public final RegistryObject<BlockEntityType<ShuntBlockEntity>> shuntEntity;
-	public final RegistryObject<BlockEntityType<TubeBlockEntity>> tubeEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<DistributorBlockEntity>> distributorEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<FilterBlockEntity>> filterEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<MultiFilterBlockEntity>> multiFilterEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<OsmosisFilterBlockEntity>> osmosisFilterEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<RedstoneTubeBlockEntity>> redstoneTubeEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<ShuntBlockEntity>> shuntEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<TubeBlockEntity>> tubeEntity;
 
-	public final RegistryObject<MenuType<FilterMenu>> filterMenu;
-	public final RegistryObject<MenuType<MultiFilterMenu>> multiFilterMenu;
-	public final RegistryObject<MenuType<LoaderMenu>> loaderMenu;
+	public final DeferredHolder<MenuType<?>, MenuType<FilterMenu>> filterMenu;
+	public final DeferredHolder<MenuType<?>, MenuType<MultiFilterMenu>> multiFilterMenu;
+	public final DeferredHolder<MenuType<?>, MenuType<LoaderMenu>> loaderMenu;
+	
+	public final DeferredHolder<AttachmentType<?>, AttachmentType<Set<BlockPos>>> tubesInChunkAttachment;
 
-	public TubesReloaded()
+	public TubesReloaded(IEventBus modBus)
 	{
 		INSTANCE=this;
 		
-		final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-		final IEventBus forgeBus = MinecraftForge.EVENT_BUS;
+		final IEventBus forgeBus = NeoForge.EVENT_BUS;
 		
 		this.serverConfig = ConfigHelper.register(ModConfig.Type.SERVER, ServerConfig::create);
 		
@@ -173,18 +165,19 @@ public class TubesReloaded
 		final DeferredRegister<CreativeModeTab> tabs = makeDeferredRegister(modBus, Registries.CREATIVE_MODE_TAB);
 		final DeferredRegister<BlockEntityType<?>> blockEntities = makeDeferredRegister(modBus, Registries.BLOCK_ENTITY_TYPE);
 		final DeferredRegister<MenuType<?>> containers = makeDeferredRegister(modBus, Registries.MENU);
+		final DeferredRegister<AttachmentType<?>> attachmentTypes = makeDeferredRegister(modBus, NeoForgeRegistries.Keys.ATTACHMENT_TYPES);
 
 		// blocks and blockitems
-		List<RegistryObject<? extends TubeBlock>> tubeBlocksWithTubeBlockEntity = new ArrayList<>();
+		List<Supplier<? extends TubeBlock>> tubeBlocksWithTubeBlockEntity = new ArrayList<>();
 		
-		Pair<RegistryObject<TubeBlock>,RegistryObject<BlockItem>> tubeBlockAndItem = registerBlockAndItem(blocks, items, Names.TUBE,
+		this.tubeBlock = registerBlockAndItem(blocks, items, Names.TUBE,
 			() -> new TubeBlock(new ResourceLocation("tubesreloaded:block/tube"), BlockBehaviour.Properties.of()
 				.instrument(NoteBlockInstrument.DIDGERIDOO)
 				.mapColor(MapColor.TERRACOTTA_YELLOW)
 				.strength(0.4F)
 				.sound(SoundType.METAL)),
-			block -> new BlockItem(block, new Item.Properties()));
-		this.tubeBlock = tubeBlockAndItem.getFirst();		
+			block -> new BlockItem(block, new Item.Properties()))
+			.getFirst();	
 		this.shuntBlock = registerBlockAndStandardItem(blocks, items, Names.SHUNT,
 			() -> new ShuntBlock(BlockBehaviour.Properties.of()
 				.mapColor(MapColor.TERRACOTTA_YELLOW)
@@ -231,7 +224,7 @@ public class TubesReloaded
 		for (DyeColor color : DyeColor.values())
 		{
 			String name = Names.COLORED_TUBE_NAMES[color.ordinal()];
-			RegistryObject<ColoredTubeBlock> block = registerBlockAndStandardItem(blocks, items, name,
+			DeferredHolder<Block, ColoredTubeBlock> block = registerBlockAndStandardItem(blocks, items, name,
 				() -> new ColoredTubeBlock(
 					new ResourceLocation(TubesReloaded.MODID, "block/" + name),
 					color,
@@ -260,7 +253,7 @@ public class TubesReloaded
 			() -> BlockEntityType.Builder.of(
 					TubeBlockEntity::new,
 					tubeBlocksWithTubeBlockEntity.stream()
-						.map(RegistryObject::get)
+						.map(Supplier::get)
 						.toArray(TubeBlock[]::new))
 				.build(null));
 		this.shuntEntity = blockEntities.register(Names.SHUNT,
@@ -281,15 +274,19 @@ public class TubesReloaded
 		this.filterMenu = containers.register(Names.FILTER, () -> new MenuType<>(FilterMenu::createClientMenu, FeatureFlags.VANILLA_SET));
 		this.multiFilterMenu = containers.register(Names.MULTIFILTER, () -> new MenuType<>(MultiFilterMenu::clientMenu, FeatureFlags.VANILLA_SET));
 		
+		this.tubesInChunkAttachment = attachmentTypes.register(Names.TUBES_IN_CHUNK, () -> AttachmentType.<Set<BlockPos>>builder(() -> new HashSet<>())
+			.serialize(TubesInChunk.TUBE_SET_CODEC)
+			.comparator(Set::equals)
+			.build());
+		
 		// subscribe events
-		modBus.addListener(this::onCommonSetup);
+		modBus.addListener(this::onRegisterPayloadHandlers);
 		modBus.addListener(this::onRegisterCapabilities);
 		
-		forgeBus.addGenericListener(LevelChunk.class, this::onAttachChunkCapabilities);
 		forgeBus.addListener(this::onUseItemOnBlock);
 		forgeBus.addListener(this::onChunkWatch);
 		
-		if (FMLEnvironment.dist == net.minecraftforge.api.distmarker.Dist.CLIENT)
+		if (FMLEnvironment.dist.isClient())
 		{
 			ClientEvents.subscribeClientEvents(modBus, forgeBus);
 		}
@@ -307,42 +304,23 @@ public class TubesReloaded
 	
 	// mod events
 	
-	private void onCommonSetup(FMLCommonSetupEvent event)
-	{		
-		// register packets
-		int packetID=0;
-		TubesReloaded.CHANNEL.registerMessage(packetID++,
-			IsWasSprintPacket.class,
-			IsWasSprintPacket::write,
-			IsWasSprintPacket::read,
-			IsWasSprintPacket::handle
-			);
-		TubesReloaded.CHANNEL.registerMessage(packetID++,
-			TubeBreakPacket.class,
-			TubeBreakPacket::write,
-			TubeBreakPacket::read,
-			TubeBreakPacket::handle
-			);
-		TubesReloaded.CHANNEL.registerMessage(packetID++,
-			SyncTubesInChunkPacket.class,
-			SyncTubesInChunkPacket::write,
-			SyncTubesInChunkPacket::read,
-			SyncTubesInChunkPacket::handle
-			);
+	private void onRegisterPayloadHandlers(RegisterPayloadHandlerEvent event)
+	{
+		event.registrar(MODID)
+			.play(IsWasSprintPacket.ID, IsWasSprintPacket::read, IsWasSprintPacket::handle)
+			.play(TubeBreakPacket.ID, TubeBreakPacket::read, TubeBreakPacket::handle)
+			.play(SyncTubesInChunkPacket.ID, SyncTubesInChunkPacket::read, SyncTubesInChunkPacket::handle);
 	}
 	
 	private void onRegisterCapabilities(RegisterCapabilitiesEvent event)
 	{
-		event.register(TubesInChunk.class);
-	}
-	
-	// forge events
-	
-	private void onAttachChunkCapabilities(AttachCapabilitiesEvent<LevelChunk> event)
-	{
-		TubesInChunk tubesInChunk = new TubesInChunk(event.getObject());
-		event.addCapability(new ResourceLocation(TubesReloaded.MODID, Names.TUBES_IN_CHUNK), tubesInChunk);
-		event.addListener(tubesInChunk::onCapabilityInvalidated);
+		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.distributorEntity.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.filterEntity.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.multiFilterEntity.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.osmosisFilterEntity.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.redstoneTubeEntity.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.shuntEntity.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.tubeEntity.get(), (be,side) -> be.getItemHandler(side));
 	}
 	
 	// EntityPlaceEvent doesn't fire on clients
@@ -352,7 +330,7 @@ public class TubesReloaded
 		ItemStack stack = useContext.getItemInHand();
 
 		// we need to check world side because physical clients can have server worlds
-		if (event.getUsePhase() == UsePhase.POST_BLOCK && stack.getItem() instanceof BlockItem blockItem)
+		if (event.getUsePhase() == UsePhase.ITEM_AFTER_BLOCK && stack.getItem() instanceof BlockItem blockItem)
 		{
 			Level level = useContext.getLevel();
 			BlockPlaceContext placeContext = new BlockPlaceContext(useContext);
@@ -409,9 +387,7 @@ public class TubesReloaded
 		LevelChunk chunk = event.getChunk();
 		ServerPlayer player = event.getPlayer();
 		ChunkPos pos = chunk.getPos();
-		chunk.getCapability(TubesInChunk.CAPABILITY).ifPresent(cap -> 
-			TubesReloaded.CHANNEL.send(PacketDistributor.PLAYER.with(()->player), new SyncTubesInChunkPacket(pos, cap.getPositions()))
-		);
+		PacketDistributor.PLAYER.with(player).send(new SyncTubesInChunkPacket(pos, TubesInChunk.getTubesInChunk(chunk)));
 	}
 	
 	// registry helper methods
@@ -423,19 +399,19 @@ public class TubesReloaded
 		return register;
 	}
 	
-	private static <BLOCK extends Block, ITEM extends BlockItem> Pair<RegistryObject<BLOCK>,RegistryObject<ITEM>> registerBlockAndItem(
+	private static <BLOCK extends Block, ITEM extends BlockItem> Pair<DeferredHolder<Block, BLOCK>, DeferredHolder<Item, ITEM>> registerBlockAndItem(
 		DeferredRegister<Block> blocks,
 		DeferredRegister<Item> items,
 		String name,
 		Supplier<BLOCK> blockFactory,
 		Function<? super BLOCK,ITEM> itemFactory)
 	{
-		RegistryObject<BLOCK> block = blocks.register(name, blockFactory);
-		RegistryObject<ITEM> item = items.register(name, () -> itemFactory.apply(block.get()));
+		DeferredHolder<Block, BLOCK> block = blocks.register(name, blockFactory);
+		DeferredHolder<Item, ITEM> item = items.register(name, () -> itemFactory.apply(block.get()));
 		return Pair.of(block, item);
 	}
 	
-	private static <BLOCK extends Block> RegistryObject<BLOCK> registerBlockAndStandardItem(
+	private static <BLOCK extends Block> DeferredHolder<Block, BLOCK> registerBlockAndStandardItem(
 		DeferredRegister<Block> blocks,
 		DeferredRegister<Item> items,
 		String name,

@@ -22,7 +22,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public class LoaderBlock extends Block
 {
@@ -39,7 +40,7 @@ public class LoaderBlock extends Block
 	{
 		if (player instanceof ServerPlayer serverPlayer)
 		{
-			NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider((id, inventory, theServerPlayer) ->
+			serverPlayer.openMenu(new SimpleMenuProvider((id, inventory, theServerPlayer) ->
 				new LoaderMenu(id, inventory, pos), Component.translatable(this.getDescriptionId()))
 			);
 		}
@@ -53,8 +54,10 @@ public class LoaderBlock extends Block
 		// check if it can insert the item
 		Direction outputDir = state.getValue(FACING);
 		BlockPos outputPos = pos.relative(outputDir);
-		ItemStack remaining = WorldHelper.getItemHandlerAt(world, outputPos, outputDir.getOpposite())
-				.map(handler -> WorldHelper.disperseItemToHandler(stack, handler)).orElse(stack.copy());
+		IItemHandler outputHandler = world.getCapability(Capabilities.ItemHandler.BLOCK, outputPos, outputDir.getOpposite());
+		ItemStack remaining = outputHandler == null
+			? stack.copy()
+			: WorldHelper.disperseItemToHandler(stack, outputHandler);
 
 		if (remaining.getCount() > 0) // we have remaining items
 		{

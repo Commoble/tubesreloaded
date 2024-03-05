@@ -5,16 +5,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DirectionalBlock;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public class FilterShuntingItemHandler implements IItemHandler
 {
 	private final AbstractFilterBlockEntity filter;
 	private boolean shunting = false; // true while retreiving insertion result from neighbor, averts infinite loops
-	
-	// inventory of the block we may be sending items to
-	private LazyOptional<IItemHandler> targetInventory = LazyOptional.empty();
 	
 	public FilterShuntingItemHandler (AbstractFilterBlockEntity filter)
 	{
@@ -53,9 +50,10 @@ public class FilterShuntingItemHandler implements IItemHandler
 			BlockPos outputPos = pos.relative(outputDir);
 			
 			this.shunting = true;
-			ItemStack remaining = this.getOutputOptional(outputPos,outputDir)
-				.map(handler -> WorldHelper.disperseItemToHandler(stack, handler))
-				.orElse(stack.copy());
+			IItemHandler outputHandler = this.filter.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, outputPos, outputDir.getOpposite());
+			ItemStack remaining = outputHandler == null
+				? stack.copy()
+				: WorldHelper.disperseItemToHandler(stack, outputHandler);
 			this.shunting = false;
 			
 			if (remaining.getCount() > 0) // we have remaining items
@@ -65,15 +63,6 @@ public class FilterShuntingItemHandler implements IItemHandler
 		}
 		
 		return ItemStack.EMPTY;
-	}
-	
-	private LazyOptional<IItemHandler> getOutputOptional(BlockPos outputPos, Direction outputDir)
-	{
-		if (!this.targetInventory.isPresent())
-		{
-			this.targetInventory = WorldHelper.getItemHandlerAt(this.filter.getLevel(), outputPos, outputDir.getOpposite());
-		}
-		return this.targetInventory;
 	}
 
 	@Override

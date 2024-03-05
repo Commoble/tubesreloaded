@@ -34,11 +34,9 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class TubeBlockEntity extends BlockEntity
 {
@@ -55,7 +53,7 @@ public class TubeBlockEntity extends BlockEntity
 	private Map<Direction, RemoteConnection> remoteConnections = new HashMap<>();
 	private boolean isConnectionSyncDirty = false; // if true, sync to clients in update packet (always sync in update tag)
 	
-	private AABB renderAABB = EMPTY_AABB; // used by client, updated whenever NBT is read
+	public AABB renderAABB = EMPTY_AABB; // used by client, updated whenever NBT is read
 	
 	@Nonnull
 	public Queue<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
@@ -63,11 +61,6 @@ public class TubeBlockEntity extends BlockEntity
 	protected final TubeInventoryHandler[] inventoryHandlers = Arrays.stream(Direction.values())
 			.map(dir -> new TubeInventoryHandler(this, dir))
 			.toArray(TubeInventoryHandler[]::new);	// one handler for each direction
-	
-	@SuppressWarnings("unchecked")
-	protected final LazyOptional<IItemHandler>[] handlerOptionals = Arrays.stream(this.inventoryHandlers)
-		.map(handler -> LazyOptional.of(() -> handler))
-		.toArray(size -> (LazyOptional<IItemHandler>[])new LazyOptional[size]);
 	
 	private Queue<ItemInTubeWrapper> wrappersToSendToClient = new LinkedList<ItemInTubeWrapper>();
 	public Queue<ItemInTubeWrapper> incomingWrapperBuffer = new LinkedList<ItemInTubeWrapper>();
@@ -270,16 +263,9 @@ public class TubeBlockEntity extends BlockEntity
 			this.onPossibleNetworkUpdateRequired();
 			this.network.invalid = true;
 			this.level.setBlockAndUpdate(this.worldPosition, newState);
-			TubesReloaded.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.level.getChunkAt(this.worldPosition)),
-				new TubeBreakPacket(Vec3.atCenterOf(this.worldPosition), Vec3.atCenterOf(otherPos)));
+			PacketDistributor.TRACKING_CHUNK.with(this.level.getChunkAt(this.worldPosition)).send(new TubeBreakPacket(Vec3.atCenterOf(this.worldPosition), Vec3.atCenterOf(otherPos)));
 		}
 		this.onDataUpdated();
-	}
-
-	@Override
-	public AABB getRenderBoundingBox()
-	{
-		return this.renderAABB;
 	}
 	
 	public boolean isConnectionSyncDirty()
@@ -293,16 +279,6 @@ public class TubeBlockEntity extends BlockEntity
 	}
 
 	/**** Event Handling ****/
-	
-	@Override
-	public void invalidateCaps()
-	{
-		for (var handlerOptional : this.handlerOptionals)
-		{
-			handlerOptional.invalidate();
-		}
-		super.invalidateCaps();
-	}
 	
 	public void onPossibleNetworkUpdateRequired()
 	{
@@ -394,10 +370,11 @@ public class TubeBlockEntity extends BlockEntity
 			}
 			else if (!this.level.isClientSide)
 			{
-				if (nextBlockEntity != null)	// te exists but is not a tube
+				IItemHandler nextHandler = this.level.getCapability(Capabilities.ItemHandler.BLOCK, nextPos, dir.getOpposite());
+				if (nextHandler != null)	// te exists but is not a tube
 				{
-					ItemStack remaining = nextBlockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, dir.getOpposite()).map(handler -> WorldHelper.disperseItemToHandler(wrapper.stack, handler)).orElse(wrapper.stack.copy());
-	
+					ItemStack remaining = WorldHelper.disperseItemToHandler(wrapper.stack, nextHandler);
+						
 					if (!remaining.isEmpty())	// target inventory filled up unexpectedly
 					{
 						ItemStack unenqueueableItems = this.enqueueItemStack(remaining, dir, false); // attempt to re-enqueue the item on that side
@@ -424,15 +401,10 @@ public class TubeBlockEntity extends BlockEntity
 	
 	/**** Inventory handling ****/
 
-	@Override
-	@Nonnull
-	public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side)
+	@Nullable
+	public IItemHandler getItemHandler(@Nullable Direction side)
 	{
-		if (cap == ForgeCapabilities.ITEM_HANDLER && side != null)
-		{
-			return this.handlerOptionals[side.ordinal()].cast();	// T is <IItemHandler> here, which our handler implements
-		}
-		return super.getCapability(cap, side);
+		return side == null ? null : this.inventoryHandlers[side.ordinal()];
 	}
 
 	// insert a new itemstack into the tube network from a direction
@@ -497,13 +469,12 @@ public class TubeBlockEntity extends BlockEntity
 	{
 		for (Direction face : Direction.values())
 		{
-			BlockEntity te = this.level.getBlockEntity(this.worldPosition.relative(face));
-			if (te != null && !(te instanceof TubeBlockEntity))
+			BlockPos neighborPos = this.worldPosition.relative(face);
+			BlockEntity te = this.level.getBlockEntity(neighborPos);
+			if (!(te instanceof TubeBlockEntity))
 			{
+				IItemHandler handler = this.level.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, face.getOpposite());
 				// if a nearby inventory that is not a tube exists
-				LazyOptional<IItemHandler> cap = te.getCapability(ForgeCapabilities.ITEM_HANDLER,
-						face.getOpposite());
-				IItemHandler handler = cap.orElse(null);
 				if (handler != null)
 				{
 					if (TubeBlockEntity.isSpaceForAnythingInItemHandler(handler))
