@@ -62,6 +62,13 @@ runs {
 	}
 }
 
+configurations {
+	datagenCompileClasspath.extendsFrom(compileClasspath)
+	datagenRuntimeClasspath.extendsFrom(runtimeClasspath)
+	gametestCompileClasspath.extendsFrom(compileClasspath)
+	gametestRuntimeClasspath.extendsFrom(runtimeClasspath)
+}
+
 repositories {
 	maven { url "https://commoble.net/maven/" }
 }
@@ -71,6 +78,9 @@ dependencies {
     
 	implementation "net.commoble.databuddy:databuddy-${databuddy_mc_version}:${databuddy_version}"
 	jarJar(group: "net.commoble.databuddy", name: "databuddy-${databuddy_mc_version}", version: "[${databuddy_version}, ${databuddy_next_version})")
+	
+	datagenImplementation sourceSets.main.output
+	gametestImplementation sourceSets.main.output
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

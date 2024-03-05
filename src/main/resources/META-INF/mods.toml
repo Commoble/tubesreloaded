@@ -37,7 +37,7 @@ Adds tubes to minecraft
     # the modid of the dependency
     modId="forge" #mandatory
     # Does this dependency have to exist - if not, ordering below must be specified
-    mandatory=true #mandatory
+    type="required"
     # The version range of the dependency
     versionRange="[47.0.3,)" #mandatory
     # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
@@ -47,13 +47,13 @@ Adds tubes to minecraft
 # Here's another dependency
 [[dependencies.tubesreloaded]]
     modId="minecraft"
-    mandatory=true
+    type="required"
     versionRange="[1.20.1, 1.21)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.tubesreloaded]]
     modId="useitemonblockevent"
-    mandatory=true
+    type="required"
     versionRange="[1.0.0.2,)"
     ordering="NONE"
     side="BOTH"
