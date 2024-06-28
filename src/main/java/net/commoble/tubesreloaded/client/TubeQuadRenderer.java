@@ -11,6 +11,7 @@ import net.commoble.tubesreloaded.util.DirectionTransformer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
@@ -109,8 +110,12 @@ public class TubeQuadRenderer
 
 	private static void putVertex(PoseStack.Pose matrixEntryIn, VertexConsumer bufferIn, float x, float y, float z, float texU, float texV, int packedLight, Vec3 normal)
 	{
-		bufferIn.vertex(matrixEntryIn.pose(), x, y, z).color(1F,1F,1F, 1F).uv(texU, texV).overlayCoords(0, 10).uv2(packedLight)
-			.normal(matrixEntryIn.normal(), (float)normal.x, (float)normal.y, (float)normal.z).endVertex();
+		bufferIn.addVertex(matrixEntryIn.pose(), x, y, z)
+			.setColor(1F,1F,1F, 1F)
+			.setUv(texU, texV)
+			.setOverlay(OverlayTexture.NO_OVERLAY)
+			.setLight(packedLight)
+			.setNormal(matrixEntryIn, (float)normal.x, (float)normal.y, (float)normal.z);
 	}
 	
 	public static int getPackedLight(Level world, BlockPos pos)

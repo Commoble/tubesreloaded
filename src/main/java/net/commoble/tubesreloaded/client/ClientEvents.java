@@ -7,31 +7,31 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.event.TickEvent.ClientTickEvent;
 
 public class ClientEvents
 {
-	public static void subscribeClientEvents(IEventBus modBus, IEventBus forgeBus)
+	public static void subscribeClientEvents(IEventBus modBus, IEventBus gameBus)
 	{
 		modBus.addListener(ClientEvents::onRegisterScreens);
 		modBus.addListener(ClientEvents::onRegisterRenderers);
 		
-		forgeBus.addListener(ClientEvents::onClientTick);
-		forgeBus.addListener(ClientEvents::onClientLogIn);
-		forgeBus.addListener(ClientEvents::onClientLogOut);
+		gameBus.addListener(ClientEvents::onClientTick);
+		gameBus.addListener(ClientEvents::onClientLogIn);
+		gameBus.addListener(ClientEvents::onClientLogOut);
 	}
 	
 	private static void onRegisterScreens(RegisterMenuScreensEvent event)
 	{
 		// register screens
 		event.register(TubesReloaded.get().loaderMenu.get(), StandardSizeContainerScreenFactory.of(
-			new ResourceLocation(TubesReloaded.MODID, "textures/gui/loader.png"), TubesReloaded.get().loaderBlock.get().getDescriptionId()));
+			TubesReloaded.id("textures/gui/loader.png"), TubesReloaded.get().loaderBlock.get().getDescriptionId()));
 		event.register(TubesReloaded.get().filterMenu.get(), StandardSizeContainerScreenFactory.of(
-			new ResourceLocation(TubesReloaded.MODID, "textures/gui/filter.png"), TubesReloaded.get().filterBlock.get().getDescriptionId()));
+			TubesReloaded.id("textures/gui/filter.png"), TubesReloaded.get().filterBlock.get().getDescriptionId()));
 		event.register(TubesReloaded.get().multiFilterMenu.get(), StandardSizeContainerScreenFactory.of(
-			new ResourceLocation("textures/gui/container/shulker_box.png"), TubesReloaded.get().multiFilterBlock.get().getDescriptionId()));
+			ResourceLocation.withDefaultNamespace("textures/gui/container/shulker_box.png"), TubesReloaded.get().multiFilterBlock.get().getDescriptionId()));
 	}
 	
 	private static void onRegisterRenderers(RegisterRenderers event)
@@ -43,7 +43,7 @@ public class ClientEvents
 		BlockEntityRenderers.register(TubesReloaded.get().osmosisFilterEntity.get(), OsmosisFilterTileEntityRenderer::new);
 	}
 	
-	private static void onClientTick(ClientTickEvent event)
+	private static void onClientTick(ClientTickEvent.Post event)
 	{
 		Minecraft mc = Minecraft.getInstance();
 		

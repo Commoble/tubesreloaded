@@ -17,12 +17,12 @@ import net.commoble.databuddy.datagen.BlockStateFile.Multipart;
 import net.commoble.databuddy.datagen.BlockStateFile.PropertyValue;
 import net.commoble.databuddy.datagen.BlockStateFile.Variants;
 import net.commoble.databuddy.datagen.BlockStateFile.WhenApply;
+import net.commoble.databuddy.datagen.JsonDataProvider;
+import net.commoble.databuddy.datagen.SimpleModel;
 import net.commoble.tubesreloaded.TubesReloaded;
 import net.commoble.tubesreloaded.blocks.extractor.ExtractorBlock;
 import net.commoble.tubesreloaded.blocks.tube.RedstoneTubeBlock;
 import net.commoble.tubesreloaded.blocks.tube.TubeBlock;
-import net.commoble.databuddy.datagen.JsonDataProvider;
-import net.commoble.databuddy.datagen.SimpleModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -45,9 +45,10 @@ import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod.EventBusSubscriber;
-import net.neoforged.fml.common.Mod.EventBusSubscriber.Bus;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.EventBusSubscriber.Bus;
 import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.crafting.IntersectionIngredient;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
@@ -98,7 +99,7 @@ public class TubesReloadedDatagen
 			doBlock.apply(regObj.get(), TubesReloadedDatagen::tubeBlockState, simpleBlockLoot)
 				.baseModel(models, SimpleModel.createWithoutRenderType(trBlockPrefix("tube"))
 					.addTexture("all", formatId(regObj.getId(), "block/%s")))
-				.model(models, "block/%s_extension", SimpleModel.createWithoutRenderType(new ResourceLocation(TubesReloaded.MODID, "block/tube_extension"))
+				.model(models, "block/%s_extension", SimpleModel.createWithoutRenderType(TubesReloaded.id("block/tube_extension"))
 					.addTexture("all", formatId(regObj.getId(), "block/%s")))
 				.tags(blockTags, TubesReloaded.Tags.Blocks.COLORED_TUBES)
 				.localize(lang, localizedName);
@@ -147,17 +148,21 @@ public class TubesReloadedDatagen
 			doItem.apply(regObj.get().asItem(), blockItemModel)
 				.recipe(recipes, formatId(regObj.getId(), "%s_from_gold"), RecipeHelpers.shaped(item, 8, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 					'i', Ingredient.of(Tags.Items.INGOTS_GOLD),
-					'G', Ingredient.of(TagKey.create(Registries.ITEM, new ResourceLocation("forge", "glass/"+dyeColor.getName()))))))
+					'G', IntersectionIngredient.of(
+						Ingredient.of(Tags.Items.GLASS_PANES),
+						Ingredient.of(TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "dyed/" + dyeColor.getName())))))))
 				.recipe(recipes, formatId(regObj.getId(), "%s_from_copper"), RecipeHelpers.shaped(item, 2, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 					'i', Ingredient.of(Tags.Items.INGOTS_COPPER),
-					'G', Ingredient.of(TagKey.create(Registries.ITEM, new ResourceLocation("forge", "glass/"+dyeColor.getName()))))))
+					'G', IntersectionIngredient.of(
+						Ingredient.of(Tags.Items.GLASS_PANES),
+						Ingredient.of(TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "dyed/" + dyeColor.getName())))))))
 				.tags(itemTags, TubesReloaded.Tags.Items.COLORED_TUBES);
 		});
 		doItem.apply(mod.distributorBlock.get().asItem(), blockItemModel)
 			.recipe(recipes, RecipeHelpers.shaped(mod.distributorBlock.get().asItem(), 1, CraftingBookCategory.BUILDING,
 				List.of("csc", "sGs", "csc"),
 				Map.of(
-					'c', Ingredient.of(Tags.Items.COBBLESTONE),
+					'c', Ingredient.of(Tags.Items.COBBLESTONES),
 					's', Ingredient.of(mod.shuntBlock.get().asItem()),
 					'G', Ingredient.of(Tags.Items.FENCE_GATES))));
 		doItem.apply(mod.extractorBlock.get().asItem(), blockItemModel)
@@ -182,7 +187,7 @@ public class TubesReloadedDatagen
 			.recipe(recipes, RecipeHelpers.shaped(mod.loaderBlock.get().asItem(), 1, CraftingBookCategory.BUILDING,
 				List.of("sss", "P S", "sss"),
 				Map.of(
-					's', Ingredient.of(Tags.Items.COBBLESTONE),
+					's', Ingredient.of(Tags.Items.COBBLESTONES),
 					'S', Ingredient.of(mod.shuntBlock.get().asItem()),
 					'P', Ingredient.of(Items.PISTON))));
 		ItemDataHelper.create(mod.osmosisFilterBlock.get().asItem()) // model isn't generated
@@ -202,20 +207,20 @@ public class TubesReloadedDatagen
 			.recipe(recipes, RecipeHelpers.shaped(mod.shuntBlock.get().asItem(), 1, CraftingBookCategory.BUILDING,
 				List.of(" t ", "tst", " t "),
 				Map.of(
-					's', Ingredient.of(Tags.Items.COBBLESTONE),
+					's', Ingredient.of(Tags.Items.COBBLESTONES),
 					't', Ingredient.of(TubesReloaded.Tags.Items.TUBES))))
 			.tags(itemTags, TubesReloaded.Tags.Items.TUBES);
 		doItem.apply(mod.tubeBlock.get().asItem(), blockItemModel)
 			.recipe(recipes, formatId(mod.tubeBlock.getId(), "%s_from_gold"), RecipeHelpers.shaped(mod.tubeBlock.get().asItem(), 8, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 				'i', Ingredient.of(Tags.Items.INGOTS_GOLD),
-				'G', Ingredient.of(Tags.Items.GLASS_COLORLESS))))
+				'G', Ingredient.of(Tags.Items.GLASS_BLOCKS_COLORLESS))))
 			.recipe(recipes, formatId(mod.tubeBlock.getId(), "%s_from_copper"), RecipeHelpers.shaped(mod.tubeBlock.get().asItem(), 2, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 				'i', Ingredient.of(Tags.Items.INGOTS_COPPER),
-				'G', Ingredient.of(Tags.Items.GLASS_COLORLESS))))
+				'G', Ingredient.of(Tags.Items.GLASS_BLOCKS_COLORLESS))))
 			.tags(itemTags, TubesReloaded.Tags.Items.TUBES);
 		
 		// non-block items
-		ItemDataHelper.create(mod.tubingPliers.get(), models, SimpleModel.create(new ResourceLocation("item/handheld"), SimpleModel.RenderTypes.CUTOUT)
+		ItemDataHelper.create(mod.tubingPliers.get(), models, SimpleModel.create(ResourceLocation.withDefaultNamespace("item/handheld"), SimpleModel.RenderTypes.CUTOUT)
 				.addTexture("layer0", formatId(mod.tubingPliers.getId(), "item/%s")))
 			.recipe(recipes, RecipeHelpers.shaped(mod.tubingPliers.get().asItem(), 1, CraftingBookCategory.MISC,
 				List.of("  I", "It ", " I "),
@@ -236,7 +241,7 @@ public class TubesReloadedDatagen
 		BlockStateFile.addDataProvider(event, TubesReloaded.MODID, JsonOps.INSTANCE, blockStates);
 		dataGenerator.addProvider(event.includeClient(), lang);
 		SimpleModel.addDataProvider(event, TubesReloaded.MODID, JsonOps.INSTANCE, models);
-		dataGenerator.addProvider(event.includeServer(), new JsonDataProvider<>(dataGenerator.getPackOutput(), dataGenerator, PackOutput.Target.DATA_PACK, "loot_tables", LootTable.CODEC, lootTables));
+		dataGenerator.addProvider(event.includeServer(), new JsonDataProvider<>(dataGenerator.getPackOutput(), dataGenerator, PackOutput.Target.DATA_PACK, "loot_tables", LootTable.DIRECT_CODEC, lootTables));
 		dataGenerator.addProvider(event.includeServer(), new JsonDataProvider<>(dataGenerator.getPackOutput(), dataGenerator, PackOutput.Target.DATA_PACK, "recipes", Recipe.CODEC, recipes));
 		dataGenerator.addProvider(event.includeServer(), blockTags);
 		dataGenerator.addProvider(event.includeServer(), itemTags);
@@ -280,7 +285,7 @@ public class TubesReloadedDatagen
 		ResourceLocation blockModel = BlockDataHelper.blockModel(block);
 		ResourceLocation offModel = blockModel;
 		ResourceLocation onModel = formatId(blockModel, "%s_on");
-		ResourceLocation extension = new ResourceLocation(TubesReloaded.MODID, "block/tube_extension");
+		ResourceLocation extension = TubesReloaded.id("block/tube_extension");
 		return BlockStateFile.multipart(Multipart.builder()
 			.addWhenApply(WhenApply.when(
 				Case.create(RedstoneTubeBlock.POWERED, false),
@@ -378,11 +383,11 @@ public class TubesReloadedDatagen
 	 */
 	public static ResourceLocation formatId(ResourceLocation original, String formatString)
 	{
-		return new ResourceLocation(original.getNamespace(), String.format(formatString, original.getPath()));
+		return ResourceLocation.fromNamespaceAndPath(original.getNamespace(), String.format(formatString, original.getPath()));
 	}
 	
 	public static ResourceLocation trBlockPrefix(String s)
 	{
-		return new ResourceLocation(TubesReloaded.MODID, "block/" + s);
+		return TubesReloaded.id("block/" + s);
 	}
 }

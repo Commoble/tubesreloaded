@@ -9,7 +9,7 @@ group = "net.commoble.${modid}"
 base { archivesName="${modid}-${mc_version}" }
 version = "${mod_version}"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 // the jarjar stuff
 jarJar.enable()
@@ -50,12 +50,12 @@ runs {
 	
 	gameTestServer {
 		systemProperty 'forge.enabledGameTestNamespaces', project.modid
-		modSources.addAll project.sourceSets.gametest
+		modSources.add project.sourceSets.gametest
 	}
 
 	data {
 		programArguments.addAll '--mod', project.modid, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-		modSources.addAll project.sourceSets.datagen
+		modSources.add project.sourceSets.datagen
 	}
 }
 

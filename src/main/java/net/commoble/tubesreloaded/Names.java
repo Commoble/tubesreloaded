@@ -24,6 +24,7 @@ public class Names
 	
 	// misc
 	public static final String TUBES_IN_CHUNK = "tubes_in_chunk";
+	public static final String PLIERED_TUBE = "pliered_tube";
 	
 	public static final String[] COLORED_TUBE_NAMES = Arrays.stream(DyeColor.values()).map(color -> color.toString() + "_tube").toArray(String[]::new);
 }

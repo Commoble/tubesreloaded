@@ -20,12 +20,15 @@ import net.commoble.tubesreloaded.routing.RoutingNetwork;
 import net.commoble.tubesreloaded.util.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -258,12 +261,12 @@ public class TubeBlockEntity extends BlockEntity
 				this.setConnectionSyncDirty(true);
 			}
 		}
-		if (!this.level.isClientSide)
+		if (this.level instanceof ServerLevel serverLevel)
 		{
 			this.onPossibleNetworkUpdateRequired();
 			this.network.invalid = true;
 			this.level.setBlockAndUpdate(this.worldPosition, newState);
-			PacketDistributor.TRACKING_CHUNK.with(this.level.getChunkAt(this.worldPosition)).send(new TubeBreakPacket(Vec3.atCenterOf(this.worldPosition), Vec3.atCenterOf(otherPos)));
+			PacketDistributor.sendToPlayersTrackingChunk(serverLevel, new ChunkPos(this.worldPosition), new TubeBreakPacket(Vec3.atCenterOf(this.worldPosition), Vec3.atCenterOf(otherPos)));
 		}
 		this.onDataUpdated();
 	}
@@ -489,21 +492,21 @@ public class TubeBlockEntity extends BlockEntity
 
 	@Override
 	/** read **/
-	public void load(CompoundTag compound)
+	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
-		super.load(compound); // reads forge data and third-party capabilities
-		this.readAllNBT(compound);
+		super.loadAdditional(compound, registries); // reads neoforge data and third-party capabilities
+		this.readAllNBT(compound, registries);
 	}
 
 	@Override	// write entire inventory by default (for server -> hard disk purposes this is what is called)
-	public void saveAdditional(CompoundTag compound)
+	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
-		super.saveAdditional(compound); // saves forge data and third-party capabilities
-		this.writeAllNBT(compound);
+		super.saveAdditional(compound, registries); // saves neoforge data and third-party capabilities
+		this.writeAllNBT(compound, registries);
 	}
 	
 	// write all nbt specific to tubes
-	protected void writeAllNBT(CompoundTag compound)
+	protected void writeAllNBT(CompoundTag compound, HolderLookup.Provider registries)
 	{
 		BlockPos tubePos = this.getBlockPos();
 		BlockState state = this.getBlockState();
@@ -515,7 +518,7 @@ public class TubeBlockEntity extends BlockEntity
 		for (ItemInTubeWrapper wrapper : this.inventory)
 		{
 			CompoundTag invTag = new CompoundTag();
-			wrapper.writeToNBT(invTag, group);
+			wrapper.writeToNBT(invTag, group, registries);
 			invList.add(invTag);
 		}
 		if (!invList.isEmpty())
@@ -532,7 +535,7 @@ public class TubeBlockEntity extends BlockEntity
 	}
 	
 	// read all nbt specific to tubes
-	protected void readAllNBT(@Nullable CompoundTag compound)
+	protected void readAllNBT(@Nullable CompoundTag compound, HolderLookup.Provider registries)
 	{
 		// ensures stuff gets synced when we load from data in mid-session
 		// (e.g. from a structure block)
@@ -549,7 +552,7 @@ public class TubeBlockEntity extends BlockEntity
 				for (int i = 0; i < invList.size(); i++)
 				{
 					CompoundTag itemTag = invList.getCompound(i);
-					inventory.add(ItemInTubeWrapper.readFromNBT(itemTag, group));
+					inventory.add(ItemInTubeWrapper.readFromNBT(itemTag, group, registries));
 				}
 				this.inventory = inventory;
 			}
@@ -559,7 +562,7 @@ public class TubeBlockEntity extends BlockEntity
 				for (int i=0; i<invList.size(); i++)
 				{
 					CompoundTag itemTag = invList.getCompound(i);
-					this.inventory.add(ItemInTubeWrapper.readFromNBT(itemTag, group));
+					this.inventory.add(ItemInTubeWrapper.readFromNBT(itemTag, group, registries));
 				}
 			}
 			
@@ -598,19 +601,19 @@ public class TubeBlockEntity extends BlockEntity
 	 * //handleUpdateTag just calls read by default
 	 */
 	@Override
-	public CompoundTag getUpdateTag()
+	public CompoundTag getUpdateTag(HolderLookup.Provider registries)
 	{
-		CompoundTag compound = super.getUpdateTag();
+		CompoundTag compound = super.getUpdateTag(registries);
 		this.setConnectionSyncDirty(true);
-		this.writeAllNBT(compound);	// okay to send entire inventory on chunk load
+		this.writeAllNBT(compound, registries);	// okay to send entire inventory on chunk load
 		this.setConnectionSyncDirty(false);
 		return compound;
 	}	
 
 	@Override
-	public void handleUpdateTag(CompoundTag tag)
+	public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries)
 	{
-		this.readAllNBT(tag);
+		this.readAllNBT(tag, registries);
 	}
 
 	/**
@@ -621,10 +624,10 @@ public class TubeBlockEntity extends BlockEntity
 	@Override
 	public ClientboundBlockEntityDataPacket getUpdatePacket()
 	{
-		return ClientboundBlockEntityDataPacket.create(this, be -> this.makeUpdatePacketTag());
+		return ClientboundBlockEntityDataPacket.create(this, (be,registries) -> this.makeUpdatePacketTag(registries));
 	}
 	
-	protected CompoundTag makeUpdatePacketTag()
+	protected CompoundTag makeUpdatePacketTag(HolderLookup.Provider registries)
 	{
 		BlockState state = this.getBlockState();
 		BlockPos pos = this.getBlockPos();
@@ -632,7 +635,7 @@ public class TubeBlockEntity extends BlockEntity
 		OctahedralGroup normalizer = group.inverse();
 		
 		CompoundTag compound = new CompoundTag();
-		super.saveAdditional(compound); // write the basic TE stuff
+		super.saveAdditional(compound, registries); // write the basic TE stuff
 
 		ListTag invList = new ListTag();
 
@@ -641,7 +644,7 @@ public class TubeBlockEntity extends BlockEntity
 			// empty itemstacks are not added to the tube
 			ItemInTubeWrapper wrapper = this.wrappersToSendToClient.poll();
 			CompoundTag invTag = new CompoundTag();
-			wrapper.writeToNBT(invTag, group);
+			wrapper.writeToNBT(invTag, group, registries);
 			invList.add(invTag);
 		}
 		if (!invList.isEmpty())
@@ -668,9 +671,9 @@ public class TubeBlockEntity extends BlockEntity
 	 * Receive packet on client and get data out of it
 	 */
 	@Override
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet)
+	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider registries)
 	{
-		this.readAllNBT(packet.getTag());
+		this.readAllNBT(packet.getTag(), registries);
 	}
 	
 	public void setConnectionsRaw(Map<Direction, RemoteConnection> newConnections)

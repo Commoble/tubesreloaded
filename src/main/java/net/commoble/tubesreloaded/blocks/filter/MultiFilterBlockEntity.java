@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import net.commoble.tubesreloaded.TubesReloaded;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
@@ -41,7 +42,7 @@ public class MultiFilterBlockEntity extends AbstractFilterBlockEntity
 		if (this.getBlockState().hasProperty(DirectionalBlock.FACING))
 		{
 			Direction outputDir = this.getBlockState().getValue(DirectionalBlock.FACING);
-			if (side == outputDir.getOpposite())
+			if (side != outputDir)
 			{
 				return this.shuntingHandler;
 			}
@@ -67,16 +68,16 @@ public class MultiFilterBlockEntity extends AbstractFilterBlockEntity
 	}
 
 	@Override
-	public void load(CompoundTag tag)
+	public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
 	{
-		super.load(tag);
-		this.inventory.deserializeNBT(tag.getCompound(INV_KEY));
+		super.loadAdditional(tag, registries);
+		this.inventory.deserializeNBT(registries, tag.getCompound(INV_KEY));
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag tag)
+	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
 	{
-		super.saveAdditional(tag);
-		tag.put(INV_KEY, this.inventory.serializeNBT());
+		super.saveAdditional(tag, registries);
+		tag.put(INV_KEY, this.inventory.serializeNBT(registries));
 	}
 }

@@ -9,20 +9,19 @@ import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 
 public class ClientPacketHandlers
 {
-	public static void onTubeBreakPacket(PlayPayloadContext context, TubeBreakPacket packet)
+	public static void onTubeBreakPacket(TubeBreakPacket packet)
 	{
 		Minecraft mc = Minecraft.getInstance();
 		ClientLevel level = mc.level;
 		
 		if (level != null)
 		{
-			Vec3[] points = RaytraceHelper.getInterpolatedPoints(packet.start, packet.end);
+			Vec3[] points = RaytraceHelper.getInterpolatedPoints(packet.start(), packet.end());
 			ParticleEngine manager = mc.particleEngine;
-			BlockState state = level.getBlockState(BlockPos.containing(packet.start));
+			BlockState state = level.getBlockState(BlockPos.containing(packet.start()));
 			
 			for (Vec3 point : points)
 			{

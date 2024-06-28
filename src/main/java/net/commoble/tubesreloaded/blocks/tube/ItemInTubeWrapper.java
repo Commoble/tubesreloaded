@@ -7,6 +7,7 @@ import java.util.Queue;
 import com.mojang.math.OctahedralGroup;
 
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.world.item.ItemStack;
@@ -30,6 +31,7 @@ public class ItemInTubeWrapper
 	public static final String TICKS_REMAINING_TAG = "ticksRemaining";
 	public static final String TICKS_DURATION_TAG = "maxDurationInTicks";
 	public static final String IS_FRESHLY_INSERTED = "isFreshly";
+	public static final String ITEM = "item";
 	
 	/** It would be a good idea to supply this constructor with a copy of a list when using an existing list **/
 	public ItemInTubeWrapper(ItemStack stack, Queue<Direction> moves, int ticksToTravel)
@@ -55,9 +57,9 @@ public class ItemInTubeWrapper
 		}
 	}
 	
-	public static ItemInTubeWrapper readFromNBT(CompoundTag compound, OctahedralGroup group)
+	public static ItemInTubeWrapper readFromNBT(CompoundTag compound, OctahedralGroup group, HolderLookup.Provider registries)
 	{
-		ItemStack stack = ItemStack.of(compound);
+		ItemStack stack = ItemStack.parseOptional(registries, compound.getCompound(ITEM));
 		int[] moveBuffer = compound.getIntArray(MOVES_REMAINING_TAG);
 		int ticksElapsed = compound.getInt(TICKS_REMAINING_TAG);
 		int maxDuration = compound.getInt(TICKS_DURATION_TAG);
@@ -69,13 +71,13 @@ public class ItemInTubeWrapper
 		return wrapper;
 	}
 	
-	public CompoundTag writeToNBT(CompoundTag compound, OctahedralGroup group)
+	public CompoundTag writeToNBT(CompoundTag compound, OctahedralGroup group, HolderLookup.Provider registries)
 	{
 		compound.put(MOVES_REMAINING_TAG, compressMoveList(this.remainingMoves, group));
 		compound.putInt(TICKS_REMAINING_TAG, this.ticksElapsed);
 		compound.putInt(TICKS_DURATION_TAG, this.maximumDurationInTube);
 		compound.putBoolean(IS_FRESHLY_INSERTED, this.freshlyInserted);
-		this.stack.save(compound);
+		compound.put(ITEM, this.stack.save(registries, compound));
 		
 		return compound;
 	}

@@ -68,7 +68,7 @@ public record BlockDataHelper(Block block)
 	public BlockDataHelper model(Map<ResourceLocation, SimpleModel> models, String formatString, SimpleModel model)
 	{
 		ResourceLocation id = this.id();
-		models.put(new ResourceLocation(id.getNamespace(), String.format(formatString, id.getPath())), model);
+		models.put(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), String.format(formatString, id.getPath())), model);
 		return this;
 	}
 	
@@ -84,6 +84,6 @@ public record BlockDataHelper(Block block)
 	
 	public static ResourceLocation blockModel(ResourceLocation location)
 	{
-		return new ResourceLocation(location.getNamespace(), "block/" + location.getPath());
+		return ResourceLocation.fromNamespaceAndPath(location.getNamespace(), "block/" + location.getPath());
 	}
 }

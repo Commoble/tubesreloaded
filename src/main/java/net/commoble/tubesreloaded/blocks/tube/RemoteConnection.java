@@ -85,7 +85,7 @@ public class RemoteConnection
 		public static Storage fromNBT(CompoundTag nbt, OctahedralGroup group)
 		{
 			Direction toSide = group.rotate(Direction.byName(nbt.getString("toSide")));
-			BlockPos toPos = PosHelper.transform(NbtUtils.readBlockPos(nbt.getCompound("toPos")), group);
+			BlockPos toPos = PosHelper.transform(NbtUtils.readBlockPos(nbt, "toPos").orElse(BlockPos.ZERO), group);
 			boolean isPrimary = nbt.getBoolean("isPrimary");
 			return new Storage(toSide, toPos, isPrimary);
 		}

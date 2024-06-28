@@ -6,7 +6,9 @@ import net.commoble.tubesreloaded.TubesReloaded;
 import net.commoble.tubesreloaded.blocks.shunt.ShuntBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -78,39 +80,41 @@ public class FilterBlockEntity extends AbstractFilterBlockEntity
 	
 	////// NBT and syncing
 	
-	protected void writeData(CompoundTag compound)
+	protected void writeData(CompoundTag compound, HolderLookup.Provider registries)
 	{
-		CompoundTag inventory = new CompoundTag();
-		this.filterStack.save(inventory);
-		compound.put(INV_KEY, inventory);
+		if (!this.filterStack.isEmpty())
+		{
+			Tag inventory = this.filterStack.save(registries);
+			compound.put(INV_KEY, inventory);
+		}
 	}
 	
-	protected void readData(CompoundTag compound)
+	protected void readData(CompoundTag compound, HolderLookup.Provider registries)
 	{
 		CompoundTag inventory = compound.getCompound(INV_KEY);
-		this.filterStack = ItemStack.of(inventory);
+		this.filterStack = ItemStack.parseOptional(registries, inventory);
 	}
 
 	@Override	// write entire inventory by default (for server -> hard disk purposes this is what is called)
-	public void saveAdditional(CompoundTag compound)
+	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
-		super.saveAdditional(compound);
-		this.writeData(compound);
+		super.saveAdditional(compound, registries);
+		this.writeData(compound, registries);
 	}
 	
 	@Override
 	/** read **/
-	public void load(CompoundTag compound)
+	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
-		super.load(compound);
-		this.readData(compound);
+		super.loadAdditional(compound, registries);
+		this.readData(compound, registries);
 	}
 	
 	@Override
-	public CompoundTag getUpdateTag()
+	public CompoundTag getUpdateTag(HolderLookup.Provider registries)
 	{
-		CompoundTag tag = super.getUpdateTag();
-		this.writeData(tag);
+		CompoundTag tag = super.getUpdateTag(registries);
+		this.writeData(tag, registries);
 		return tag;
 	}
 

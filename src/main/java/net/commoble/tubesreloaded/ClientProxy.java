@@ -34,7 +34,7 @@ public class ClientProxy
 	{
 		// mark the capability on the client and send a packet to the server to do the same
 		instance.isHoldingSprint = isSprinting;
-		PacketDistributor.SERVER.noArg().send(new IsWasSprintPacket(isSprinting));
+		PacketDistributor.sendToServer(new IsWasSprintPacket(isSprinting));
 	}
 	
 	public static void updateTubesInChunk(ChunkPos pos, Set<BlockPos> tubes)

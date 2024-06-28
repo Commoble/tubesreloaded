@@ -17,6 +17,7 @@ import net.commoble.tubesreloaded.blocks.loader.LoaderBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -106,25 +107,29 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 	/// basic block properties
 
 	@Override
-	public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type)
+	public boolean isPathfindable(BlockState state, PathComputationType type)
 	{
 		return false;
 	}
 
 	// block behaviour
 	@Override
-	@Deprecated
 	public void onPlace(BlockState newState, Level level, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
-		TubesInChunk.updateTubeSet(level, pos, Set<BlockPos>::add);
+		if (level instanceof ServerLevel serverLevel)
+		{
+			TubesInChunk.updateTubeSet(serverLevel, pos, Set<BlockPos>::add);
+		}
 		super.onPlace(newState, level, pos, oldState, isMoving);
 	}
 
 	@Override
-	@Deprecated
 	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
 	{
-		TubesInChunk.updateTubeSet(level, pos, Set<BlockPos>::remove);
+		if (level instanceof ServerLevel serverLevel)
+		{
+			TubesInChunk.updateTubeSet(serverLevel, pos, Set<BlockPos>::remove);
+		}
 		BlockEntity te = level.getBlockEntity(pos);
 		if (te instanceof TubeBlockEntity tube && !state.is(newState.getBlock()))
 		{

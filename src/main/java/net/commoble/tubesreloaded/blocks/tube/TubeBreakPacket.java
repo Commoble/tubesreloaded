@@ -1,69 +1,39 @@
 package net.commoble.tubesreloaded.blocks.tube;
 
+import io.netty.buffer.ByteBuf;
 import net.commoble.tubesreloaded.TubesReloaded;
 import net.commoble.tubesreloaded.client.ClientPacketHandlers;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class TubeBreakPacket implements CustomPacketPayload
+public record TubeBreakPacket(Vec3 start, Vec3 end) implements CustomPacketPayload
 {
-	public static final ResourceLocation ID = new ResourceLocation(TubesReloaded.MODID, "tube_break");
+	public static final CustomPacketPayload.Type<TubeBreakPacket> TYPE = new CustomPacketPayload.Type<>(TubesReloaded.id("tube_break"));
+	public static final StreamCodec<ByteBuf, TubeBreakPacket> STREAM_CODEC = StreamCodec.composite(
+		ByteBufCodecs.DOUBLE, p -> p.start.x,
+		ByteBufCodecs.DOUBLE, p -> p.start.y,
+		ByteBufCodecs.DOUBLE, p -> p.start.z,
+		ByteBufCodecs.DOUBLE, p -> p.end.x,
+		ByteBufCodecs.DOUBLE, p -> p.end.y,
+		ByteBufCodecs.DOUBLE, p -> p.end.z,
+		TubeBreakPacket::new);
 	
-	public final Vec3 start;
-	public final Vec3 end;
-	
-	public TubeBreakPacket(Vec3 start, Vec3 end)
+	public TubeBreakPacket(double x0, double y0, double z0, double x1, double y1, double z1)
 	{
-		this.start = start;
-		this.end = end;
+		this(new Vec3(x0, y0, z0), new Vec3(x1, y1, z1));
 	}
 	
-	public void write(FriendlyByteBuf buffer)
+	public void handle(IPayloadContext context)
 	{
-		CompoundTag nbt = new CompoundTag();
-		nbt.putDouble("startX", this.start.x);
-		nbt.putDouble("startY", this.start.y);
-		nbt.putDouble("startZ", this.start.z);
-		nbt.putDouble("endX", this.end.x);
-		nbt.putDouble("endY", this.end.y);
-		nbt.putDouble("endZ", this.end.z);
-		buffer.writeNbt(nbt);
-	}
-	
-	public static TubeBreakPacket read(FriendlyByteBuf buffer)
-	{
-		CompoundTag nbt = buffer.readNbt();
-		if (nbt == null)
-		{
-			return new TubeBreakPacket(Vec3.ZERO, Vec3.ZERO);
-		}
-		else
-		{
-			Vec3 start = new Vec3(
-				nbt.getDouble("startX"),
-				nbt.getDouble("startY"),
-				nbt.getDouble("startZ"));
-			Vec3 end = new Vec3(
-				nbt.getDouble("endX"),
-				nbt.getDouble("endY"),
-				nbt.getDouble("endZ"));
-			
-			return new TubeBreakPacket(start, end);
-		}
-	}
-	
-	public void handle(PlayPayloadContext context)
-	{
-		context.workHandler().execute(() -> ClientPacketHandlers.onTubeBreakPacket(context, this));
+		context.enqueueWork(() -> ClientPacketHandlers.onTubeBreakPacket(this));
 	}
 
 	@Override
-	public ResourceLocation id()
+	public Type<? extends CustomPacketPayload> type()
 	{
-		return ID;
+		return TYPE;
 	}
 }

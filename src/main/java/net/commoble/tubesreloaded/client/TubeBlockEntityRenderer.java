@@ -12,6 +12,7 @@ import net.commoble.tubesreloaded.blocks.tube.RemoteConnection;
 import net.commoble.tubesreloaded.blocks.tube.TubeBlock;
 import net.commoble.tubesreloaded.blocks.tube.TubeBlockEntity;
 import net.commoble.tubesreloaded.blocks.tube.TubingPliersItem;
+import net.commoble.tubesreloaded.util.BlockSide;
 import net.commoble.tubesreloaded.util.DirectionTransformer;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
@@ -27,8 +28,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -327,11 +326,11 @@ public class TubeBlockEntityRenderer implements BlockEntityRenderer<TubeBlockEnt
 					ItemStack stack = player.getItemInHand(hand);
 					if (stack.getItem() instanceof TubingPliersItem)
 					{
-						@Nullable CompoundTag nbt = stack.getTagElement(TubingPliersItem.LAST_TUBE_DATA);
-						if (nbt != null)
+						@Nullable BlockSide plieredTube = TubingPliersItem.getPlieredTube(stack);
+						if (plieredTube != null)
 						{
-							BlockPos posOfLastTubeOfPlayer = NbtUtils.readBlockPos(nbt.getCompound(TubingPliersItem.LAST_TUBE_POS));
-							Direction sideOfLastTubeOfPlayer = Direction.from3DDataValue(nbt.getInt(TubingPliersItem.LAST_TUBE_SIDE));
+							BlockPos posOfLastTubeOfPlayer = plieredTube.pos();
+							Direction sideOfLastTubeOfPlayer = plieredTube.direction();
 							if (posOfLastTubeOfPlayer.equals(tube.getBlockPos()))
 							{
 

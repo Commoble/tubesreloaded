@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "tag": "c:ingots/iron"
+    },
+    "t": {
+      "tag": "tubesreloaded:tubes"
+    }
+  },
+  "pattern": [
+    "  I",
+    "It ",
+    " I "
+  ],
+  "result": {
+    "count": 1,
+    "id": "tubesreloaded:tubing_pliers"
+  }
+}

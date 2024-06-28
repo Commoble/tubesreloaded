@@ -41,8 +41,10 @@ import net.commoble.tubesreloaded.blocks.tube.TubesInChunk;
 import net.commoble.tubesreloaded.blocks.tube.TubingPliersItem;
 import net.commoble.tubesreloaded.client.ClientEvents;
 import net.commoble.tubesreloaded.client.FakeWorldForTubeRaytrace;
+import net.commoble.tubesreloaded.util.BlockSide;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -55,7 +57,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlags;
@@ -91,7 +93,7 @@ import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent.UsePhase;
 import net.neoforged.neoforge.event.level.ChunkWatchEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
@@ -106,14 +108,14 @@ public class TubesReloaded
 	{
 		public static class Blocks
 		{
-			public static final TagKey<Block> COLORED_TUBES = TagKey.create(Registries.BLOCK, new ResourceLocation(MODID, "colored_tubes"));
-			public static final TagKey<Block> TUBES = TagKey.create(Registries.BLOCK, new ResourceLocation(MODID, "tubes"));
-			public static final TagKey<Block> ROTATABLE_BY_PLIERS = TagKey.create(Registries.BLOCK, new ResourceLocation(MODID, "rotatable_by_pliers"));
+			public static final TagKey<Block> COLORED_TUBES = TagKey.create(Registries.BLOCK, id("colored_tubes"));
+			public static final TagKey<Block> TUBES = TagKey.create(Registries.BLOCK, id("tubes"));
+			public static final TagKey<Block> ROTATABLE_BY_PLIERS = TagKey.create(Registries.BLOCK, id("rotatable_by_pliers"));
 		}
 		public static class Items
 		{
-			public static final TagKey<Item> COLORED_TUBES = TagKey.create(Registries.ITEM, new ResourceLocation(MODID, "colored_tubes"));
-			public static final TagKey<Item> TUBES = TagKey.create(Registries.ITEM, new ResourceLocation(MODID, "tubes"));
+			public static final TagKey<Item> COLORED_TUBES = TagKey.create(Registries.ITEM, id("colored_tubes"));
+			public static final TagKey<Item> TUBES = TagKey.create(Registries.ITEM, id("tubes"));
 		}
 	}
 	
@@ -150,14 +152,16 @@ public class TubesReloaded
 	public final DeferredHolder<MenuType<?>, MenuType<LoaderMenu>> loaderMenu;
 	
 	public final DeferredHolder<AttachmentType<?>, AttachmentType<Set<BlockPos>>> tubesInChunkAttachment;
+	
+	public final DeferredHolder<DataComponentType<?>, DataComponentType<BlockSide>> plieredTubeDataComponent;
 
 	public TubesReloaded(IEventBus modBus)
 	{
 		INSTANCE=this;
 		
-		final IEventBus forgeBus = NeoForge.EVENT_BUS;
+		final IEventBus gameBus = NeoForge.EVENT_BUS;
 		
-		this.serverConfig = ConfigHelper.register(ModConfig.Type.SERVER, ServerConfig::create);
+		this.serverConfig = ConfigHelper.register(MODID, ModConfig.Type.SERVER, ServerConfig::create);
 		
 		// register registry objects
 		final DeferredRegister<Block> blocks = makeDeferredRegister(modBus, Registries.BLOCK);
@@ -166,12 +170,13 @@ public class TubesReloaded
 		final DeferredRegister<BlockEntityType<?>> blockEntities = makeDeferredRegister(modBus, Registries.BLOCK_ENTITY_TYPE);
 		final DeferredRegister<MenuType<?>> containers = makeDeferredRegister(modBus, Registries.MENU);
 		final DeferredRegister<AttachmentType<?>> attachmentTypes = makeDeferredRegister(modBus, NeoForgeRegistries.Keys.ATTACHMENT_TYPES);
-
+		final DeferredRegister<DataComponentType<?>> dataComponentTypes = makeDeferredRegister(modBus, Registries.DATA_COMPONENT_TYPE);
+		
 		// blocks and blockitems
 		List<Supplier<? extends TubeBlock>> tubeBlocksWithTubeBlockEntity = new ArrayList<>();
 		
 		this.tubeBlock = registerBlockAndItem(blocks, items, Names.TUBE,
-			() -> new TubeBlock(new ResourceLocation("tubesreloaded:block/tube"), BlockBehaviour.Properties.of()
+			() -> new TubeBlock(id("block/tube"), BlockBehaviour.Properties.of()
 				.instrument(NoteBlockInstrument.DIDGERIDOO)
 				.mapColor(MapColor.TERRACOTTA_YELLOW)
 				.strength(0.4F)
@@ -189,7 +194,7 @@ public class TubesReloaded
 				.strength(2F, 6F)
 				.sound(SoundType.METAL)));
 		this.redstoneTubeBlock = registerBlockAndStandardItem(blocks, items, Names.REDSTONE_TUBE,
-			() -> new RedstoneTubeBlock(new ResourceLocation("tubesreloaded:block/tube"), BlockBehaviour.Properties.of()
+			() -> new RedstoneTubeBlock(id("block/tube"), BlockBehaviour.Properties.of()
 				.mapColor(MapColor.GOLD)
 				.strength(0.4F)
 				.sound(SoundType.METAL)));
@@ -226,7 +231,7 @@ public class TubesReloaded
 			String name = Names.COLORED_TUBE_NAMES[color.ordinal()];
 			DeferredHolder<Block, ColoredTubeBlock> block = registerBlockAndStandardItem(blocks, items, name,
 				() -> new ColoredTubeBlock(
-					new ResourceLocation(TubesReloaded.MODID, "block/" + name),
+					id("block/" + name),
 					color,
 					BlockBehaviour.Properties.of()
 						.mapColor(color)
@@ -276,19 +281,22 @@ public class TubesReloaded
 		
 		this.tubesInChunkAttachment = attachmentTypes.register(Names.TUBES_IN_CHUNK, () -> AttachmentType.<Set<BlockPos>>builder(() -> new HashSet<>())
 			.serialize(TubesInChunk.TUBE_SET_CODEC)
-			.comparator(Set::equals)
+			.build());
+		
+		this.plieredTubeDataComponent = dataComponentTypes.register(Names.PLIERED_TUBE, () -> DataComponentType.<BlockSide>builder()
+			.networkSynchronized(BlockSide.STREAM_CODEC)
 			.build());
 		
 		// subscribe events
 		modBus.addListener(this::onRegisterPayloadHandlers);
 		modBus.addListener(this::onRegisterCapabilities);
 		
-		forgeBus.addListener(this::onUseItemOnBlock);
-		forgeBus.addListener(this::onChunkWatch);
+		gameBus.addListener(this::onUseItemOnBlock);
+		gameBus.addListener(this::onChunkWatch);
 		
 		if (FMLEnvironment.dist.isClient())
 		{
-			ClientEvents.subscribeClientEvents(modBus, forgeBus);
+			ClientEvents.subscribeClientEvents(modBus, gameBus);
 		}
 	}
 	
@@ -304,12 +312,12 @@ public class TubesReloaded
 	
 	// mod events
 	
-	private void onRegisterPayloadHandlers(RegisterPayloadHandlerEvent event)
+	private void onRegisterPayloadHandlers(RegisterPayloadHandlersEvent event)
 	{
 		event.registrar(MODID)
-			.play(IsWasSprintPacket.ID, IsWasSprintPacket::read, IsWasSprintPacket::handle)
-			.play(TubeBreakPacket.ID, TubeBreakPacket::read, TubeBreakPacket::handle)
-			.play(SyncTubesInChunkPacket.ID, SyncTubesInChunkPacket::read, SyncTubesInChunkPacket::handle);
+			.playToServer(IsWasSprintPacket.TYPE, IsWasSprintPacket.STREAM_CODEC, IsWasSprintPacket::handle)
+			.playToClient(TubeBreakPacket.TYPE, TubeBreakPacket.STREAM_CODEC, TubeBreakPacket::handle)
+			.playToClient(SyncTubesInChunkPacket.TYPE, SyncTubesInChunkPacket.STREAM_CODEC, SyncTubesInChunkPacket::handle);
 	}
 	
 	private void onRegisterCapabilities(RegisterCapabilitiesEvent event)
@@ -367,7 +375,7 @@ public class TubesReloaded
 								{
 									player.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
 								}
-								event.cancelWithResult(InteractionResult.SUCCESS);
+								event.cancelWithResult(ItemInteractionResult.SUCCESS);
 								return;
 							}
 							else
@@ -387,7 +395,7 @@ public class TubesReloaded
 		LevelChunk chunk = event.getChunk();
 		ServerPlayer player = event.getPlayer();
 		ChunkPos pos = chunk.getPos();
-		PacketDistributor.PLAYER.with(player).send(new SyncTubesInChunkPacket(pos, TubesInChunk.getTubesInChunk(chunk)));
+		PacketDistributor.sendToPlayer(player, new SyncTubesInChunkPacket(pos, TubesInChunk.getTubesInChunk(chunk)));
 	}
 	
 	// registry helper methods
@@ -420,5 +428,10 @@ public class TubesReloaded
 		return registerBlockAndItem(blocks,items,name,blockFactory,
 				block -> new BlockItem(block, new Item.Properties()))
 			.getFirst();
+	}
+	
+	public static ResourceLocation id(String path)
+	{
+		return ResourceLocation.fromNamespaceAndPath(MODID, path);
 	}
 }

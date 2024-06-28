@@ -11,11 +11,11 @@ import com.mojang.serialization.MapCodec;
 import net.commoble.tubesreloaded.ClientProxy;
 import net.commoble.tubesreloaded.TubesReloaded;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public class TubesInChunk
@@ -27,7 +27,7 @@ public class TubesInChunk
 	/** This codec serializes a maplike element, its results can be cast to CompoundNBT**/
 	public static final Codec<Set<BlockPos>> CODEC = FIELD_CODEC.codec();
 	
-	public static void updateTubeSet(Level level, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
+	public static void updateTubeSet(ServerLevel level, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
 	{
 		LevelChunk chunk = level.getChunkAt(pos);
 		if (chunk != null)
@@ -35,7 +35,7 @@ public class TubesInChunk
 			var set = chunk.getData(TubesReloaded.get().tubesInChunkAttachment.get());
 			consumer.accept(set, pos);
 			chunk.setData(TubesReloaded.get().tubesInChunkAttachment.get(), set);
-			PacketDistributor.TRACKING_CHUNK.with(chunk).send(new SyncTubesInChunkPacket(chunk.getPos(), set));
+			PacketDistributor.sendToPlayersTrackingChunk(level, chunk.getPos(), new SyncTubesInChunkPacket(chunk.getPos(), set));
 		}
 	}
 	

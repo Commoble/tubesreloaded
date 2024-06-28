@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "f": {
+      "item": "tubesreloaded:filter"
+    },
+    "h": {
+      "item": "minecraft:hopper"
+    },
+    "s": {
+      "tag": "c:slimeballs"
+    }
+  },
+  "pattern": [
+    "f",
+    "s",
+    "h"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tubesreloaded:osmosis_filter"
+  }
+}

@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import net.commoble.tubesreloaded.TubesReloaded;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -41,16 +42,16 @@ public class DistributorBlockEntity extends BlockEntity
 	}
 	
 	@Override
-	public void saveAdditional(CompoundTag nbt)
+	public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries)
 	{
-		super.saveAdditional(nbt);
+		super.saveAdditional(nbt, registries);
 		nbt.putIntArray(NEXT_DIRECTIONS, IntStream.range(0, 6)
 			.map(i-> this.handlers[i].getNextDirectionIndex())
 			.toArray());
 	}
 	
 	@Override
-	public void load(CompoundTag nbt)
+	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries)
 	{
 		int[] directionIndices = nbt.getIntArray(NEXT_DIRECTIONS);
 		int maxSize = Math.min(this.handlers.length, directionIndices.length);
@@ -58,6 +59,6 @@ public class DistributorBlockEntity extends BlockEntity
 		{
 			this.handlers[i].setNextDirectionIndex(directionIndices[i]);
 		}
-		super.load(nbt);
+		super.loadAdditional(nbt, registries);
 	}
 }

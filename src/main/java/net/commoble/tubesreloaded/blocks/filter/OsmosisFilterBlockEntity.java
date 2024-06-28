@@ -7,7 +7,6 @@ import com.mojang.datafixers.util.Pair;
 import net.commoble.tubesreloaded.TubesReloaded;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
@@ -21,7 +20,6 @@ public class OsmosisFilterBlockEntity extends FilterBlockEntity
 {
 	public static final BlockEntityTicker<OsmosisFilterBlockEntity> SERVER_TICKER = (level, pos, state, filter) -> filter.serverTick();
 	
-	public long transferHash;
 	public boolean checkedItemsThisTick = false;
 
 	public OsmosisFilterBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
@@ -32,13 +30,6 @@ public class OsmosisFilterBlockEntity extends FilterBlockEntity
 	public OsmosisFilterBlockEntity(BlockPos pos, BlockState state)
 	{
 		this(TubesReloaded.get().osmosisFilterEntity.get(), pos, state);
-	}
-
-	@Override
-	public void load(CompoundTag compound)
-	{
-		super.load(compound);
-		this.transferHash = this.getBlockPos().hashCode();
 	}
 	
 	public boolean getCheckedItemsAndMarkChecked()
@@ -53,7 +44,7 @@ public class OsmosisFilterBlockEntity extends FilterBlockEntity
 		if (!this.level.isClientSide())
 		{
 			this.checkedItemsThisTick = false;
-			if ((this.level.getGameTime() + this.transferHash) % TubesReloaded.get().serverConfig().osmosisFilterTransferRate().get() == 0
+			if ((this.level.getGameTime() + this.hashCode()) % TubesReloaded.get().serverConfig().osmosisFilterTransferRate().get() == 0
 				&& this.getBlockState().getValue(OsmosisFilterBlock.TRANSFERRING_ITEMS))
 			{
 				Direction filterOutputDirection = this.getBlockState().getValue(FilterBlock.FACING);

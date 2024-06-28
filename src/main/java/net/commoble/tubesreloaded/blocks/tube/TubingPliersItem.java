@@ -4,11 +4,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import net.commoble.tubesreloaded.TubesReloaded;
+import net.commoble.tubesreloaded.util.BlockSide;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -29,11 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public class TubingPliersItem extends Item
-{
-	public static final String LAST_TUBE_DATA = "last_tube_data";
-	public static final String LAST_TUBE_POS = "last_tube_pos";
-	public static final String LAST_TUBE_SIDE = "last_tube_side";
-	
+{	
 	public TubingPliersItem(Properties properties)
 	{
 		super(properties);
@@ -61,51 +56,44 @@ public class TubingPliersItem extends Item
 	
 	private InteractionResult onUseOnTube(Level level, BlockPos pos, @Nonnull TubeBlockEntity tube, ItemStack stack, Player player, Direction activatedSide)
 	{
-		if (!level.isClientSide)
+		if (player instanceof ServerPlayer serverPlayer && level instanceof ServerLevel serverLevel)
 		{
-			@Nullable CompoundTag nbt = stack.getTagElement(LAST_TUBE_DATA);
+			@Nullable BlockSide plieredTube = getPlieredTube(stack);
 			BlockState state = level.getBlockState(pos);
 			
 			// no existing position stored in item
-			if (nbt == null)
+			if (plieredTube == null)
 			{
 				// if we clicked an unused side of a tube block
 				if (state.getBlock() instanceof TubeBlock tubeBlock && !tubeBlock.hasConnectionOnSide(state, activatedSide))
 				{
-					CompoundTag newNBT = new CompoundTag();
-					newNBT.put(LAST_TUBE_POS, NbtUtils.writeBlockPos(pos));
-					newNBT.putInt(LAST_TUBE_SIDE, activatedSide.ordinal());
-					stack.addTagElement(LAST_TUBE_DATA, newNBT);
+					setPlieredTube(stack, new BlockSide(pos, activatedSide));
 				}
 				
 			}
 			else // existing position stored in stack
 			{
-				BlockPos lastPos = NbtUtils.readBlockPos(nbt.getCompound(LAST_TUBE_POS));
-				Direction lastSide = Direction.from3DDataValue(nbt.getInt(LAST_TUBE_SIDE));
+				BlockPos lastPos = plieredTube.pos();
+				Direction lastSide = plieredTube.direction();
 				// if player clicked the same tube twice, clear the last-used-position
 				if (lastPos.equals(pos))
 				{
-					stack.removeTagKey(LAST_TUBE_DATA);
+					removePlieredTube(stack);
 				}
 				// if tube was already connected to the other position, remove connections
 				else if (tube.hasRemoteConnection(lastPos))
 				{
 					TubeBlockEntity.removeConnection(level, pos, lastPos);
-					stack.removeTagKey(LAST_TUBE_DATA);
+					removePlieredTube(stack);
 				}
 				else // we clicked a different tube that doesn't have an existing connection to the original tube
 				{
 					// if the tube is already connected on this side, cancel the connection
 					if (tube.hasRemoteConnection(activatedSide))
 					{
-						stack.removeTagKey(LAST_TUBE_DATA);
-						if (player instanceof ServerPlayer serverPlayer && level instanceof ServerLevel serverLevel)
-						{
-							PacketDistributor.PLAYER.with(serverPlayer).send(new TubeBreakPacket(Vec3.atCenterOf(lastPos), Vec3.atCenterOf(pos)));
-							
-							serverPlayer.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
-						}
+						removePlieredTube(stack);
+						PacketDistributor.sendToPlayer(serverPlayer, new TubeBreakPacket(Vec3.atCenterOf(lastPos), Vec3.atCenterOf(pos)));
+						serverPlayer.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
 						return InteractionResult.SUCCESS;
 					}
 					// do a raytrace to check for interruptions
@@ -117,26 +105,18 @@ public class TubingPliersItem extends Item
 					// if tube wasn't connected but they can't be connected due to a block in the way, interrupt the connection
 					if (hit != null)
 					{
-						stack.removeTagKey(LAST_TUBE_DATA);
-						if (player instanceof ServerPlayer serverPlayer && level instanceof ServerLevel serverLevel)
-						{
-							PacketDistributor.PLAYER.with(serverPlayer).send(new TubeBreakPacket(startVec, endVec));
-							serverLevel.sendParticles(serverPlayer, DustParticleOptions.REDSTONE, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
-							
-							serverPlayer.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
-						}
+						removePlieredTube(stack);
+						PacketDistributor.sendToPlayer(serverPlayer, new TubeBreakPacket(startVec, endVec));
+						serverLevel.sendParticles(serverPlayer, DustParticleOptions.REDSTONE, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
+						serverPlayer.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
 					}
 					// if we clicked the same side of two different tubes, deny the connection attempt (fixes an edge case)
 					else if (activatedSide == lastSide)
 					{
-						stack.removeTagKey(LAST_TUBE_DATA);
-						if (player instanceof ServerPlayer serverPlayer && level instanceof ServerLevel serverLevel)
-						{
-							PacketDistributor.PLAYER.with(serverPlayer).send(new TubeBreakPacket(startVec, endVec));
-							serverLevel.sendParticles(serverPlayer, DustParticleOptions.REDSTONE, false, endVec.x, endVec.y, endVec.z, 5, .05, .05, .05, 0);
-							
-							serverPlayer.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
-						}
+						removePlieredTube(stack);
+						PacketDistributor.sendToPlayer(serverPlayer, new TubeBreakPacket(startVec, endVec));
+						serverLevel.sendParticles(serverPlayer, DustParticleOptions.REDSTONE, false, endVec.x, endVec.y, endVec.z, 5, .05, .05, .05, 0);
+						serverPlayer.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
 					}
 					else if (state.getBlock() instanceof TubeBlock tubeBlock && !tubeBlock.hasConnectionOnSide(state, activatedSide))
 					{
@@ -145,7 +125,7 @@ public class TubingPliersItem extends Item
 							&& lastState.getBlock() instanceof TubeBlock lastTubeBlock && !lastTubeBlock.hasConnectionOnSide(lastState, lastSide))
 						{
 							
-							stack.removeTagKey(LAST_TUBE_DATA);
+							removePlieredTube(stack);
 							if (level.getBlockEntity(lastPos) instanceof TubeBlockEntity lastPost)
 							{
 								RemoteConnection originalConnection = lastPost.getRemoteConnection(lastSide);
@@ -158,12 +138,12 @@ public class TubingPliersItem extends Item
 								
 								TubeBlockEntity.addConnection(level, lastPost, lastSide, tube, activatedSide);
 							}
-							stack.hurtAndBreak(1, player, thePlayer -> thePlayer.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+							stack.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
 							
 						}
 						else // too far away, initiate a new connection from here
 						{
-							stack.addTagElement(LAST_TUBE_DATA, NbtUtils.writeBlockPos(pos));
+							setPlieredTube(stack, new BlockSide(pos, activatedSide));
 							// TODO give feedback to player
 						}
 					}
@@ -203,10 +183,10 @@ public class TubingPliersItem extends Item
 		super.inventoryTick(stack, level, entity, itemSlot, isSelected);
 		if (!level.isClientSide)
 		{
-			@Nullable CompoundTag lastTubeData = stack.getTagElement(LAST_TUBE_DATA);
-			if (lastTubeData != null)
+			@Nullable BlockSide plieredTube = getPlieredTube(stack);
+			if (plieredTube != null)
 			{
-				BlockPos lastTubePos = NbtUtils.readBlockPos(lastTubeData.getCompound(LAST_TUBE_POS));
+				BlockPos lastTubePos = plieredTube.pos();
 				if (shouldRemoveConnection(lastTubePos, level, entity))
 				{
 					breakPendingConnection(stack,lastTubePos,entity,level);
@@ -229,13 +209,28 @@ public class TubingPliersItem extends Item
 	
 	public static void breakPendingConnection(ItemStack stack, BlockPos connectingPos, Entity holder, Level level)
 	{
-		stack.removeTagKey(LAST_TUBE_DATA);
+		removePlieredTube(stack);
 		if (holder instanceof ServerPlayer serverPlayer)
 		{
-			PacketDistributor.PLAYER.with(serverPlayer).send(
+			PacketDistributor.sendToPlayer(serverPlayer,
 				new TubeBreakPacket(
 					Vec3.atCenterOf(connectingPos),
 					new Vec3(holder.getX(), holder.getEyeY(), holder.getZ())));
 		}
+	}
+	
+	public static void setPlieredTube(ItemStack stack, BlockSide blockSide)
+	{
+		stack.set(TubesReloaded.get().plieredTubeDataComponent.get(), blockSide);
+	}
+	
+	public static @Nullable BlockSide getPlieredTube(ItemStack stack)
+	{
+		return stack.get(TubesReloaded.get().plieredTubeDataComponent.get());
+	}
+	
+	public static void removePlieredTube(ItemStack stack)
+	{
+		stack.remove(TubesReloaded.get().plieredTubeDataComponent.get());
 	}
 }

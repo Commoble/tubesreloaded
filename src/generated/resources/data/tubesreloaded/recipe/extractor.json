@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "h": {
+      "item": "minecraft:hopper"
+    },
+    "p": {
+      "item": "minecraft:piston"
+    },
+    "s": {
+      "item": "tubesreloaded:shunt"
+    }
+  },
+  "pattern": [
+    "h",
+    "p",
+    "s"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tubesreloaded:extractor"
+  }
+}

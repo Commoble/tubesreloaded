@@ -57,6 +57,6 @@ public record ItemDataHelper(Item item)
 	
 	public static ResourceLocation itemModel(ResourceLocation id)
 	{
-		return new ResourceLocation(id.getNamespace(), "item/" + id.getPath());
+		return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "item/" + id.getPath());
 	}
 }

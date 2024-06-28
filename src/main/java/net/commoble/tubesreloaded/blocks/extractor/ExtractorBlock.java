@@ -81,7 +81,7 @@ public class ExtractorBlock extends Block
 				ItemStack stack = this.extractNextStack(inputHandler);
 				if (stack.getCount() > 0)
 				{
-					ItemStack remaining = this.putStackInHandler(stack, outputHandler);
+					ItemStack remaining = outputHandler == null ? stack : this.putStackInHandler(stack, outputHandler);
 					WorldHelper.ejectItemstack(level, pos, outputDir, remaining);
 				}
 			}
