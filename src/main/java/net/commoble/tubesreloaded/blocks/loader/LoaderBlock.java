@@ -60,17 +60,9 @@ public class LoaderBlock extends Block
 
 		if (remaining.getCount() > 0) // we have remaining items
 		{
-			// check if there is space to eject the item
-			if (world.getBlockState(outputPos).isCollisionShapeFullBlock(world, outputPos))
-			{	// if output position is solid cube, don't eject item
-				return remaining;
-			}
-			else
-			{	// otherwise eject item
-				WorldHelper.ejectItemstack(world, pos, outputDir, remaining);
-		        world.playSound(null, pos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.3F, world.random.nextFloat() * 0.25F + 2F);
-				return ItemStack.EMPTY;
-			}
+			WorldHelper.ejectItemstack(world, pos, outputDir, remaining);
+	        world.playSound(null, pos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.3F, world.random.nextFloat() * 0.25F + 2F);
+			return ItemStack.EMPTY;
 		}
 		else	// item was accepted fully
 		{

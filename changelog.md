@@ -1,3 +1,6 @@
+## 5.0.0.2
+* Fixed loaders voiding items when facing solid cubes. They will now always eject any items inserted into them.
+
 ## 5.0.0.1
 * Fixed color tube recipes
 
