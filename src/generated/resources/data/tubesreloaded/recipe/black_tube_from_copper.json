@@ -6,10 +6,10 @@
       "type": "neoforge:intersection",
       "children": [
         {
-          "tag": "c:glass_panes"
+          "tag": "c:glass_blocks"
         },
         {
-          "tag": "c:dyed/black"
+          "tag": "c:dyed/blue"
         }
       ]
     },

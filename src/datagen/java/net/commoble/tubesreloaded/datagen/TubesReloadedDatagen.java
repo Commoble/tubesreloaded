@@ -149,12 +149,12 @@ public class TubesReloadedDatagen
 				.recipe(recipes, formatId(regObj.getId(), "%s_from_gold"), RecipeHelpers.shaped(item, 8, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 					'i', Ingredient.of(Tags.Items.INGOTS_GOLD),
 					'G', IntersectionIngredient.of(
-						Ingredient.of(Tags.Items.GLASS_PANES),
+						Ingredient.of(Tags.Items.GLASS_BLOCKS),
 						Ingredient.of(TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "dyed/" + dyeColor.getName())))))))
 				.recipe(recipes, formatId(regObj.getId(), "%s_from_copper"), RecipeHelpers.shaped(item, 2, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 					'i', Ingredient.of(Tags.Items.INGOTS_COPPER),
 					'G', IntersectionIngredient.of(
-						Ingredient.of(Tags.Items.GLASS_PANES),
+						Ingredient.of(Tags.Items.GLASS_BLOCKS),
 						Ingredient.of(TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "dyed/" + dyeColor.getName())))))))
 				.tags(itemTags, TubesReloaded.Tags.Items.COLORED_TUBES);
 		});
@@ -241,8 +241,8 @@ public class TubesReloadedDatagen
 		BlockStateFile.addDataProvider(event, TubesReloaded.MODID, JsonOps.INSTANCE, blockStates);
 		dataGenerator.addProvider(event.includeClient(), lang);
 		SimpleModel.addDataProvider(event, TubesReloaded.MODID, JsonOps.INSTANCE, models);
-		dataGenerator.addProvider(event.includeServer(), new JsonDataProvider<>(dataGenerator.getPackOutput(), dataGenerator, PackOutput.Target.DATA_PACK, "loot_tables", LootTable.DIRECT_CODEC, lootTables));
-		dataGenerator.addProvider(event.includeServer(), new JsonDataProvider<>(dataGenerator.getPackOutput(), dataGenerator, PackOutput.Target.DATA_PACK, "recipes", Recipe.CODEC, recipes));
+		dataGenerator.addProvider(event.includeServer(), new JsonDataProvider<>(dataGenerator.getPackOutput(), dataGenerator, PackOutput.Target.DATA_PACK, "loot_table", LootTable.DIRECT_CODEC, lootTables));
+		dataGenerator.addProvider(event.includeServer(), new JsonDataProvider<>(dataGenerator.getPackOutput(), dataGenerator, PackOutput.Target.DATA_PACK, "recipe", Recipe.CODEC, recipes));
 		dataGenerator.addProvider(event.includeServer(), blockTags);
 		dataGenerator.addProvider(event.includeServer(), itemTags);
 	}

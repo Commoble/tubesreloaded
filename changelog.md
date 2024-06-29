@@ -1,3 +1,6 @@
+## 5.0.0.1
+* Fixed recipes
+
 ## 5.0.0.0
 * Updated to neoforge / MC-1.21. This is generally not compatible with old worlds; attempting to load an older world may cause data loss.
 * Fixed a bug where multifilters could only accept item insertion on one of their input faces
