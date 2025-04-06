@@ -195,7 +195,7 @@ public class TubesReloadedDatagen
 				List.of("f", "s", "h"),
 				Map.of(
 					'f', Ingredient.of(mod.filterBlock.get().asItem()),
-					's', Ingredient.of(Tags.Items.SLIMEBALLS),
+					's', Ingredient.of(Tags.Items.SLIME_BALLS),
 					'h', Ingredient.of(Items.HOPPER))));
 		doItem.apply(mod.redstoneTubeBlock.get().asItem(), blockItemModel)
 			.recipe(recipes, RecipeHelpers.shaped(mod.redstoneTubeBlock.get().asItem(), 1, CraftingBookCategory.BUILDING,

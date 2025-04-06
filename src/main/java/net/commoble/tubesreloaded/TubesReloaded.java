@@ -395,7 +395,7 @@ public class TubesReloaded
 		LevelChunk chunk = event.getChunk();
 		ServerPlayer player = event.getPlayer();
 		ChunkPos pos = chunk.getPos();
-		PacketDistributor.sendToPlayer(player, new SyncTubesInChunkPacket(pos, TubesInChunk.getTubesInChunk(chunk)));
+		PacketDistributor.sendToPlayer(player, new SyncTubesInChunkPacket(pos, Set.copyOf(TubesInChunk.getTubesInChunk(chunk))));
 	}
 	
 	// registry helper methods

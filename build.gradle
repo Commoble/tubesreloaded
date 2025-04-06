@@ -67,7 +67,7 @@ configurations {
 }
 
 repositories {
-	maven { url "https://commoble.net/maven/" }
+	maven { url "https://maven.commoble.net/" }
 }
 
 dependencies {

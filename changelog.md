@@ -1,3 +1,8 @@
+## 5.0.0.3
+* Requires neoforge 21.1.139+
+* Fix trying to place tube blocks occasionally kicking players
+* Osmosis Filter recipe now uses c:slime_balls tag ingredient instead of c:slimeballs
+
 ## 5.0.0.2
 * Fixed loaders voiding items when facing solid cubes. They will now always eject any items inserted into them.
 
